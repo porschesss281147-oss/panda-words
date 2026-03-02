@@ -101,11 +101,11 @@ export default function HomePage() {
 
 return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Background - รูปอยู่ที่ public/home.png */}
+      {/* Background */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
-          backgroundImage: `url('${process.env.NEXT_PUBLIC_BASE_PATH || ''}/home.png')` 
+          backgroundImage: `url('/panda-words/home.png')`
         }}
       ></div>
       <div className="absolute inset-0 bg-white/60 backdrop-blur-sm"></div>
