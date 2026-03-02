@@ -5,6 +5,7 @@ import './globals.css';
 export const metadata = {
   title: 'PANDA WORDS - เกมภาษาจีน',
   description: 'เรียนรู้ภาษาจีนผ่านเกมสนุกๆ',
+  metadataBase: new URL('https://porschesss281147-oss.github.io/panda-words'),
 };
 
 export default function RootLayout({ children }) {
