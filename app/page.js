@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 import { useSound } from "@/hooks/useSound";  // import hook
-import styles from "../styles/page.module.css";
+import styles from "./page.module.css";
 
 export default function LoginPage() {
   const router = useRouter();
