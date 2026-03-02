@@ -4,6 +4,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+   basePath: '/panda-words',
+  assetPrefix: '/panda-words/',  
 };
 
 export default nextConfig;
