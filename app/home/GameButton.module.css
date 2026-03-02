@@ -1,0 +1,27 @@
+.footer {
+  margin-top: 1rem;
+}
+
+.primaryBtn {
+  padding: 1rem 3rem;
+  border-radius: 50px;
+  border: none;
+
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-weight: 700;
+  letter-spacing: 1px;
+
+  cursor: pointer;
+
+  background: linear-gradient(45deg, #ffd700, #ffec8b);
+  color: #7b0000;
+
+  transition: all 0.3s ease;
+}
+
+.primaryBtn:hover {
+  transform: scale(1.1);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.4),
+    0 0 15px rgba(255, 215, 0, 0.7);
+}

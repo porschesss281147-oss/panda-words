@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+   background-image: url("/home.png");
+  background-size: cover;       /* เต็มจอ */
+  background-position: center;  /* จัดกึ่งกลาง */
+  background-repeat: no-repeat; /* ไม่ซ้ำ */
+  background-attachment: fixed;
 }
 
 @theme inline {
