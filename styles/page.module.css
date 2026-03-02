@@ -347,3 +347,102 @@
     padding: 0.7rem;
   }
 }
+
+/* เพิ่มตรงส่วนท้ายไฟล์ */
+
+.heroStats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.statItem {
+  text-align: center;
+}
+
+.statNumber {
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #c21e0c;
+  line-height: 1.2;
+}
+
+.statLabel {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.iconSection,
+.inputSection {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  display: block;
+  font-size: 1rem;
+  color: #4a4a4a;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.charCount {
+  text-align: right;
+  font-size: 0.8rem;
+  color: #999;
+  margin-top: 0.25rem;
+}
+
+.buttonDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.buttonDisabled:hover {
+  transform: none;
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.footer {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #999;
+}
+
+.copyright {
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .heroStats {
+    gap: 1rem;
+  }
+  
+  .statNumber {
+    font-size: 1.5rem;
+  }
+  
+  .statLabel {
+    font-size: 0.8rem;
+  }
+}
