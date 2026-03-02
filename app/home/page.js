@@ -101,7 +101,7 @@ export default function HomePage() {
 
 return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Background - ใช้ style แทน className */}
+      {/* Background - รูปอยู่ที่ public/home.png */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
