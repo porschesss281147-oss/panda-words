@@ -101,13 +101,10 @@ export default function HomePage() {
 
 return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Background */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ 
-          backgroundImage: `url('/panda-words/home.png')`
-        }}
-      ></div>
+     <div 
+  className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+  style={{ backgroundImage: `url('/panda-words/home.png')` }} 
+></div>
       <div className="absolute inset-0 bg-white/60 backdrop-blur-sm"></div>
 
       {/* Content */}
