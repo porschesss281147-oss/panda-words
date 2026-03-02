@@ -56,7 +56,6 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="home-page"> 
     <div className={styles.wrapper}>
       {/* LEFT SIDE */}
       <div className={styles.hero}>
@@ -70,7 +69,6 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-  </div>
 
       {/* RIGHT SIDE */}
       <div className={styles.panelWrapper}>
