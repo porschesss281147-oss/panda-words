@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 import { useSound } from "@/hooks/useSound";
-import styles from "../styles/page.module.css";
+import styles from "./page.module.css";
 
 // ดึง basePath จาก environment หรือใช้ค่าว่าง
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
