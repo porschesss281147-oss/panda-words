@@ -9,6 +9,6 @@ const nextConfig = {
    trailingSlash: true, 
   env: {
     NEXT_PUBLIC_BASE_PATH: '/panda-words',
-};
+},
 
 export default nextConfig;
