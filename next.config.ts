@@ -4,11 +4,12 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-   basePath: '/panda-words',
-  assetPrefix: '/panda-words/',  
-   trailingSlash: true, 
+  basePath: '/panda-words',
+  assetPrefix: '/panda-words/',
+  trailingSlash: true,
   env: {
     NEXT_PUBLIC_BASE_PATH: '/panda-words',
-},
+  },
+};
 
-export default nextConfig;
+module.exports = nextConfig;
