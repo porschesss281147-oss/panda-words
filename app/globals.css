@@ -1,12 +1,48 @@
 @import "tailwindcss";
 
-.home-page {
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  position: relative;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+}
+
+/* พื้นหลังแยกต่างหาก */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-image: url('/panda-words/home.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  min-height: 100vh;
+  z-index: -2;
+}
+
+/* overlay สีเข้มให้ตัวหนังสืออ่านง่าย */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3); /* ปรับความเข้มได้ตามต้องการ */
+  z-index: -1;
 }
 
 @theme inline {
@@ -21,10 +57,4 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
