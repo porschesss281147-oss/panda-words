@@ -33,7 +33,6 @@ body::before {
   z-index: -2;
 }
 
-/* overlay สีเข้มให้ตัวหนังสืออ่านง่าย */
 body::after {
   content: '';
   position: fixed;
@@ -41,7 +40,6 @@ body::after {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3); /* ปรับความเข้มได้ตามต้องการ */
   z-index: -1;
 }
 
