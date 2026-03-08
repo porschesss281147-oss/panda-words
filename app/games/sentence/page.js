@@ -558,7 +558,7 @@ export default function SentenceGamePage() {
   >
     {/* Background ภาพจาง */}
     <div className="absolute inset-0 opacity-20 pointer-events-none">
-      <img src="/3.png" alt="background" className="w-full h-full object-cover" />
+     <img src="/3.png" alt="background" className="w-full h-full object-cover" />
     </div>
 
     {/* Header */}
