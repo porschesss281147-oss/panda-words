@@ -556,10 +556,10 @@ export default function SentenceGamePage() {
       paddingTop: "15px"
     }}
   >
-    {/* Background ภาพจาง */}
-    <div className="absolute inset-0 opacity-20 pointer-events-none">
-     <img src="/3.png" alt="background" className="w-full h-full object-cover" />
-    </div>
+      <div 
+  className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+  style={{ backgroundImage: `url('/panda-words/3.png')` }} 
+></div>
 
     {/* Header */}
     <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200">
