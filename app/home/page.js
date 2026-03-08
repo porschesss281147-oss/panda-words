@@ -103,7 +103,7 @@ return (
     <div className="relative min-h-screen overflow-hidden">
      <div 
   className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-  style={{ backgroundImage: `url('/panda-words/rr.png')` }} 
+  style={{ backgroundImage: `url('/panda-words/home.png')` }} 
 ></div>
       <div className="absolute inset-0 bg-white/60 backdrop-blur-sm"></div>
 
