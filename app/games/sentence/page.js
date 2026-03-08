@@ -3,8 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { useSound } from '@/hooks/useSound';
-import { games, hsk1, hsk2, hsk3, allHsk } from '@/data/games';
-import { Volume2, Clock, CheckCircle, XCircle, Award, RotateCcw, Home } from 'lucide-react';
+import { games } from '@/data/games';
+import { generateSentenceQuestions } from '@/data/question-generators/hsk1';
+import { Volume2, CheckCircle, XCircle, RotateCcw, Home, Clock } from 'lucide-react';
 
 export default function SentenceGamePage() {
   const router = useRouter();
@@ -25,74 +26,11 @@ export default function SentenceGamePage() {
   const [answerHistory, setAnswerHistory] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [timerActive, setTimerActive] = useState(false);
   
   const timerRef = useRef(null);
   const game = games.find(g => g.id === 'sentence');
   const unlockedLevel = user?.unlockedLevels?.sentence || 1;
-
-  // เลือกชุดคำศัพท์ตามเกม
-  const getWordSet = (gameId) => {
-    switch(gameId) {
-      case 'hsk1': return hsk1;
-      case 'hsk2': return hsk2;
-      case 'hsk3': return hsk3;
-      case 'hskmix': return allHsk;
-      default: return allHsk;
-    }
-  };
-
-  // สร้างคำถามแบบเติมคำ
-  const generateQuestions = (level) => {
-    const wordSet = getWordSet(game.id);
-    const shuffled = [...wordSet].sort(() => 0.5 - Math.random());
-    const selectedWords = shuffled.slice(0, 20); // สุ่ม 20 คำ
-    
-    // สร้างประโยคตัวอย่าง
-    const sentenceTemplates = [
-      { template: '我 ____ 学生', correct: '是', meaning: 'ฉันเป็นนักเรียน' },
-      { template: '你 ____ 老师', correct: '是', meaning: 'คุณเป็นครู' },
-      { template: '我 ____ 你', correct: '爱', meaning: 'ฉันรักคุณ' },
-      { template: '你 ____ 什么？', correct: '吃', meaning: 'คุณกินอะไร' },
-      { template: '我 ____ 水', correct: '喝', meaning: 'ฉันดื่มน้ำ' },
-      { template: '你 ____ 哪里？', correct: '去', meaning: 'คุณไปไหน' },
-      { template: '我 ____ 学校', correct: '去', meaning: 'ฉันไปโรงเรียน' },
-      { template: '你 ____ 名字？', correct: '的', meaning: 'ชื่อของคุณ' },
-      { template: '我 ____ 中国', correct: '爱', meaning: 'ฉันรักจีน' },
-      { template: '你 ____ 好吗？', correct: '身体', meaning: 'สุขภาพดีไหม' },
-      { template: '我 ____ 两岁', correct: '今年', meaning: 'ฉันอายุ 2 ขวบปีนี้' },
-      { template: '你 ____ 吃饭了吗？', correct: '中午', meaning: 'กินข้าวเที่ยงหรือยัง' },
-      { template: '我 ____ 去中国', correct: '想', meaning: 'ฉันอยากไปจีน' },
-      { template: '你 ____ 说中文吗？', correct: '会', meaning: 'คุณพูดจีนได้ไหม' },
-      { template: '我 ____ 一点中文', correct: '会', meaning: 'ฉันพูดจีนได้นิดหน่อย' },
-      { template: '你 ____ 多少钱？', correct: '这个', meaning: 'อันนี้เท่าไหร่' },
-      { template: '我 ____ 要这个', correct: '就', meaning: 'ฉันขอเอาอันนี้' },
-      { template: '你 ____ 再见', correct: '说', meaning: 'คุณพูดลาก่อน' },
-      { template: '我 ____ 工作', correct: '在', meaning: 'ฉันทำงาน' },
-      { template: '你 ____ 住哪里', correct: '在', meaning: 'คุณอยู่ที่ไหน' }
-    ];
-
-    // สุ่มเลือก 10 ข้อ
-    const shuffledTemplates = [...sentenceTemplates].sort(() => 0.5 - Math.random());
-    const selectedTemplates = shuffledTemplates.slice(0, 10);
-    
-    return selectedTemplates.map((temp, index) => {
-      // สร้างตัวเลือกผิด
-      const otherWords = selectedWords
-        .filter(w => w.chinese !== temp.correct)
-        .map(w => w.chinese)
-        .slice(0, 3);
-      
-      const options = [temp.correct, ...otherWords].sort(() => 0.5 - Math.random());
-      
-      return {
-        sentence: temp.template,
-        options: options,
-        correct: temp.correct,
-        meaning: temp.meaning,
-        pinyin: selectedWords.find(w => w.chinese === temp.correct)?.pinyin || ''
-      };
-    });
-  };
 
   // เริ่มเกม
   useEffect(() => {
@@ -105,7 +43,13 @@ export default function SentenceGamePage() {
     setLoading(true);
     
     try {
-      const newQuestions = generateQuestions(selectedLevel);
+      const newQuestions = generateSentenceQuestions(selectedLevel, 10);
+      console.log('Generated questions:', newQuestions);
+      
+      if (!newQuestions || newQuestions.length === 0) {
+        throw new Error('No questions generated');
+      }
+      
       setQuestions(newQuestions);
       setCurrentQuestionIndex(0);
       setScore(0);
@@ -114,6 +58,8 @@ export default function SentenceGamePage() {
       setGameCompleted(false);
       setShowResult(false);
       setFeedback({ show: false, message: '', type: '', correct: '' });
+      setSelectedAnswer(null);
+      setTimerActive(true);
       playSound('start');
     } catch (error) {
       console.error('Error starting game:', error);
@@ -130,9 +76,12 @@ export default function SentenceGamePage() {
 
   // จับเวลา
   useEffect(() => {
-    if (gameStarted && !gameCompleted && !showResult && !feedback.show && questions.length > 0) {
+    if (timerActive && !gameCompleted && !showResult && !feedback.show && questions.length > 0) {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
+          if (prev <= 3) {
+            playSound('tick');
+          }
           if (prev <= 1) {
             clearInterval(timerRef.current);
             handleTimeOut();
@@ -144,12 +93,13 @@ export default function SentenceGamePage() {
 
       return () => clearInterval(timerRef.current);
     }
-  }, [gameStarted, currentQuestionIndex, gameCompleted, showResult, feedback.show, questions.length]);
+  }, [timerActive, currentQuestionIndex, gameCompleted, showResult, feedback.show, questions.length]);
 
   const handleTimeOut = () => {
     if (!questions.length || currentQuestionIndex >= questions.length) return;
     
     playSound('error');
+    setTimerActive(false);
     const currentQuestion = questions[currentQuestionIndex];
     
     if (!currentQuestion) return;
@@ -170,13 +120,7 @@ export default function SentenceGamePage() {
 
     setTimeout(() => {
       setFeedback({ show: false, message: '', type: '', correct: '' });
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-        setTimeLeft(30);
-        setSelectedAnswer(null);
-      } else {
-        finishGame();
-      }
+      moveToNextQuestion();
     }, 2000);
   };
 
@@ -184,14 +128,13 @@ export default function SentenceGamePage() {
     if (feedback.show || gameCompleted || !questions.length || currentQuestionIndex >= questions.length) return;
     
     playSound('click');
+    setTimerActive(false);
     setSelectedAnswer(answer);
     
     const currentQuestion = questions[currentQuestionIndex];
     if (!currentQuestion) return;
     
     const isCorrect = answer === currentQuestion.correct;
-    
-    clearInterval(timerRef.current);
     
     if (isCorrect) {
       playSound('success');
@@ -206,7 +149,7 @@ export default function SentenceGamePage() {
       playSound('error');
       setFeedback({
         show: true,
-        message: `✗ ผิด! คำตอบที่ถูกคือ "${currentQuestion.correct || ''}"`,
+        message: '✗ ผิด!',
         type: 'error',
         correct: currentQuestion.correct || ''
       });
@@ -220,18 +163,24 @@ export default function SentenceGamePage() {
 
     setTimeout(() => {
       setFeedback({ show: false, message: '', type: '', correct: '' });
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-        setTimeLeft(30);
-        setSelectedAnswer(null);
-      } else {
-        finishGame();
-      }
-    }, 2000);
+      moveToNextQuestion();
+    }, 2500);
+  };
+
+  const moveToNextQuestion = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+      setTimeLeft(30);
+      setSelectedAnswer(null);
+      setTimerActive(true);
+    } else {
+      finishGame();
+    }
   };
 
   const finishGame = () => {
     setGameCompleted(true);
+    setTimerActive(false);
     
     const totalQuestions = questions.length;
     const finalScore = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
@@ -257,7 +206,7 @@ export default function SentenceGamePage() {
 
     setTimeout(() => {
       setShowResult(true);
-    }, 1500);
+    }, 2000);
   };
 
   const playAgain = () => {
@@ -292,24 +241,17 @@ export default function SentenceGamePage() {
     utterance.rate = 0.9;
     utterance.pitch = 1;
     utterance.volume = 1;
-
-    utterance.onstart = () => setIsPlaying(true);
-    utterance.onend = () => setIsPlaying(false);
-    utterance.onerror = () => {
-      setIsPlaying(false);
-    };
-
     window.speechSynthesis.speak(utterance);
   };
 
   if (!game) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 text-center">
-          <p className="text-white text-xl">ไม่พบข้อมูลเกม</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f4efe6" }}>
+        <div className="bg-white rounded-2xl p-8 text-center shadow-xl">
+          <p className="text-purple-800 text-xl">ไม่พบข้อมูลเกม</p>
           <button
             onClick={() => router.push('/home')}
-            className="mt-4 bg-white/20 text-white px-6 py-2 rounded-full hover:bg-white/30"
+            className="mt-4 bg-purple-500 text-white px-6 py-2 rounded-full hover:bg-purple-600"
           >
             กลับหน้าแรก
           </button>
@@ -317,24 +259,26 @@ export default function SentenceGamePage() {
       </div>
     );
   }
-
+  
   // เลือกด่าน
   if (!gameStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-purple-900">
-        <header className="bg-white/10 backdrop-blur-md shadow-lg">
+      <div className="min-h-screen" style={{ background: "#f4efe6" }}>
+        <header className="bg-white/70 backdrop-blur-md shadow-sm border-b border-purple-200/50">
           <div className="max-w-6xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <button
                 onClick={() => router.push('/home')}
-                className="text-white hover:text-yellow-300 transition-colors"
+                className="text-black font-semibold hover:text-gray-700 transition-colors flex items-center gap-2 bg-white/60 px-4 py-2 rounded-full"
               >
                 ← กลับ
               </button>
-              <h1 className="text-2xl font-bold text-white">{game.title}</h1>
-              <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                {game.title}
+              </h1>
+              <div className="flex items-center gap-2 bg-white/60 px-3 py-1 rounded-full">
                 <span className="text-2xl">{user?.icon}</span>
-                <span className="text-white">{user?.name}</span>
+                <span className="text-black font-semibold">{user?.name}</span>
               </div>
             </div>
           </div>
@@ -343,11 +287,11 @@ export default function SentenceGamePage() {
         <main className="max-w-4xl mx-auto px-4 py-12">
           <div className="text-center mb-12">
             <span className="text-8xl mb-4 block animate-bounce">{game.icon}</span>
-            <h2 className="text-3xl font-bold text-white mb-4">{game.title}</h2>
-            <p className="text-xl text-white/80">{game.description}</p>
+            <h2 className="text-3xl font-bold text-purple-800 mb-4">{game.title}</h2>
+            <p className="text-xl text-black">{game.description}</p>
           </div>
 
-          <h3 className="text-2xl font-bold text-white text-center mb-6">เลือกระดับด่าน</h3>
+          <h3 className="text-2xl font-bold text-pink-500 text-center mb-6">เลือกระดับด่าน</h3>
           
           <div className="grid grid-cols-5 gap-4 mb-8">
             {Array.from({ length: 10 }, (_, i) => i + 1).map((level) => {
@@ -365,9 +309,9 @@ export default function SentenceGamePage() {
                     transition-all duration-300 transform
                     ${isUnlocked 
                       ? isCurrent
-                        ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-xl scale-105 ring-4 ring-yellow-300'
-                        : 'bg-gradient-to-br from-green-400 to-emerald-500 text-white shadow-lg hover:scale-110 hover:shadow-xl'
-                      : 'bg-gray-500/50 text-gray-300 cursor-not-allowed backdrop-blur-sm'
+                        ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-xl scale-105 ring-4 ring-purple-300'
+                        : 'bg-gradient-to-br from-purple-400 to-pink-400 text-white shadow-lg hover:scale-110 hover:shadow-xl'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }
                   `}
                 >
@@ -378,14 +322,14 @@ export default function SentenceGamePage() {
             })}
           </div>
 
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6">
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-6">
             <div className="flex items-center justify-between">
-              <span className="text-white">ความคืบหน้า</span>
-              <span className="text-white">{unlockedLevel}/10 ด่าน</span>
+              <span className="text-purple-800">ความคืบหน้า</span>
+              <span className="text-purple-600">{unlockedLevel}/10 ด่าน</span>
             </div>
-            <div className="w-full bg-white/20 rounded-full h-3 mt-2">
+            <div className="w-full bg-purple-200 rounded-full h-3 mt-2">
               <div 
-                className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full h-3 transition-all duration-500"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-full h-3 transition-all duration-500"
                 style={{ width: `${(unlockedLevel / 10) * 100}%` }}
               ></div>
             </div>
@@ -402,142 +346,128 @@ export default function SentenceGamePage() {
     const passed = finalScore >= 80;
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-purple-900">
-        <header className="bg-white/10 backdrop-blur-md shadow-lg">
+      <div className="min-h-screen" style={{ background: "#f4efe6" }}>
+        <header className="bg-white/70 backdrop-blur-md shadow-sm border-b border-purple-200/50">
           <div className="max-w-6xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <button
                 onClick={goToLevelSelect}
-                className="text-white hover:text-yellow-300 transition-colors"
+                className="text-purple-600 hover:text-purple-800 transition-colors flex items-center gap-2 bg-white/60 px-4 py-2 rounded-full"
               >
-                ← เลือกด่าน
+                ← กลับ
               </button>
-              <h1 className="text-2xl font-bold text-white">ผลการเล่น</h1>
-              <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                ผลการเล่น
+              </h1>
+              <div className="flex items-center gap-2 bg-white/60 px-3 py-1 rounded-full">
                 <span className="text-2xl">{user?.icon}</span>
-                <span className="text-white">{user?.name}</span>
+                <span className="text-purple-700 font-medium">{user?.name}</span>
               </div>
             </div>
           </div>
         </header>
 
         <main className="max-w-4xl mx-auto px-4 py-8">
-          <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 shadow-2xl">
-            <h2 className="text-3xl font-bold text-white text-center mb-6">
-              ด่านที่ {selectedLevel}
-            </h2>
+          <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+            <div className="text-center mb-8">
+              <div className="inline-block px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-sm font-semibold mb-4 shadow-lg">
+                ด่านที่ {selectedLevel}
+              </div>
+              <h2 className="text-4xl font-bold text-gray-800 mb-2">สรุปผลการเรียน</h2>
+              <div className="w-24 h-1 bg-gradient-to-r from-purple-400 to-pink-400 mx-auto rounded-full"></div>
+            </div>
 
             <div className="text-center mb-8">
-              <div className="inline-block relative">
-                <span className="text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400">
-                  {finalScore}
-                </span>
-                <span className="text-2xl text-white/60 ml-2">คะแนน</span>
+              <div className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                {finalScore}
               </div>
-              
+              <div className="text-xl text-gray-600 mt-2">คะแนน</div>
+            </div>
+
+            <div className="text-center mb-8">
               {passed ? (
-                <div className="mt-4 bg-green-500/20 text-green-300 px-6 py-3 rounded-full inline-flex items-center gap-2">
-                  <CheckCircle size={24} />
-                  <span className="text-xl font-semibold">ผ่าน! ✅</span>
+                <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-400 to-emerald-400 text-white px-8 py-3 rounded-full shadow-lg">
+                  <CheckCircle size={28} />
+                  <span className="text-xl font-semibold">ผ่าน! ยอดเยี่ยม! 🎉</span>
                 </div>
               ) : (
-                <div className="mt-4">
-                  <div className="bg-red-500/20 text-red-300 px-6 py-3 rounded-full inline-flex items-center gap-2 mb-3">
-                    <XCircle size={24} />
-                    <span className="text-xl font-semibold">ไม่ผ่าน! ต้องได้ 80 คะแนนขึ้นไป</span>
+                <div className="inline-flex flex-col items-center gap-3">
+                  <div className="bg-gradient-to-r from-red-400 to-pink-400 text-white px-8 py-3 rounded-full shadow-lg flex items-center gap-2">
+                    <XCircle size={28} />
+                    <span className="text-xl font-semibold">ไม่ผ่าน</span>
                   </div>
+                  <p className="text-gray-600">ต้องได้ 80 คะแนนขึ้นไป</p>
                 </div>
               )}
             </div>
 
             <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="bg-white/5 rounded-2xl p-4 text-center">
-                <div className="text-3xl font-bold text-blue-300">{score}</div>
-                <div className="text-white/60">ถูกต้อง</div>
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-4 text-center shadow-md border border-blue-200">
+                <div className="text-3xl font-bold text-blue-600 mb-1">{score}</div>
+                <div className="text-blue-500 text-sm">ถูกต้อง</div>
               </div>
-              <div className="bg-white/5 rounded-2xl p-4 text-center">
-                <div className="text-3xl font-bold text-orange-300">{totalQuestions - score}</div>
-                <div className="text-white/60">ผิด</div>
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-4 text-center shadow-md border border-orange-200">
+                <div className="text-3xl font-bold text-orange-600 mb-1">{totalQuestions - score}</div>
+                <div className="text-orange-500 text-sm">ผิด</div>
               </div>
-              <div className="bg-white/5 rounded-2xl p-4 text-center">
-                <div className="text-3xl font-bold text-green-300">{totalQuestions}</div>
-                <div className="text-white/60">ทั้งหมด</div>
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-4 text-center shadow-md border border-green-200">
+                <div className="text-3xl font-bold text-green-600 mb-1">{totalQuestions}</div>
+                <div className="text-green-500 text-sm">ทั้งหมด</div>
               </div>
             </div>
 
-            {answerHistory.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <Award size={24} />
-                  รายละเอียดแต่ละข้อ
-                </h3>
-                <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                  {answerHistory.map((item, index) => (
-                    <div
-                      key={index}
-                      className={`p-4 rounded-xl ${
-                        item.correct
-                          ? 'bg-green-500/20 border border-green-500/30'
-                          : 'bg-red-500/20 border border-red-500/30'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <p className="text-white font-medium mb-2">
-                            ข้อ {index + 1}: {item.question?.sentence || ''}
-                          </p>
-                          <div className="grid grid-cols-3 gap-4 text-sm">
-                            <div>
-                              <p className="text-white/60">คำตอบของคุณ</p>
-                              <p className={`font-bold ${item.correct ? 'text-green-300' : 'text-red-300'}`}>
-                                {item.userAnswer || '(ไม่ได้ตอบ)'}
-                              </p>
-                            </div>
-                            {!item.correct && (
-                              <div>
-                                <p className="text-white/60">คำตอบที่ถูก</p>
-                                <p className="font-bold text-green-300">{item.question?.correct || ''}</p>
-                              </div>
-                            )}
-                            <div>
-                              <p className="text-white/60">คำศัพท์</p>
-                              <button
-                                onClick={() => speak(item.question?.correct || '')}
-                                className="flex items-center gap-1 text-yellow-300 hover:text-yellow-400"
-                              >
-                                <Volume2 size={16} />
-                                ฟังเสียง
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                        <span className={`text-2xl ${item.correct ? 'text-green-300' : 'text-red-300'}`}>
-                          {item.correct ? '✓' : '✗'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {questions.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-xl font-bold text-white mb-4">📚 คำศัพท์ที่ได้เรียน</h3>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                  {questions.map((q, index) => (
-                    <div key={index} className="bg-white/5 rounded-xl p-3 text-center">
-                      <p className="text-white font-bold text-lg">{q?.correct || ''}</p>
-                      <p className="text-yellow-300 text-sm">{q?.pinyin || ''}</p>
-                      <p className="text-white/60 text-xs mt-1">{q?.meaning || ''}</p>
-                      <button
-                        onClick={() => speak(q?.correct || '')}
-                        className="mt-2 text-white/40 hover:text-white transition-colors"
-                      >
-                        <Volume2 size={16} />
-                      </button>
-                    </div>
-                  ))}
+                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <span className="text-2xl">📚</span>
+                  คำศัพท์ที่ได้เรียน
+                </h3>
+                
+                <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                  {questions.map((q, index) => {
+                    const historyItem = answerHistory[index] || {};
+                    return (
+                      <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-100 shadow-sm hover:shadow-md transition-all">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="bg-purple-200 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">
+                                ข้อ {index + 1}
+                              </span>
+                              {historyItem.correct ? (
+                                <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                                  <CheckCircle size={12} /> ถูกต้อง
+                                </span>
+                              ) : (
+                                <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                                  <XCircle size={12} /> ผิด
+                                </span>
+                              )}
+                            </div>
+                            
+                            <p className="text-2xl font-bold text-purple-700 mb-1">{q.correct}</p>
+                            <p className="text-pink-600 mb-1">{q.pinyin}</p>
+                            <p className="text-gray-700">{q.meaning}</p>
+                            
+                            {historyItem.userAnswer && !historyItem.correct && (
+                              <div className="mt-2 text-sm">
+                                <span className="text-gray-500">คุณตอบ: </span>
+                                <span className="text-red-600">{historyItem.userAnswer}</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <button
+                            onClick={() => speak(q.correct)}
+                            className="ml-4 p-3 bg-purple-100 text-purple-600 rounded-full hover:bg-purple-200 transition-colors"
+                            title="ฟังเสียง"
+                          >
+                            <Volume2 size={20} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -545,7 +475,7 @@ export default function SentenceGamePage() {
             <div className="flex gap-4">
               <button
                 onClick={playAgain}
-                className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl font-bold text-lg hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
               >
                 <RotateCcw size={20} />
                 เล่นอีกครั้ง
@@ -553,14 +483,14 @@ export default function SentenceGamePage() {
               {passed && selectedLevel < 10 && (
                 <button
                   onClick={() => startGame(selectedLevel + 1)}
-                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                  className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-white py-4 rounded-xl font-bold text-lg hover:from-green-500 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
                 >
                   ด่านต่อไป
                 </button>
               )}
               <button
                 onClick={goToLevelSelect}
-                className="flex-1 bg-gradient-to-r from-gray-500 to-gray-600 text-white py-4 rounded-xl font-bold text-lg hover:from-gray-600 hover:to-gray-700 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                className="flex-1 bg-gradient-to-r from-gray-400 to-gray-500 text-white py-4 rounded-xl font-bold text-lg hover:from-gray-500 hover:to-gray-600 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
               >
                 <Home size={20} />
                 เลือกด่าน
@@ -572,10 +502,29 @@ export default function SentenceGamePage() {
     );
   }
 
-  if (loading || questions.length === 0) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center">
-        <div className="text-white text-xl">กำลังโหลด...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f4efe6" }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-xl">กำลังโหลด...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f4efe6" }}>
+        <div className="text-center">
+          <p className="text-red-500 text-xl">ไม่พบคำถาม</p>
+          <button
+            onClick={goToLevelSelect}
+            className="mt-4 bg-purple-500 text-white px-6 py-2 rounded-full hover:bg-purple-600"
+          >
+            กลับไปเลือกด่าน
+          </button>
+        </div>
       </div>
     );
   }
@@ -583,8 +532,16 @@ export default function SentenceGamePage() {
   const currentQuestion = questions[currentQuestionIndex];
   if (!currentQuestion) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center">
-        <div className="text-white text-xl">เกิดข้อผิดพลาด</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f4efe6" }}>
+        <div className="text-center">
+          <p className="text-red-500 text-xl">ข้อผิดพลาด</p>
+          <button
+            onClick={goToLevelSelect}
+            className="mt-4 bg-purple-500 text-white px-6 py-2 rounded-full hover:bg-purple-600"
+          >
+            กลับไปเลือกด่าน
+          </button>
+        </div>
       </div>
     );
   }
@@ -592,116 +549,216 @@ export default function SentenceGamePage() {
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-purple-900">
-      <header className="bg-white/10 backdrop-blur-md shadow-lg">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={goToLevelSelect}
-              className="text-white hover:text-yellow-300 transition-colors"
-            >
-              ← ออกจากเกม
-            </button>
-            <h1 className="text-2xl font-bold text-white">
-              ด่านที่ {selectedLevel}/10
-            </h1>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full">
-                <Clock size={20} className="text-yellow-300" />
-                <span className={`text-xl font-bold ${timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-                  {timeLeft}s
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">{user?.icon}</span>
-              </div>
+  <div 
+    className="min-h-screen flex flex-col items-center relative px-4 sm:px-6"
+    style={{
+      background: "#f4efe6",
+      paddingTop: "15px"
+    }}
+  >
+    {/* Background ภาพจาง */}
+    <div className="absolute inset-0 opacity-20 pointer-events-none">
+      <img src="/3.png" alt="background" className="w-full h-full object-cover" />
+    </div>
+
+    {/* Header */}
+    <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200">
+      <div className="w-full px-4 sm:px-6 lg:px-10 py-3">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={goToLevelSelect}
+            className="text-gray-700 hover:text-gray-900 transition-colors flex items-center gap-2 bg-white/80 px-4 sm:px-5 py-2 rounded-full text-base sm:text-lg shadow-sm font-medium"
+          >
+            ← ออกจากเกม
+          </button>
+
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold 
+text-transparent bg-clip-text 
+bg-gradient-to-r from-purple-600 via-purple-500 to-pink-400">
+  เกมเติมประโยค
+</h1>
+
+          <div className="flex items-center gap-3 sm:gap-4">
+  {/* Question Progress */}
+  <div className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 rounded-full shadow-md border border-purple-200">
+    <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full text-white font-bold text-sm shadow-inner">
+      {currentQuestionIndex + 1}
+    </div>
+    <div className="flex flex-col">
+      <span className="text-xs text-gray-500">ข้อที่</span>
+      <span className="text-sm font-bold text-gray-800">/{questions.length}</span>
+    </div>
+  </div>
+
+
+            {/* User */}
+            <div className="flex items-center gap-2 sm:gap-3 bg-white/80 px-3 py-1.5 rounded-full shadow-sm">
+              <span className="text-2xl sm:text-3xl">{user?.icon}</span>
+              <span className="hidden sm:inline text-gray-700 font-medium text-base sm:text-lg">
+                {user?.name}
+              </span>
             </div>
           </div>
         </div>
-      </header>
+      </div>
+    </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white/10 rounded-full h-3 mb-8">
-          <div 
-            className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full h-3 transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          ></div>
+    {/* Timer - ใหญ่ขึ้น */}
+    <div className="w-full max-w-5xl mt-20 sm:mt-24 px-4">
+      <div className="relative w-full h-4 sm:h-5 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+        <div
+          className="absolute top-0 left-0 h-full bg-gradient-to-r from-red-500 via-orange-500 to-yellow-400 transition-all duration-1000"
+          style={{ width: `${(timeLeft / 30) * 100}%` }}
+        >
+          <div className="absolute top-0 right-0 w-4 h-full bg-white/30 blur-sm"></div>
+        </div>
+      </div>
+      <div className="flex justify-end items-center mt-2 text-gray-700 text-base sm:text-lg font-semibold">
+        <span className="bg-white/60 px-4 py-1.5 rounded-full shadow-sm">
+          ⏳ {timeLeft} วินาที
+        </span>
+      </div>
+    </div>
+
+    {/* Main Content */}
+    <main className="flex-1 w-full max-w-5xl mx-auto flex flex-col items-center justify-center px-4">
+      <div className="w-full -mt-8 sm:-mt-10">
+        {/* Question */}
+        <div className="text-center mb-8 sm:mb-10">
+
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 leading-relaxed">
+            {currentQuestion.sentenceWithBlank}
+          </h1>
+
+          {currentQuestion.sentencePinyin && (
+            <p className="text-xl sm:text-2xl md:text-3xl text-gray-500 mb-4 sm:mb-5 font-medium">
+              {currentQuestion.sentencePinyin}
+            </p>
+          )}
+
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-600 italic border-t border-gray-200 pt-4 mt-4">
+            {currentQuestion.fullMeaning}
+          </p>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 mb-8">
-          <div className="text-center mb-6">
-            <span className="text-white/60">ข้อที่ {currentQuestionIndex + 1}/{questions.length}</span>
-          </div>
-          
-          <p className="text-white text-3xl text-center mb-8 font-medium">
-            {currentQuestion.sentence || ''}
-          </p>
+        {/* Options - ใหญ่ขึ้น */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+          {currentQuestion.options.map((option, index) => {
+            const colors = [
+              'from-teal-500 to-emerald-600',
+              'from-sky-500 to-cyan-600',
+              'from-indigo-500 to-purple-600',
+              'from-pink-500 to-rose-600'
+            ];
 
-          <div className="grid grid-cols-2 gap-4">
-            {(currentQuestion.options || []).map((option, index) => (
+            const isCorrectOption = feedback.show && option === currentQuestion.correct;
+            const isWrongOption = feedback.show && option === selectedAnswer && option !== currentQuestion.correct;
+
+            return (
               <button
                 key={index}
                 onClick={() => handleAnswer(option)}
                 disabled={feedback.show || selectedAnswer !== null}
                 className={`
-                  p-6 rounded-xl text-2xl font-bold
-                  transition-all duration-300 transform
-                  ${feedback.show && option === currentQuestion.correct
-                    ? 'bg-green-500 text-white scale-105 ring-4 ring-green-300'
-                    : feedback.show && option === selectedAnswer && option !== currentQuestion.correct
-                    ? 'bg-red-500 text-white scale-95'
-                    : 'bg-white/20 text-white hover:bg-white/30 hover:scale-105'
-                  }
-                  ${selectedAnswer === option ? 'ring-2 ring-yellow-400' : ''}
-                  disabled:opacity-50 disabled:cursor-not-allowed
+                  py-5 sm:py-6 md:py-7 px-3
+                  text-xl sm:text-2xl md:text-3xl lg:text-4xl
+                  font-bold
+                  rounded-2xl sm:rounded-3xl
+                  text-white
+                  bg-gradient-to-r ${colors[index % colors.length]}
+                  shadow-lg
+                  transform transition-all duration-200
+                  hover:scale-105 hover:shadow-xl
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+                  ${isCorrectOption ? 'ring-4 ring-green-400 ring-offset-2' : ''}
+                  ${isWrongOption ? 'ring-4 ring-red-400 ring-offset-2' : ''}
+                  ${selectedAnswer === option && !feedback.show ? 'ring-4 ring-yellow-400 ring-offset-2' : ''}
                 `}
               >
                 {option}
               </button>
-            ))}
-          </div>
-
-          {feedback.show && (
-            <div className={`mt-6 p-4 rounded-xl text-center animate-bounce ${
-              feedback.type === 'success' ? 'bg-green-500/20' : 'bg-red-500/20'
-            }`}>
-              <p className={`text-2xl font-bold ${
-                feedback.type === 'success' ? 'text-green-300' : 'text-red-300'
-              }`}>
-                {feedback.message}
-              </p>
-              {feedback.type === 'error' && feedback.correct && (
-                <p className="text-white/80 mt-2">
-                  คำตอบที่ถูกต้อง: "{feedback.correct}"
-                </p>
-              )}
-            </div>
-          )}
+            );
+          })}
         </div>
 
-        {currentQuestion && (
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-white/60">คำศัพท์ในข้อนี้</span>
-              <button
-                onClick={() => speak(currentQuestion.correct)}
-                className="text-white/40 hover:text-white transition-colors"
-              >
-                <Volume2 size={20} />
-              </button>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <p className="text-white font-bold">{currentQuestion.correct || ''}</p>
-                <p className="text-yellow-300 text-sm">{currentQuestion.pinyin || ''}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-white">{currentQuestion.meaning || ''}</p>
-              </div>
-            </div>
+          {/* Feedback - ใหญ่ตรงกลาง */}
+{feedback.show && (
+  <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
+    {/* Overlay สีดำโปร่งแสง */}
+    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fadeIn"></div>
+    
+    {/* กล่อง Feedback */}
+    <div className={`
+      relative max-w-2xl w-full p-8 sm:p-10 md:p-12 
+      rounded-3xl shadow-2xl text-center
+      transform animate-popIn
+      ${feedback.type === 'success' 
+        ? 'bg-gradient-to-br from-green-500 to-emerald-600 border-4 border-green-300' 
+        : 'bg-gradient-to-br from-red-500 to-rose-600 border-4 border-red-300'
+      }
+    `}>
+      {/* ไอคอนขนาดใหญ่ */}
+      <div className="mb-6">
+        {feedback.type === 'success' ? (
+          <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center">
+            <CheckCircle size={64} className="text-white" />
+          </div>
+        ) : (
+          <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center">
+            <XCircle size={64} className="text-white" />
           </div>
         )}
-      </main>
+      </div>
+
+      {/* ข้อความ Feedback */}
+      <p className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-4 drop-shadow-lg">
+        {feedback.message}
+      </p>
+
+      {/* คำตอบที่ถูกต้อง (กรณีผิด) */}
+      {feedback.type === 'error' && feedback.correct && (
+        <div className="mt-6 p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
+          <p className="text-2xl sm:text-3xl text-white/90 mb-2">
+            คำตอบที่ถูกต้อง:
+          </p>
+          <p className="text-5xl sm:text-6xl md:text-7xl font-bold text-yellow-300 drop-shadow-lg">
+            {feedback.correct}
+          </p>
+          <p className="text-xl sm:text-2xl text-white/80 mt-4">
+            {currentQuestion?.fullMeaning || currentQuestion?.meaning}
+          </p>
+        </div>
+      )}
+{/* ตัวจับเวลา (ถ้าต้องการ) */}
+<div className="mt-8 text-center">
+  {feedback.type === 'success' ? (
+    <div className="space-y-2">
+      <div className="flex justify-center gap-2 text-4xl animate-bounce">
+        <span>🎉</span>
+        <span>⭐</span>
+        <span>🎉</span>
+      </div>
+      <p className="text-white/90 text-2xl font-bold">เก่งมาก! ยอดเยี่ยม!</p>
+      <p className="text-white/70 text-lg">เตรียมไปข้อต่อไป...</p>
     </div>
-  );
+  ) : (
+    <div className="space-y-2">
+      <div className="flex justify-center gap-2 text-4xl">
+        <span>💪</span>
+        <span>✨</span>
+        <span>🌻</span>
+      </div>
+      <p className="text-white/90 text-2xl font-bold">ไม่เป็นไรนะ!</p>
+      <p className="text-white/70 text-lg">ครั้งหน้าต้องดีขึ้นแน่!</p>
+    </div>
+  )}
+</div>
+    </div>
+  </div>
+)}
+
+      </div>
+    </main>
+  </div>
+);
 }
