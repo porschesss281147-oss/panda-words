@@ -556,10 +556,15 @@ export default function SentenceGamePage() {
       paddingTop: "15px"
     }}
   >
-      <div 
-  className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-  style={{ backgroundImage: `url('/panda-words/3.png')` }} 
-></div>
+   
+<div className="fixed inset-0 -z-50">
+  <div 
+    className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+    style={{ backgroundImage: `url('/panda-words/3.png')` }}
+  />
+
+  <div className="absolute inset-0 bg-white/30" />
+</div>
 
     {/* Header */}
     <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200">
