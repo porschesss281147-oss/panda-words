@@ -1,3 +1,4 @@
+
 export const hsk1 = [
   { 
     id: 1,
@@ -374,7 +375,7 @@ export const hsk1 = [
   pinyin: 'jǐ', 
   thai: 'กี่',
   sentence: '你有几个儿子？',
-  sentence_pinyin: 'nǐ yǒu jǐ gè érzi？',
+  sentence_pinyin: 'nǐ yǒu jǐ gè érzi',
   sentence_th: 'คุณมีลูกชายกี่คน'
 },
 { 
@@ -527,7 +528,7 @@ export const hsk1 = [
   pinyin: 'ma', 
   thai: 'ไหม',
   sentence: '你是中国人吗？',
-  sentence_pinyin: 'nǐ shì zhōngguó rén ma？',
+  sentence_pinyin: 'nǐ shì zhōngguó rén ma',
   sentence_th: 'คุณเป็นคนจีนไหม'
 },
 { 
@@ -590,7 +591,7 @@ export const hsk1 = [
   pinyin: 'nǎ', 
   thai: 'ไหน',
   sentence: '哪个杯子是你的？',
-  sentence_pinyin: 'nǎ gè bēizi shì nǐ de？',
+  sentence_pinyin: 'nǎ gè bēizi shì nǐ de',
   sentence_th: 'แก้วใบไหนเป็นของคุณ'
 },
 { 
@@ -599,7 +600,7 @@ export const hsk1 = [
   pinyin: 'nǎr', 
   thai: 'ที่ไหน',
   sentence: '你家在哪儿？',
-  sentence_pinyin: 'nǐ jiā zài nǎr？',
+  sentence_pinyin: 'nǐ jiā zài nǎr',
   sentence_th: 'บ้านคุณอยู่ที่ไหน'
 },
 { 
@@ -626,7 +627,7 @@ export const hsk1 = [
   pinyin: 'ne', 
   thai: 'ล่ะ',
   sentence: '你们家有几个人呢？',
-  sentence_pinyin: 'nǐmen jiā yǒu jǐ gè rén ne？',
+  sentence_pinyin: 'nǐmen jiā yǒu jǐ gè rén ne',
   sentence_th: 'ที่บ้านคุณมีคนกี่คนล่ะ'
 },
 { 
@@ -635,7 +636,7 @@ export const hsk1 = [
   pinyin: 'néng', 
   thai: 'สามารถ',
   sentence: '我能坐在这儿吗？',
-  sentence_pinyin: 'wǒ néng zuò zài zhèr ma？',
+  sentence_pinyin: 'wǒ néng zuò zài zhèr ma',
   sentence_th: 'ฉันนั่งตรงนี้ได้ไหม'
 },
 { 
@@ -644,7 +645,7 @@ export const hsk1 = [
   pinyin: 'nǐ', 
   thai: 'คุณ',
   sentence: '你认识这个人吗？',
-  sentence_pinyin: 'nǐ rènshi zhè gè rén ma？',
+  sentence_pinyin: 'nǐ rènshi zhè gè rén ma',
   sentence_th: 'คุณรู้จักคนนี้ไหม'
 },
 { 
@@ -689,7 +690,7 @@ export const hsk1 = [
   pinyin: 'píngguǒ', 
   thai: 'แอปเปิ้ล',
   sentence: '你想不想吃个苹果？',
-  sentence_pinyin: 'nǐ xiǎng bu xiǎng chī gè píngguǒ？',
+  sentence_pinyin: 'nǐ xiǎng bu xiǎng chī gè píngguǒ',
   sentence_th: 'คุณอยากกินแอปเปิ้ลไหม'
 },
 { 
@@ -815,7 +816,7 @@ export const hsk1 = [
   pinyin: 'shéi', 
   thai: 'ใคร',
   sentence: '那个人是谁？',
-  sentence_pinyin: 'nà gè rén shì shéi？',
+  sentence_pinyin: 'nà gè rén shì shéi',
   sentence_th: 'คนนั้นคือใคร'
 },
 { 
@@ -824,7 +825,7 @@ export const hsk1 = [
   pinyin: 'shénme', 
   thai: 'อะไร',
   sentence: '你看见了什么？',
-  sentence_pinyin: 'nǐ kànjiàn le shénme？',
+  sentence_pinyin: 'nǐ kànjiàn le shénme',
   sentence_th: 'คุณเห็นอะไร'
 },
 { 
@@ -869,7 +870,7 @@ export const hsk1 = [
   pinyin: 'shuǐ', 
   thai: 'น้ำ',
   sentence: '杯子里还有水吗？',
-  sentence_pinyin: 'bēizi lǐ hái yǒu shuǐ ma？',
+  sentence_pinyin: 'bēizi lǐ hái yǒu shuǐ ma',
   sentence_th: 'ในแก้วยังมีน้ำไหม'
 },
 { 
@@ -896,7 +897,7 @@ export const hsk1 = [
   pinyin: 'shuō', 
   thai: 'พูด',
   sentence: '你在说什么？',
-  sentence_pinyin: 'nǐ zài shuō shénme？',
+  sentence_pinyin: 'nǐ zài shuō shénme',
   sentence_th: 'คุณพูดอะไรอยู่'
 },
 { 
@@ -1067,7 +1068,7 @@ export const hsk1 = [
   pinyin: 'xiànzài', 
   thai: 'ตอนนี้',
   sentence: '现在几点？',
-  sentence_pinyin: 'xiànzài jǐ diǎn？',
+  sentence_pinyin: 'xiànzài jǐ diǎn',
   sentence_th: 'ตอนนี้กี่โมง'
 },
 { 
@@ -1130,7 +1131,7 @@ export const hsk1 = [
   pinyin: 'xīngqī', 
   thai: 'สัปดาห์',
   sentence: '今天是星期几？',
-  sentence_pinyin: 'jīntiān shì xīngqī jǐ？',
+  sentence_pinyin: 'jīntiān shì xīngqī jǐ',
   sentence_th: 'วันนี้วันอะไร'
 },
 { 
@@ -1238,7 +1239,7 @@ export const hsk1 = [
   pinyin: 'zàijiàn', 
   thai: 'ลาก่อน',
   sentence: '再见，明天见！',
-  sentence_pinyin: 'zàijiàn, míngtiān jiàn！',
+  sentence_pinyin: 'zàijiàn, míngtiān jiàn',
   sentence_th: 'ลาก่อน เจอกันพรุ่งนี้!'
 },
 { 
@@ -1256,7 +1257,7 @@ export const hsk1 = [
   pinyin: 'zěnme', 
   thai: 'อย่างไร',
   sentence: '你怎么去学校？',
-  sentence_pinyin: 'nǐ zěnme qù xuéxiào？',
+  sentence_pinyin: 'nǐ zěnme qù xuéxiào',
   sentence_th: 'คุณไปโรงเรียนอย่างไร'
 },
 { 
@@ -1265,7 +1266,7 @@ export const hsk1 = [
   pinyin: 'zěnmeyàng', 
   thai: 'เป็นอย่างไร',
   sentence: '你最近怎么样？',
-  sentence_pinyin: 'nǐ zuìjìn zěnmeyàng？',
+  sentence_pinyin: 'nǐ zuìjìn zěnmeyàng',
   sentence_th: 'ช่วงนี้คุณเป็นอย่างไรบ้าง'
 },
 { 
@@ -3512,7 +3513,7 @@ export const hsk3 = [
   pinyin: 'háishì',
   thai: 'หรือ',
   sentence: '你去还是我去？',
-  sentence_pinyin: 'nǐ qù háishì wǒ qù？',
+  sentence_pinyin: 'nǐ qù háishì wǒ qù',
   sentence_th: 'คุณไปหรือฉันไป'
 },
 { 
@@ -4550,13 +4551,13 @@ export const hsk3 = [
   sentence_pinyin: 'wǒ měi tiān dōu xuéxí。',
   sentence_th: 'ฉันเรียนทุกวัน'
 },
-{ 
+{
   id: 507,
   chinese: '妹妹',
   pinyin: 'mèimei',
   thai: 'น้องสาว',
   sentence: '我妹妹很可爱。',
-  sentence_pinyin: 'wǒ mèimei hěn kě’ài。',
+  sentence_pinyin: "wǒ mèimei hěn kě'ài。",
   sentence_th: 'น้องสาวฉันน่ารัก'
 },
 { 
@@ -4610,7 +4611,7 @@ export const hsk3 = [
   pinyin: 'míngzi',
   thai: 'ชื่อ',
   sentence: '你叫什么名字？',
-  sentence_pinyin: 'nǐ jiào shénme míngzi？',
+  sentence_pinyin: 'nǐ jiào shénme míngzi',
   sentence_th: 'คุณชื่ออะไร'
 },
 { 
@@ -4664,7 +4665,7 @@ export const hsk3 = [
   pinyin: 'nǎ',
   thai: 'ไหน',
   sentence: '你去哪？',
-  sentence_pinyin: 'nǐ qù nǎ？',
+  sentence_pinyin: 'nǐ qù nǎ',
   sentence_th: 'คุณไปไหน'
 },
 { 
@@ -4673,7 +4674,7 @@ export const hsk3 = [
   pinyin: 'nǎr',
   thai: 'ที่ไหน',
   sentence: '你去哪儿？',
-  sentence_pinyin: 'nǐ qù nǎr？',
+  sentence_pinyin: 'nǐ qù nǎr',
   sentence_th: 'คุณไปที่ไหน'
 },
 { 
@@ -4727,7 +4728,7 @@ export const hsk3 = [
   pinyin: 'ne',
   thai: 'ล่ะ',
   sentence: '你呢？',
-  sentence_pinyin: 'nǐ ne？',
+  sentence_pinyin: 'nǐ ne',
   sentence_th: 'คุณล่ะ'
 },
 { 
@@ -4799,7 +4800,7 @@ export const hsk3 = [
   pinyin: 'nín',
   thai: 'คุณ',
   sentence: '您好吗？',
-  sentence_pinyin: 'nín hǎo ma？',
+  sentence_pinyin: 'nín hǎo ma',
   sentence_th: 'คุณสบายดีไหม'
 },
 { 
@@ -4829,13 +4830,13 @@ export const hsk3 = [
   sentence_pinyin: 'tā shì nǚ de。',
   sentence_th: 'เธอเป็นผู้หญิง'
 },
-{ 
+{
   id: 538,
   chinese: '女儿',
   pinyin: "nǚ'ér",
   thai: 'ลูกสาว',
   sentence: '我女儿很可爱。',
-  sentence_pinyin: 'wǒ nǚ’ér hěn kě’ài。',
+  sentence_pinyin: "wǒ nǚ'ér hěn kě'ài。",
   sentence_th: 'ลูกสาวฉันน่ารัก'
 },
 { 
@@ -4997,7 +4998,7 @@ export const hsk3 = [
   pinyin: 'qián',
   thai: 'เงิน',
   sentence: '多少钱？',
-  sentence_pinyin: 'duōshao qián？',
+  sentence_pinyin: 'duōshao qián',
   sentence_th: 'เท่าไหร่'
 },
 { 
@@ -5051,7 +5052,7 @@ export const hsk3 = [
   pinyin: 'qíngkuàng',
   thai: 'สถานการณ์',
   sentence: '情况怎么样？',
-  sentence_pinyin: 'qíngkuàng zěnmeyàng？',
+  sentence_pinyin: 'qíngkuàng zěnmeyàng',
   sentence_th: 'สถานการณ์เป็นอย่างไร'
 },
 { 
@@ -5267,7 +5268,7 @@ export const hsk3 = [
   pinyin: 'shéi',
   thai: 'ใคร',
   sentence: '他是谁？',
-  sentence_pinyin: 'tā shì shéi？',
+  sentence_pinyin: 'tā shì shéi',
   sentence_th: 'เขาเป็นใคร'
 },
 { 
@@ -5285,7 +5286,7 @@ export const hsk3 = [
   pinyin: 'shénme',
   thai: 'อะไร',
   sentence: '这是什么？',
-  sentence_pinyin: 'zhè shì shénme？',
+  sentence_pinyin: 'zhè shì shénme',
   sentence_th: 'นี่คืออะไร'
 },
 { 
@@ -5312,7 +5313,7 @@ export const hsk3 = [
   pinyin: 'shēngrì',
   thai: 'วันเกิด',
   sentence: '生日快乐！',
-  sentence_pinyin: 'shēngrì kuàilè！',
+  sentence_pinyin: 'shēngrì kuàilè',
   sentence_th: 'สุขสันต์วันเกิด'
 },
 { 
@@ -5339,7 +5340,7 @@ export const hsk3 = [
   pinyin: 'shíhou',
   thai: 'เวลา',
   sentence: '什么时候？',
-  sentence_pinyin: 'shénme shíhou？',
+  sentence_pinyin: 'shénme shíhou',
   sentence_th: 'เมื่อไหร่'
 },
 { 
