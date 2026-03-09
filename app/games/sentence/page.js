@@ -550,15 +550,16 @@ export default function SentenceGamePage() {
 
   return (
   <div 
-    className="min-h-screen flex flex-col items-center relative px-4 sm:px-6"
-<div className="fixed inset-0 -z-10">
-  <div 
-    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-    style={{ backgroundImage: `url('/panda-words/3.png')` }}
-  />
-
-  <div className="absolute inset-0 bg-white/30" />
-</div>
+ return (
+  <div className="min-h-screen flex flex-col items-center relative px-4 sm:px-6">
+    {/* Background image - correctly nested */}
+    <div className="fixed inset-0 -z-10">
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url('/3.png')` }}  // Fixed path too
+      />
+      <div className="absolute inset-0 bg-white/30" />
+    </div>
 
     {/* Header */}
     <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200">
