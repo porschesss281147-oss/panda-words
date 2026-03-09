@@ -549,22 +549,20 @@ export default function SentenceGamePage() {
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
  return (
- <div 
-  className="min-h-screen flex flex-col items-center relative px-4 sm:px-6 bg-cover bg-center bg-no-repeat"
-  style={{
-    backgroundImage: `url('/3.png')`,
-    paddingTop: "15px"
-  }}
->
-   
-<div className="fixed inset-0 -z-10">
   <div 
-    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-    style={{ backgroundImage: `url('/panda-words/3.png')` }}
-  />
-
-  <div className="absolute inset-0 bg-white/30" />
-</div>
+    className="min-h-screen flex flex-col items-center relative px-4 sm:px-6"
+    style={{
+      paddingTop: "15px"
+    }}
+  >
+    
+    <div className="fixed inset-0 -z-10">
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url('/3.png')` }}
+      />
+      <div className="absolute inset-0 bg-white/30" />
+    </div>
 
     {/* Header */}
     <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200">
