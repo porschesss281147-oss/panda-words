@@ -549,12 +549,13 @@ export default function SentenceGamePage() {
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
  return (
-  <div 
-    className="min-h-screen flex flex-col items-center relative px-4 sm:px-6"
-    style={{
-      paddingTop: "15px"
-    }}
-  >
+ <div 
+  className="min-h-screen flex flex-col items-center relative px-4 sm:px-6 bg-cover bg-center bg-no-repeat"
+  style={{
+    backgroundImage: `url('/3.png')`,
+    paddingTop: "15px"
+  }}
+>
    
 <div className="fixed inset-0 -z-10">
   <div 
