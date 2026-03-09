@@ -552,7 +552,6 @@ export default function SentenceGamePage() {
   <div 
     className="min-h-screen flex flex-col items-center relative px-4 sm:px-6"
     style={{
-      background: "#f4efe6",
       paddingTop: "15px"
     }}
   >
