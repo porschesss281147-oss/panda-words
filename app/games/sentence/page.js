@@ -559,7 +559,7 @@ export default function SentenceGamePage() {
     <div className="fixed inset-0 -z-10">
      <div 
   className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-  style={{ backgroundImage: `url('/panda-words/3.png')` }} 
+  style={{ backgroundImage: `url('/panda-words/cc.png')` }} 
 ></div>
       <div className="absolute inset-0 bg-white/30" />
     </div>
