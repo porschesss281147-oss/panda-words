@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { useLeaderboard } from '@/context/LeaderboardContext';
 import { useSound } from '@/hooks/useSound';
-import { games, allHsk, hsk1, hsk2, hsk3 } from '@/data/games';  // แก้ตรงนี้
-import { LogOut, Gamepad2, Trophy, Target, Volume2, Sparkles, Award, Users } from 'lucide-react';
+import { games, allHsk, hsk1, hsk2, hsk3 } from '@/data/games';
+import { LogOut, Gamepad2, Trophy, Target, Volume2, Sparkles, Award, Users, X, HelpCircle, BookOpen, CheckCircle, Star, Zap, Crown } from 'lucide-react';
 
 export default function HomePage() {
   const router = useRouter();
@@ -16,6 +16,9 @@ export default function HomePage() {
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [wordOfDay, setWordOfDay] = useState(null);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [activeTab, setActiveTab] = useState('general'); // 'general', 'hsk1', 'hsk2', 'hsk3'
 
   // ถ้าไม่มี user ให้กลับไปหน้า login
   useEffect(() => {
@@ -35,7 +38,6 @@ export default function HomePage() {
   const generateNewWord = () => {
     playSound('click');
     
-    // สุ่มจาก allHsk แทน vocabulary
     if (allHsk && allHsk.length > 0) {
       const randomIndex = Math.floor(Math.random() * allHsk.length);
       const word = allHsk[randomIndex];
@@ -99,13 +101,14 @@ export default function HomePage() {
     return null;
   }
 
-return (
+  return (
     <div className="relative min-h-screen overflow-hidden">
-     <div 
-  className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-  style={{ backgroundImage: `url('/panda-words/home.png')` }} 
-></div>
-      <div className="absolute inset-0 bg-white/60 backdrop-blur-sm"></div>
+      {/* Background */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url('/panda-words/home.png')` }} 
+      />
+      <div className="absolute inset-0 bg-white/60 backdrop-blur-sm" />
 
       {/* Content */}
       <div className="relative z-10">
@@ -186,50 +189,24 @@ return (
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-  {/* ปุ่มวิธีการเล่น */}
-  <div 
-    onClick={() => {
-      playSound('click');
-    }}
-    className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4 transform hover:scale-105 transition-all cursor-pointer hover:shadow-lg"
-  >
-    <div className="bg-blue-100 p-3 rounded-full">
-      <svg xmlns="http://www.w3.org/2000/svg" className="text-blue-600" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-        <line x1="12" y1="17" x2="12.01" y2="17"/>
-      </svg>
-    </div>
-    <div>
-      <p className="text-sm text-gray-500">เรียนรู้</p>
-      <p className="text-2xl font-bold text-gray-800">วิธีการเล่น</p>
-      <p className="text-xs text-gray-400">กดเพื่อดูคำแนะนำ</p>
-    </div>
-  </div>
-
-  {/* หรือถ้าต้องการแบบ简洁กว่านี้ */}
-  <div 
-    onClick={() => {
-      playSound('click');
-      // เปิด modal วิธีการเล่น
-    }}
-    className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md p-4 flex items-center space-x-4 transform hover:scale-105 transition-all cursor-pointer hover:shadow-lg"
-  >
-    <div className="bg-white/20 p-3 rounded-full">
-      <svg xmlns="http://www.w3.org/2000/svg" className="text-white" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 16v-4"/>
-        <path d="M12 8h.01"/>
-      </svg>
-    </div>
-    <div>
-      <p className="text-sm text-white/80">วิธีเล่น</p>
-      <p className="text-2xl font-bold text-white">วิธีการเล่น</p>
-      <p className="text-xs text-white/60">คลิกเพื่อดู</p>
-    </div>
-  </div>
-</div>
+            {/* ปุ่มวิธีการเล่น */}
+            <div 
+              onClick={() => {
+                playSound('click');
+                setShowHowToPlay(true);
+              }}
+              className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md p-4 flex items-center space-x-4 transform hover:scale-105 transition-all cursor-pointer hover:shadow-lg"
+            >
+              <div className="bg-white/20 p-3 rounded-full">
+                <HelpCircle className="text-white" size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-white/80">เรียนรู้</p>
+                <p className="text-2xl font-bold text-white">วิธีการเล่น</p>
+                <p className="text-xs text-white/60">คลิกเพื่อดูคำแนะนำ</p>
+              </div>
+            </div>
+          </div>
 
           {/* Games Grid */}
           <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -271,113 +248,120 @@ return (
             ))}
           </div>
 
-          {/* อันดับผู้เล่นจริง */}
-          <div className="mt-8 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <span>🏅</span> อันดับผู้เล่น
-            </h3>
+          {/* อันดับผู้เล่นและคำศัพท์สุ่ม */}
+          <div className="grid md:grid-cols-2 gap-6 mt-8">
+            {/* อันดับผู้เล่น */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <Crown className="text-yellow-500" size={24} />
+                อันดับผู้เล่น
+              </h3>
 
-            {leaderboardLoading ? (
-              <div className="text-center py-8">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                <p className="mt-2 text-gray-500">กำลังโหลด...</p>
-              </div>
-            ) : leaderboard.length > 0 ? (
-              <div className="space-y-3">
-                {leaderboard.slice(0, 5).map((player, index) => (
-                  <div
-                    key={player.id}
-                    className={`flex items-center gap-3 p-3 rounded-xl border transition-all hover:shadow-md ${
-                      player.id === user.id
-                        ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300'
-                        : index === 0
-                        ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200'
-                        : index === 1
-                        ? 'bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200'
-                        : index === 2
-                        ? 'bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200'
-                        : 'bg-white border border-gray-100 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold shadow-md ${
-                      index === 0 ? 'bg-yellow-400 text-white' :
-                      index === 1 ? 'bg-gray-400 text-white' :
-                      index === 2 ? 'bg-amber-700 text-white' :
-                      'bg-gray-200 text-gray-600'
-                    }`}>
-                      {index + 1}
-                    </div>
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white text-xl">
-                      {player.icon || '😊'}
-                    </div>
-                    <div className="flex-1">
-                      <p className={`font-semibold ${
-                        player.id === user.id ? 'text-purple-700' : 'text-gray-800'
+              {leaderboardLoading ? (
+                <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  <p className="mt-2 text-gray-500">กำลังโหลด...</p>
+                </div>
+              ) : leaderboard.length > 0 ? (
+                <div className="space-y-3">
+                  {leaderboard.slice(0, 5).map((player, index) => (
+                    <div
+                      key={player.id}
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all hover:shadow-md ${
+                        player.id === user.id
+                          ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300'
+                          : index === 0
+                          ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200'
+                          : index === 1
+                          ? 'bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200'
+                          : index === 2
+                          ? 'bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200'
+                          : 'bg-white border border-gray-100 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold shadow-md ${
+                        index === 0 ? 'bg-yellow-400 text-white' :
+                        index === 1 ? 'bg-gray-400 text-white' :
+                        index === 2 ? 'bg-amber-700 text-white' :
+                        'bg-gray-200 text-gray-600'
                       }`}>
-                        {player.name}
-                        {player.id === user.id && ' (คุณ)'}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        เล่น {player.gamesPlayed || 0} เกม • {player.challengesCompleted || 0} ดวงดาว
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className={`font-bold ${
-                        index === 0 ? 'text-yellow-600' :
-                        index === 1 ? 'text-gray-600' :
-                        index === 2 ? 'text-amber-700' :
-                        'text-gray-600'
-                      }`}>
-                        {player.totalScore?.toLocaleString() || 0}
-                      </p>
-                      <p className="text-xs text-gray-400">คะแนน</p>
-                    </div>
-                  </div>
-                ))}
-
-                {/* ถ้าผู้เล่นไม่อยู่ใน 5 อันดับแรก */}
-                {userRank > 5 && (
-                  <>
-                    <div className="text-center text-gray-400">...</div>
-                    <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-300 hover:shadow-md transition-all">
-                      <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
-                        {userRank}
+                        {index + 1}
                       </div>
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-xl">
-                        {user.icon}
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white text-xl">
+                        {player.icon || '😊'}
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-purple-700">{user.name}</p>
-                        <p className="text-xs text-purple-500">อันดับ {userRank}</p>
+                        <p className={`font-semibold ${
+                          player.id === user.id ? 'text-purple-700' : 'text-gray-800'
+                        }`}>
+                          {player.name}
+                          {player.id === user.id && ' (คุณ)'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          เล่น {player.gamesPlayed || 0} เกม • {player.challengesCompleted || 0} ดวงดาว
+                        </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-purple-600">{stats.totalScore?.toLocaleString()}</p>
+                        <p className={`font-bold ${
+                          index === 0 ? 'text-yellow-600' :
+                          index === 1 ? 'text-gray-600' :
+                          index === 2 ? 'text-amber-700' :
+                          'text-gray-600'
+                        }`}>
+                          {player.totalScore?.toLocaleString() || 0}
+                        </p>
                         <p className="text-xs text-gray-400">คะแนน</p>
                       </div>
                     </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <Users size={48} className="mx-auto mb-3 text-gray-300" />
-                <p>ยังไม่มีผู้เล่นอื่น</p>
-                <p className="text-sm">มาเป็นคนแรกเลย! 🎉</p>
-              </div>
-            )}
+                  ))}
 
-            <button
-              onClick={() => playSound('click')}
-              className="mt-4 w-full bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl py-3 text-gray-600 font-semibold hover:from-gray-100 hover:to-gray-200 transition-all hover:shadow-md"
-            >
-              ดูอันดับทั้งหมด 🏆
-            </button>
-                    {/* คำศัพท์สุ่ม */}
-          <div className="mt-8">
+                  {userRank > 5 && (
+                    <>
+                      <div className="text-center text-gray-400">...</div>
+                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-300 hover:shadow-md transition-all">
+                        <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
+                          {userRank}
+                        </div>
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-xl">
+                          {user.icon}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-purple-700">{user.name}</p>
+                          <p className="text-xs text-purple-500">อันดับ {userRank}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-purple-600">{stats.totalScore?.toLocaleString()}</p>
+                          <p className="text-xs text-gray-400">คะแนน</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Users size={48} className="mx-auto mb-3 text-gray-300" />
+                  <p>ยังไม่มีผู้เล่นอื่น</p>
+                  <p className="text-sm">มาเป็นคนแรกเลย! 🎉</p>
+                </div>
+              )}
+
+              <button
+                onClick={() => {
+                  playSound('click');
+                  setShowLeaderboard(true);
+                }}
+                className="mt-4 w-full bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl py-3 text-gray-600 font-semibold hover:from-gray-100 hover:to-gray-200 transition-all hover:shadow-md"
+              >
+                ดูอันดับทั้งหมด 🏆
+              </button>
+            </div>
+
+            {/* คำศัพท์สุ่ม */}
             <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 shadow-lg">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white text-xl font-bold flex items-center gap-2">
-                  <span>📚</span> คำศัพท์สุ่ม
+                  <BookOpen size={24} />
+                  คำศัพท์สุ่ม
                 </h3>
                 <button
                   onClick={generateNewWord}
@@ -423,9 +407,356 @@ return (
               )}
             </div>
           </div>
-          </div>
         </main>
       </div>
+
+      {/* Modal วิธีการเล่น */}
+      {showHowToPlay && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 rounded-t-3xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-100 p-3 rounded-full">
+                    <HelpCircle className="text-blue-600" size={28} />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-800">วิธีการเล่น</h2>
+                    <p className="text-gray-500">เรียนรู้วิธีเล่นเกมต่างๆ ใน Panda Words</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    playSound('click');
+                    setShowHowToPlay(false);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={28} />
+                </button>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+                {[
+                  { id: 'general', label: 'ทั่วไป', icon: '📚' },
+                  { id: 'spelling', label: 'สะกดคำ', icon: '✍️' },
+                  { id: 'tone', label: 'เสียงวรรณยุกต์', icon: '🎵' },
+                  { id: 'match', label: 'จับคู่', icon: '🔄' }
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      playSound('click');
+                      setActiveTab(tab.id);
+                    }}
+                    className={`px-4 py-2 rounded-full font-semibold transition-all flex items-center gap-2 whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? 'bg-blue-500 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    <span>{tab.icon}</span>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              {activeTab === 'general' && (
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
+                    <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                      <Star className="text-yellow-500" size={20} />
+                      กติกาพื้นฐาน
+                    </h3>
+                    <ul className="space-y-3 text-gray-600">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="text-green-500 mt-1" size={18} />
+                        <span>แต่ละเกมมี 10 ด่าน แต่ละด่านมี 10 คำถาม</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="text-green-500 mt-1" size={18} />
+                        <span>ตอบถูกได้คะแนน ตอบผิดไม่มีคะแนน แต่ดูคำตอบที่ถูกต้องได้</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="text-green-500 mt-1" size={18} />
+                        <span>ผ่านแต่ละด่านต้องตอบให้ถูกอย่างน้อย 7 ข้อ</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="text-green-500 mt-1" size={18} />
+                        <span>เมื่อผ่านด่านจะปลดล็อกด่านถัดไป</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-yellow-50 rounded-xl p-4">
+                      <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                        <Zap className="text-yellow-500" size={18} />
+                        การให้คะแนน
+                      </h4>
+                      <ul className="space-y-2 text-sm text-gray-600">
+                        <li>• ตอบถูกข้อละ 10 คะแนน</li>
+                        <li>• โบนัสตอบถูก 10 ข้อเต็ม 50 คะแนน</li>
+                        <li>• ผ่านด่านได้โบนัส 100 คะแนน</li>
+                      </ul>
+                    </div>
+                    <div className="bg-purple-50 rounded-xl p-4">
+                      <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                        <Award className="text-purple-500" size={18} />
+                        ดวงดาว
+                      </h4>
+                      <ul className="space-y-2 text-sm text-gray-600">
+                        <li>• ได้ 3 ดาว เมื่อได้คะแนน 90-100%</li>
+                        <li>• ได้ 2 ดาว เมื่อได้คะแนน 70-89%</li>
+                        <li>• ได้ 1 ดาว เมื่อได้คะแนน 50-69%</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'spelling' && (
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6">
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">✍️ เกมสะกดคำ</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">ดูจำนวนตัวอักษร</p>
+                          <p className="text-gray-600">เกมจะแสดงขีด _ ตามจำนวนตัวอักษรของคำศัพท์</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">พิมพ์คำตอบ</p>
+                          <p className="text-gray-600">พิมพ์คำศัพท์ภาษาจีนตัวเต็มในช่องว่าง</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">ดูคำใบ้ (ถ้าต้องการ)</p>
+                          <p className="text-gray-600">กดปุ่ม "ดูคำใบ้" เพื่อดูความหมายภาษาไทย</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">4</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">ตรวจสอบคำตอบ</p>
+                          <p className="text-gray-600">กด "ตรวจสอบ" เพื่อดูว่าถูกหรือผิด</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-sm text-gray-500">💡 Tips: ไม่ต้องใส่เครื่องหมายวรรคตอน พิมพ์เฉพาะตัวอักษรจีนเท่านั้น</p>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'tone' && (
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-6">
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">🎵 เกมเสียงวรรณยุกต์</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-orange-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">ฟังเสียง</p>
+                          <p className="text-gray-600">กดปุ่มเล่นเพื่อฟังเสียงคำศัพท์</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="bg-orange-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">เลือกวรรณยุกต์</p>
+                          <p className="text-gray-600">เลือกเสียงวรรณยุกต์ที่ได้ยิน (1-4 หรือ เบา)</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="bg-orange-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">ตรวจสอบ</p>
+                          <p className="text-gray-600">กดตรวจสอบเพื่อดูว่าถูกต้องหรือไม่</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-red-50 p-3 rounded-lg text-center">
+                      <span className="text-red-600 font-bold text-xl">ˉ</span>
+                      <p className="text-sm">เสียงสามัญ</p>
+                    </div>
+                    <div className="bg-yellow-50 p-3 rounded-lg text-center">
+                      <span className="text-yellow-600 font-bold text-xl">ˊ</span>
+                      <p className="text-sm">เสียงเอก</p>
+                    </div>
+                    <div className="bg-green-50 p-3 rounded-lg text-center">
+                      <span className="text-green-600 font-bold text-xl">ˇ</span>
+                      <p className="text-sm">เสียงโท</p>
+                    </div>
+                    <div className="bg-blue-50 p-3 rounded-lg text-center">
+                      <span className="text-blue-600 font-bold text-xl">ˋ</span>
+                      <p className="text-sm">เสียงตรี</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'match' && (
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-6">
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">🔄 เกมจับคู่</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-pink-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">ดูคำศัพท์</p>
+                          <p className="text-gray-600">จะมีคำศัพท์ภาษาจีนแสดงอยู่</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="bg-pink-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">เลือกความหมาย</p>
+                          <p className="text-gray-600">เลือกความหมายภาษาไทยที่ถูกต้องจากตัวเลือก</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="bg-pink-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">จับคู่ให้ถูกต้อง</p>
+                          <p className="text-gray-600">จับคู่คำศัพท์กับความหมายให้ครบทุกคู่</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-sm text-gray-500">💡 Tips: จับคู่ให้ถูกต้องภายในเวลาที่กำหนด เพื่อรับโบนัสพิเศษ</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-6 rounded-b-3xl">
+              <button
+                onClick={() => {
+                  playSound('click');
+                  setShowHowToPlay(false);
+                }}
+                className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-600 transition-all shadow-lg"
+              >
+                เข้าใจแล้ว ไปเล่นกันเลย! 🚀
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal อันดับทั้งหมด */}
+      {showLeaderboard && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 rounded-t-3xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-yellow-100 p-3 rounded-full">
+                    <Trophy className="text-yellow-600" size={28} />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-800">อันดับผู้เล่นทั้งหมด</h2>
+                    <p className="text-gray-500">จัดอันดับตามคะแนนรวม</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    playSound('click');
+                    setShowLeaderboard(false);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={28} />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {leaderboardLoading ? (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                  <p className="mt-4 text-gray-500">กำลังโหลดอันดับ...</p>
+                </div>
+              ) : leaderboard.length > 0 ? (
+                <div className="space-y-2">
+                  {leaderboard.map((player, index) => (
+                    <div
+                      key={player.id}
+                      className={`flex items-center gap-3 p-4 rounded-xl border transition-all ${
+                        player.id === user.id
+                          ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300'
+                          : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg shadow-md ${
+                        index === 0 ? 'bg-yellow-400 text-white' :
+                        index === 1 ? 'bg-gray-400 text-white' :
+                        index === 2 ? 'bg-amber-700 text-white' :
+                        'bg-gray-200 text-gray-600'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white text-2xl">
+                        {player.icon || '😊'}
+                      </div>
+                      <div className="flex-1">
+                        <p className={`font-semibold ${
+                          player.id === user.id ? 'text-purple-700' : 'text-gray-800'
+                        }`}>
+                          {player.name}
+                          {player.id === user.id && ' (คุณ)'}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          เล่น {player.gamesPlayed || 0} เกม • {player.challengesCompleted || 0} ดวงดาว
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-gray-800">{player.totalScore?.toLocaleString() || 0}</p>
+                        <p className="text-xs text-gray-400">คะแนน</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Users size={64} className="mx-auto mb-4 text-gray-300" />
+                  <p className="text-gray-600 text-lg">ยังไม่มีผู้เล่น</p>
+                  <p className="text-gray-400">มาเป็นคนแรกและสร้างตำนานกันเถอะ! 🎉</p>
+                </div>
+              )}
+            </div>
+
+            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-6 rounded-b-3xl">
+              <button
+                onClick={() => {
+                  playSound('click');
+                  setShowLeaderboard(false);
+                }}
+                className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+              >
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
