@@ -934,7 +934,7 @@ transition-all duration-150 border-4 border-yellow-600 tracking-wide
       </div>
 
 {/* Bottom Timer Bar */}
-<div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-3xl z-20">
+<div className="w-[90%] max-w-3xl mx-auto mt-10">
 
   {/* กรอบจีน */}
   <div className="relative p-1 rounded-full bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 shadow-xl">
