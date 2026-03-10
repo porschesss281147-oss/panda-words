@@ -231,45 +231,48 @@
   line-height: 1.5;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
-
-/* Spelling Area - เล็กลงมาก */
+/* Spelling Area */
 .spellingArea {
   text-align: center;
-  margin-bottom: 1rem;
-  background: #f8f9fa; /* ตัด gradient ออก */
-  padding: 0.8rem;
-  border-radius: 1rem;
+  margin: 1.5rem 0;
+  background: #f8f9fa;
+  padding: 1.2rem 1rem;
+  border-radius: 16px;
 }
 
+/* ช่องตัวอักษร */
 .wordLength {
   display: flex;
   justify-content: center;
-  gap: 0.3rem;
-  margin-bottom: 0.2rem;
+  align-items: flex-end;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
   flex-wrap: wrap;
 }
 
+/* ขีดคำ */
 .wordDash {
-  font-size: 2rem; /* เล็กลงอีก */
-  font-weight: 600;
+  font-size: 1.9rem;
+  font-weight: 700;
   color: #4ecdc4;
-  line-height: 1;
-  min-width: 30px;
+  min-width: 32px;
   text-align: center;
-  border-bottom: 2px solid #4ecdc4;
-  padding-bottom: 0.1rem;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  padding-bottom: 4px;
+  border-bottom: 3px solid #4ecdc4;
+  line-height: 1.4;
 }
 
+/* ข้อความจำนวนตัวอักษร */
 .wordLengthText {
+  margin-top: 0.2rem;
   color: #6c757d;
-  font-size: 0.9rem; /* เล็กลง */
+  font-size: 0.85rem;
   font-weight: 500;
   background: white;
   display: inline-block;
-  padding: 0.2rem 0.8rem;
-  border-radius: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
 /* Input Form - ใหญ่ขึ้น */
