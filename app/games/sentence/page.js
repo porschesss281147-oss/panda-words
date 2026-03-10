@@ -552,9 +552,9 @@ export default function SentenceGamePage() {
       {/* Background */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url('/panda-words/rr.png')` }} 
+        style={{ backgroundImage: `url('/panda-words/game4.png')` }} 
       />
-      <div className="absolute inset-0 bg-white/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-white/60 " />
 
       {/* Content */}
       <div className="relative z-10">
@@ -615,7 +615,7 @@ export default function SentenceGamePage() {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 w-full max-w-5xl mx-auto flex flex-col items-center justify-center px-4 mt-8">
+        <main className="flex-1 w-full max-w-5xl mx-auto flex flex-col items-center justify-center px-4 ">
           <div className="w-full">
             {/* Question */}
             <div className="text-center mb-8 sm:mb-10">
