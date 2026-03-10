@@ -10,7 +10,7 @@ import { Volume2, CheckCircle, XCircle, RotateCcw, Home, Clock } from 'lucide-re
 export default function SentenceGamePage() {
   const router = useRouter();
   const { user, unlockLevel, addGameResult } = useUser();
-  const { playSound } = useSound();
+  const { playSound, unlockAudio } = useSound();
   
   // State หลัก
   const [selectedLevel, setSelectedLevel] = useState(1);
@@ -125,6 +125,7 @@ export default function SentenceGamePage() {
   };
 
   const handleAnswer = (answer) => {
+    unlockAudio();
     if (feedback.show || gameCompleted || !questions.length || currentQuestionIndex >= questions.length) return;
     
     playSound('click');
