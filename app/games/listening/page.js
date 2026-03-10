@@ -851,7 +851,7 @@ return (
         {/* Options Section */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-Grey text-center mb-6 drop-shadow-lg">
-            เลือกคำตอบที่ถูกต้อง:
+            💡 ฟังเสียงให้ดี แล้วเลือกคำตอบที่ถูกต้อง
           </h2>
           
          <div className="grid grid-cols-2 gap-5 md:gap-7">
@@ -931,17 +931,10 @@ transition-all duration-150 border-4 border-yellow-600 tracking-wide
             ตรวจคำตอบ
           </button>
         </div>
-
-        {/* Hint */}
-        <div className="mt-8 text-center">
-          <p className="text-/80 text-lg">
-            💡 ฟังเสียงให้ดี แล้วเลือกคำตอบที่ถูกต้อง
-          </p>
-        </div>
       </div>
 
 {/* Bottom Timer Bar */}
-<div className="mt-6 w-[90%] max-w-3xl mx-auto z-20">
+<div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-3xl z-20">
 
   {/* กรอบจีน */}
   <div className="relative p-1 rounded-full bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 shadow-xl">
@@ -953,12 +946,10 @@ transition-all duration-150 border-4 border-yellow-600 tracking-wide
         className="h-full bg-gradient-to-r from-red-900 via-red-600 to-yellow-500 transition-all duration-1000"
         style={{ width: `${(timeLeft / 30) * 100}%` }}
       />
-
       {/* แสงวิ่ง */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse">
       </div>
     </div>
-
     {/* ตัวเลขเวลา */}
     <div className="absolute inset-0 flex items-center justify-center">
       <span className="text-yellow-200 font-bold text-base sm:text-lg tracking-widest drop-shadow-lg">
