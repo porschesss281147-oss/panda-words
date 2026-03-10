@@ -799,15 +799,18 @@ return (
         </div>
       </header>
 
-<div className="pt-15"></div>
-      {/* Main Game Area */}
-<div className="relative z-10 w-full max-w-4xl mx-auto">
+{/* Spacer จาก Header */}
+<div className="h-20 sm:h-24 md:h-28"></div>
+
+{/* Main Game Area */}
+<div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6">
 
   {/* Audio Section */}
-<div className="text-center mb-12">
+  <div className="text-center mb-10 sm:mb-12">
 
-  <div className="relative inline-block p-6 bg-black/30 backdrop-blur-md rounded-full mb-6 border-2 border-yellow-500/40 shadow-xl">
-
+    <div className="relative inline-block p-5 sm:p-6 
+    bg-black/30 backdrop-blur-md rounded-full 
+    mb-6 border-2 border-yellow-500/40 shadow-xl">
     {/* ปุ่มเสียง */}
     <button
       onClick={handlePlaySound}
