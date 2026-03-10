@@ -756,12 +756,12 @@ console.log('User sentence:', userSentence);
 </header>
 
       {/* คำถาม */}
-     <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold mb-8 sm:mb-10 text-center px-4">
+<h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold mb-10 mt-6 sm:mt-8 md:mt-10 z-10 text-center">
   {currentQuestion.thai}
 </h1>
 
       {/* คำศัพท์ให้ลาก - แบบสมบูรณ์ */}
-<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-5 mb-10 justify-items-center">
+<div className="flex flex-wrap gap-4 mb-12 z-10 justify-center">
   {availableWords.filter(item => !item.isUsed).map((item) => (
     <div
       key={item.id}
@@ -802,7 +802,7 @@ console.log('User sentence:', userSentence);
 </div>
 
       {/* ช่องวางคำตอบ */}
-<div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-8">
+<div className="flex flex-wrap gap-4 mb-10 z-10 justify-center">
   {dropZones.map((zone, index) => (
     <div
       key={index}
@@ -849,27 +849,15 @@ console.log('User sentence:', userSentence);
   ))}
 </div>
 
-     {/* ปุ่มตรวจคำตอบ */}
-<div className="w-full flex justify-center mt-6 sm:mt-8 md:mt-10">
+     <div className="flex justify-center mt-8">
+  {/* ปุ่มตรวจคำตอบ */}
   <button
     onClick={checkAnswer}
     disabled={dropZones.some(zone => !zone.word)}
-    className="
-      px-10 sm:px-12 md:px-14
-      py-3 sm:py-4 md:py-5
-      text-lg sm:text-xl md:text-2xl
-      font-bold text-white
-      rounded-full
-      bg-gradient-to-b from-red-500 via-red-600 to-red-800
-      border-4 border-yellow-400
-      shadow-[0_8px_0_#7f1d1d]
-      active:translate-y-2 active:shadow-[0_4px_0_#7f1d1d]
-      transition-all duration-150
-      tracking-wide
-      hover:scale-105
-      disabled:opacity-50
-      disabled:cursor-not-allowed
-    "
+    className="relative px-14 py-5 text-2xl font-bold text-white rounded-[70px] 
+    bg-gradient-to-b from-red-500 via-red-600 to-red-800 shadow-[0_8px_0_#7f1d1d] 
+    active:translate-y-2 active:shadow-[0_4px_0_#7f1d1d] transition-all 
+    duration-150 border-4 border-yellow-500 tracking-wide"
   >
     ตรวจคำตอบ
   </button>
