@@ -263,13 +263,13 @@
 
 .wordLengthText {
   color: #495057;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 600;
   background: white;
   display: inline-block;
-  padding: 0.8rem 2.5rem;
-  border-radius: 3rem;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  padding: 0.3rem 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 /* Input Form - ใหญ่ขึ้น */
