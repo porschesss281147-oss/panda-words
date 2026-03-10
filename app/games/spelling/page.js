@@ -276,7 +276,7 @@ return (
         ← ออก
       </button>
       <h1 className={styles.title}>
-        ด่านที่ {selectedLevel}/10
+       เกมสะกดคำ
       </h1>
       <div className={styles.gameStats}>
         <span className={styles.progress}>
