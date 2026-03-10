@@ -186,20 +186,50 @@ return (
               </div>
             </div>
 
-            <div 
-              onClick={() => playSound('click')}
-              className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4 transform hover:scale-105 transition-all cursor-pointer hover:shadow-lg"
-            >
-              <div className="bg-yellow-100 p-3 rounded-full">
-                <Award className="text-yellow-600" size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">ความสำเร็จ</p>
-                <p className="text-2xl font-bold text-gray-800">{stats.challengesCompleted}</p>
-                <p className="text-xs text-gray-400">ดวงดาว</p>
-              </div>
-            </div>
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+  {/* ปุ่มวิธีการเล่น */}
+  <div 
+    onClick={() => {
+      playSound('click');
+    }}
+    className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4 transform hover:scale-105 transition-all cursor-pointer hover:shadow-lg"
+  >
+    <div className="bg-blue-100 p-3 rounded-full">
+      <svg xmlns="http://www.w3.org/2000/svg" className="text-blue-600" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    </div>
+    <div>
+      <p className="text-sm text-gray-500">เรียนรู้</p>
+      <p className="text-2xl font-bold text-gray-800">วิธีการเล่น</p>
+      <p className="text-xs text-gray-400">กดเพื่อดูคำแนะนำ</p>
+    </div>
+  </div>
+
+  {/* หรือถ้าต้องการแบบ简洁กว่านี้ */}
+  <div 
+    onClick={() => {
+      playSound('click');
+      // เปิด modal วิธีการเล่น
+    }}
+    className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md p-4 flex items-center space-x-4 transform hover:scale-105 transition-all cursor-pointer hover:shadow-lg"
+  >
+    <div className="bg-white/20 p-3 rounded-full">
+      <svg xmlns="http://www.w3.org/2000/svg" className="text-white" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 16v-4"/>
+        <path d="M12 8h.01"/>
+      </svg>
+    </div>
+    <div>
+      <p className="text-sm text-white/80">วิธีเล่น</p>
+      <p className="text-2xl font-bold text-white">วิธีการเล่น</p>
+      <p className="text-xs text-white/60">คลิกเพื่อดู</p>
+    </div>
+  </div>
+</div>
 
           {/* Games Grid */}
           <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
