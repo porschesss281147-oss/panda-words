@@ -696,16 +696,14 @@ console.log('User sentence:', userSentence);
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
   return (
+    <div className="relative min-h-screen overflow-hidden">
+
+    {/* Background */}
     <div 
-      className="min-h-screen flex flex-col items-center justify-center relative px-6"
-      style={{
-        background: "#f4efe6",
-      }}
-    >
-      {/* Background ภาพจาง */}
-      <div className="absolute inset-0  opacity-70 flex justify-center items-center pointer-events-none">
-        <img src="/rr.png" alt="background" className="w-full h-full object-cover" />
-      </div>
+      className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url('/panda-words/rr.png')` }} 
+    />
+    <div className="absolute inset-0 bg-white/20" />
 
       <header className="fixed top-0 left-0 w-full z-50 bg-white/70 backdrop-blur-md shadow-sm border-b border-purple-200/50">
   <div className="w-full px-4 md:px-6 lg:px-10 py-4">
