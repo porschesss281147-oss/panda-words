@@ -16,14 +16,14 @@ export const useSound = () => {
       
       // Map ชื่อเสียงกับไฟล์
       const soundMap = {
-        'click': '/public/sounds/click.mp3',
-        'success': '/sounds/success.mp3',
-        'error': '/sounds/error.mp3',
-        'time': '/sounds/time.mp3',      // เสียงเวลาหมด
-        'achievement': '/sounds/success.mp3', // ใช้เสียง success แทน achievement
-        'start': '/sounds/click.mp3',     // ใช้เสียง click แทน start
-        'tick': '/sounds/click.mp3',      // ใช้เสียง click แทน tick
-        'warning': '/sounds/error.mp3'    // ใช้เสียง error แทน warning
+        click: '/public/sounds/click.mp3',
+        success: '/sounds/success.mp3',
+        error: '/sounds/error.mp3',
+        time: '/sounds/time.mp3',      // เสียงเวลาหมด
+        achievement: '/sounds/success.mp3', // ใช้เสียง success แทน achievement
+        start: '/sounds/click.mp3',     // ใช้เสียง click แทน start
+        tick: '/sounds/click.mp3',      // ใช้เสียง click แทน tick
+        warning: '/sounds/error.mp3'    // ใช้เสียง error แทน warning
       };
       
       const soundFile = soundMap[soundName];
