@@ -195,7 +195,7 @@ export default function HomePage() {
                 playSound('click');
                 setShowHowToPlay(true);
               }}
-              className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md p-4 flex items-center space-x-4 transform hover:scale-105 transition-all cursor-pointer hover:shadow-lg"
+              className="bg-gradient-to-br ffrom-red-500 to-red-600 rounded-xl shadow-md p-4 flex items-center space-x-4 transform hover:scale-105 transition-all cursor-pointer hover:shadow-lg"
             >
               <div className="bg-white/20 p-3 rounded-full">
                 <HelpCircle className="text-white" size={24} />
@@ -440,10 +440,10 @@ export default function HomePage() {
               {/* Tabs */}
               <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
                 {[
-                  { id: 'general', label: 'ทั่วไป', icon: '📚' },
-                  { id: 'spelling', label: 'สะกดคำ', icon: '✍️' },
-                  { id: 'tone', label: 'เสียงวรรณยุกต์', icon: '🎵' },
-                  { id: 'match', label: 'จับคู่', icon: '🔄' }
+                  { id: 'general', label: 'เกมเติมประโยค', icon: '🎴' },
+                  { id: 'spelling', label: 'เกมเรียงประโยค', icon: '📝' },
+                  { id: 'tone', label: 'เกมฟังเสียง', icon: '🎧' },
+                  { id: 'match', label: 'เกมสะกดคำ', icon: '✍️' }
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -471,20 +471,28 @@ export default function HomePage() {
                   <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
                     <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
                       <Star className="text-yellow-500" size={20} />
-                      กติกาพื้นฐาน
+                      🎴 เกมเติมประโยคให้ถูกต้อง
                     </h3>
                     <ul className="space-y-3 text-gray-600">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="text-green-500 mt-1" size={18} />
+                        <span> ใช้คำศัพท์ระดับ HSK 1 จำนวน 150 คำศัพท์ </span>
+                      </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle className="text-green-500 mt-1" size={18} />
                         <span>แต่ละเกมมี 10 ด่าน แต่ละด่านมี 10 คำถาม</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle className="text-green-500 mt-1" size={18} />
-                        <span>ตอบถูกได้คะแนน ตอบผิดไม่มีคะแนน แต่ดูคำตอบที่ถูกต้องได้</span>
+                        <span>ผ่านแต่ละด่านต้องตอบให้ถูกอย่างน้อย 8 ข้อ</span>
                       </li>
-                      <li className="flex items-start gap-2">
+                       <li className="flex items-start gap-2">
                         <CheckCircle className="text-green-500 mt-1" size={18} />
-                        <span>ผ่านแต่ละด่านต้องตอบให้ถูกอย่างน้อย 7 ข้อ</span>
+                        <span> ในแต่ละข้อมี เวลาจำกัด 30 วินาที </span>
+                      </li>
+                        <li className="flex items-start gap-2">
+                        <CheckCircle className="text-green-500 mt-1" size={18} />
+                        <span> คะแนนข้อละ 10 คะแนน </span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle className="text-green-500 mt-1" size={18} />
@@ -492,58 +500,38 @@ export default function HomePage() {
                       </li>
                     </ul>
                   </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-yellow-50 rounded-xl p-4">
-                      <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
-                        <Zap className="text-yellow-500" size={18} />
-                        การให้คะแนน
-                      </h4>
-                      <ul className="space-y-2 text-sm text-gray-600">
-                        <li>• ตอบถูกข้อละ 10 คะแนน</li>
-                        <li>• โบนัสตอบถูก 10 ข้อเต็ม 50 คะแนน</li>
-                        <li>• ผ่านด่านได้โบนัส 100 คะแนน</li>
-                      </ul>
-                    </div>
-                    <div className="bg-purple-50 rounded-xl p-4">
-                      <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
-                        <Award className="text-purple-500" size={18} />
-                        ดวงดาว
-                      </h4>
-                      <ul className="space-y-2 text-sm text-gray-600">
-                        <li>• ได้ 3 ดาว เมื่อได้คะแนน 90-100%</li>
-                        <li>• ได้ 2 ดาว เมื่อได้คะแนน 70-89%</li>
-                        <li>• ได้ 1 ดาว เมื่อได้คะแนน 50-69%</li>
-                      </ul>
-                    </div>
-                  </div>
                 </div>
               )}
 
               {activeTab === 'spelling' && (
                 <div className="space-y-6">
                   <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6">
-                    <h3 className="text-lg font-bold text-gray-800 mb-3">✍️ เกมสะกดคำ</h3>
+                    <h3 className="text-lg font-bold text-gray-800 mb-3"> 📝 เกมเรียงประโยคให้ถูกต้องและสมบูรณ์ </h3>
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
                         <div className="bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
                         <div>
-                          <p className="font-semibold text-gray-800">ดูจำนวนตัวอักษร</p>
-                          <p className="text-gray-600">เกมจะแสดงขีด _ ตามจำนวนตัวอักษรของคำศัพท์</p>
+                          <p className="font-semibold text-gray-800"> ใช้คำศัพท์ระดับ HSK 2 จำนวน 300 คำศัพท์ </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                        <div>
+                          <p className="font-semibold text-gray-800"> เกมมี 10 ด่าน และในแต่ละด่านมี 10 ข้อคำถาม </p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
                         <div className="bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
                         <div>
-                          <p className="font-semibold text-gray-800">พิมพ์คำตอบ</p>
-                          <p className="text-gray-600">พิมพ์คำศัพท์ภาษาจีนตัวเต็มในช่องว่าง</p>
+                          <p className="font-semibold text-gray-800">ลากคำ</p>
+                          <p className="text-gray-600">ให้ลากคำศัทพ์ภาษาจีนไปวางเรียงกันให้ถูกต้อง</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
                         <div className="bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
                         <div>
-                          <p className="font-semibold text-gray-800">ดูคำใบ้ (ถ้าต้องการ)</p>
-                          <p className="text-gray-600">กดปุ่ม "ดูคำใบ้" เพื่อดูความหมายภาษาไทย</p>
+                          <p className="font-semibold text-gray-800"> เวลา </p>
+                          <p className="text-gray-600"> ในแต่ละข้อมี เวลาจำกัด 40 วินาที </p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -555,17 +543,20 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-sm text-gray-500">💡 Tips: ไม่ต้องใส่เครื่องหมายวรรคตอน พิมพ์เฉพาะตัวอักษรจีนเท่านั้น</p>
-                  </div>
                 </div>
               )}
 
               {activeTab === 'tone' && (
                 <div className="space-y-6">
                   <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-6">
-                    <h3 className="text-lg font-bold text-gray-800 mb-3">🎵 เกมเสียงวรรณยุกต์</h3>
+                    <h3 className="text-lg font-bold text-gray-800 mb-3"> 🎧  เกมฟังเสียงเลือกคำตอบที่ถูกต้อง</h3>
                     <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-orange-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">ใช้คำศัพท์ระดับ HSK 3 จำนวน 600 คำศัพท์</p>
+                        </div>
+                      </div>
                       <div className="flex items-start gap-3">
                         <div className="bg-orange-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
                         <div>
@@ -574,10 +565,22 @@ export default function HomePage() {
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
+                        <div className="bg-orange-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">เกมมี 10 ด่าน และในแต่ละด่านมี 10 ข้อคำถาม</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
                         <div className="bg-orange-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
                         <div>
-                          <p className="font-semibold text-gray-800">เลือกวรรณยุกต์</p>
-                          <p className="text-gray-600">เลือกเสียงวรรณยุกต์ที่ได้ยิน (1-4 หรือ เบา)</p>
+                          <p className="font-semibold text-gray-800">ผ่านแต่ละด่านต้องตอบให้ถูกอย่างน้อย 8 ข้อ</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="bg-orange-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">เวลา</p>
+                          <p className="text-gray-600">ในแต่ละข้อมี เวลาจำกัด 30 วินาที </p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -589,23 +592,6 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-red-50 p-3 rounded-lg text-center">
-                      <span className="text-red-600 font-bold text-xl">ˉ</span>
-                      <p className="text-sm">เสียงสามัญ</p>
-                    </div>
-                    <div className="bg-yellow-50 p-3 rounded-lg text-center">
-                      <span className="text-yellow-600 font-bold text-xl">ˊ</span>
-                      <p className="text-sm">เสียงเอก</p>
-                    </div>
-                    <div className="bg-green-50 p-3 rounded-lg text-center">
-                      <span className="text-green-600 font-bold text-xl">ˇ</span>
-                      <p className="text-sm">เสียงโท</p>
-                    </div>
-                    <div className="bg-blue-50 p-3 rounded-lg text-center">
-                      <span className="text-blue-600 font-bold text-xl">ˋ</span>
-                      <p className="text-sm">เสียงตรี</p>
-                    </div>
                   </div>
                 </div>
               )}
@@ -613,33 +599,47 @@ export default function HomePage() {
               {activeTab === 'match' && (
                 <div className="space-y-6">
                   <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-6">
-                    <h3 className="text-lg font-bold text-gray-800 mb-3">🔄 เกมจับคู่</h3>
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">✍️ เกมสะกดคำภาษาจีนตัวเต็มให้ถูกต้อง</h3>
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
                         <div className="bg-pink-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
                         <div>
-                          <p className="font-semibold text-gray-800">ดูคำศัพท์</p>
-                          <p className="text-gray-600">จะมีคำศัพท์ภาษาจีนแสดงอยู่</p>
+                          <p className="font-semibold text-gray-800">ใช้คำศัพท์ระดับ HSK1 – HSK3 จำนวน 600 คำศัพท์</p>
                         </div>
                       </div>
-                      <div className="flex items-start gap-3">
+                       <div className="flex items-start gap-3">
                         <div className="bg-pink-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
                         <div>
-                          <p className="font-semibold text-gray-800">เลือกความหมาย</p>
-                          <p className="text-gray-600">เลือกความหมายภาษาไทยที่ถูกต้องจากตัวเลือก</p>
+                          <p className="font-semibold text-gray-800">เกมมี 10 ด่าน และในแต่ละด่านมี 10 ข้อคำถาม</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
                         <div className="bg-pink-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
                         <div>
-                          <p className="font-semibold text-gray-800">จับคู่ให้ถูกต้อง</p>
-                          <p className="text-gray-600">จับคู่คำศัพท์กับความหมายให้ครบทุกคู่</p>
+                          <p className="font-semibold text-gray-800">ผ่านแต่ละด่านต้องตอบให้ถูกอย่างน้อย 8 ข้อ</p>
+                        </div>
+                      </div>
+                       <div className="flex items-start gap-3">
+                        <div className="bg-pink-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">ดูคำศัพท์หรือดูคำใบ้</p>
+                          <p className="text-gray-600">จะมีคำศัพท์ภาษาไทยแสดงอยู่และบอกมีกี่ตัวอักษร</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="bg-pink-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">ให้พิมพ์ภาษาจีนตัวเต็มลงในช่อง</p>
+                        </div>
+                      </div>
+                     <div className="flex items-start gap-3">
+                        <div className="bg-pink-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+                        <div>
+                          <p className="font-semibold text-gray-800">กดตรวจสอบเพื่อดูว่าถูกต้องหรือไม่</p>
+                          <p className="text-gray-600">ถ้าตอบผิดจะมีเฉลยขึ้นให้พร้อมให้ตอบใหม่อีกครั้งเพื่อให้ทำได้</p>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-sm text-gray-500">💡 Tips: จับคู่ให้ถูกต้องภายในเวลาที่กำหนด เพื่อรับโบนัสพิเศษ</p>
                   </div>
                 </div>
               )}
