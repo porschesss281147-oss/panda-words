@@ -940,6 +940,33 @@ transition-all duration-150 border-4 border-yellow-600 tracking-wide
         </div>
       </div>
 
+{/* Bottom Timer Bar */}
+<div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-3xl z-20">
+
+  {/* กรอบจีน */}
+  <div className="relative p-1 rounded-full bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 shadow-xl">
+
+    {/* แถบเวลา */}
+    <div className="relative w-full h-6 sm:h-7 bg-red-900/80 rounded-full overflow-hidden border border-yellow-700 shadow-inner">
+    
+      <div
+        className="h-full bg-gradient-to-r from-red-900 via-red-600 to-yellow-500 transition-all duration-1000"
+        style={{ width: `${(timeLeft / 30) * 100}%` }}
+      />
+      {/* แสงวิ่ง */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse">
+      </div>
+    </div>
+
+    {/* ตัวเลขเวลา */}
+    <div className="absolute inset-0 flex items-center justify-center">
+      <span className="text-yellow-200 font-bold text-base sm:text-lg tracking-widest drop-shadow-lg">
+        ⏳ {timeLeft} วินาที
+      </span>
+    </div>
+  </div>
+</div>
+
       {/* Feedback Modal */}
       {feedback.show && (
         <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
@@ -1019,23 +1046,6 @@ transition-all duration-150 border-4 border-yellow-600 tracking-wide
           </div>
         </div>
       )}
-
-      {/* Bottom Timer Bar */}
-<div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-[100%] z-20">
-    <div className="w-full h-6 bg-gray-800/70 rounded-full overflow-hidden border border-yellow-700 shadow-inner">
-  <div
-    className="h-full bg-gradient-to-r from-red-900 via-red-700 to-yellow-600 transition-all duration-1000"
-    style={{ width: `${(timeLeft / 30) * 100}%` }}
-  ></div>
-</div>
-
-    <div className="absolute inset-0 flex items-center justify-center">
-      <span className="text-white font-bold text-lg tracking-widest drop-shadow-lg">
-        ⏳ {timeLeft} วินาที
-      </span>
-    
-  </div>
-</div>
 
       {/* CSS for sound wave animation */}
       <style jsx>{`
