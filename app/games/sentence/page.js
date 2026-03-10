@@ -6,6 +6,7 @@ import { useSound } from '@/hooks/useSound';
 import { games } from '@/data/games';
 import { generateSentenceQuestions } from '@/data/question-generators/hsk1';
 import { Volume2, CheckCircle, XCircle, RotateCcw, Home, Clock } from 'lucide-react';
+import styles from './page.module.css';
 
 export default function SentenceGamePage() {
   const router = useRouter();
@@ -550,22 +551,8 @@ export default function SentenceGamePage() {
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
  return (
-  <div 
-    className="min-h-screen flex flex-col items-center relative px-4 sm:px-6"
-    style={{
-      background: "#f4efe6",
-      paddingTop: "15px"
-    }}
-  >
-   
-<div className="fixed inset-0 -z-10">
-  <div 
-    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-    style={{ backgroundImage: `url('/panda-words/home.png')` }}
-  />
-
-  <div className="absolute inset-0 bg-white/30" />
-</div>
+  <div className="homeBackground min-h-screen flex flex-col items-center relative px-4 sm:px-6">
+    <div className="absolute inset-0 bg-white/30" />
 
     {/* Header */}
     <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200">
@@ -578,24 +565,21 @@ export default function SentenceGamePage() {
             ← ออกจากเกม
           </button>
 
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold 
-text-transparent bg-clip-text 
-bg-gradient-to-r from-purple-600 via-purple-500 to-pink-400">
-  เกมเติมประโยค
-</h1>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-purple-500 to-pink-400">
+            เกมเติมประโยค
+          </h1>
 
           <div className="flex items-center gap-3 sm:gap-4">
-  {/* Question Progress */}
-  <div className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 rounded-full shadow-md border border-purple-200">
-    <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full text-white font-bold text-sm shadow-inner">
-      {currentQuestionIndex + 1}
-    </div>
-    <div className="flex flex-col">
-      <span className="text-xs text-gray-500">ข้อที่</span>
-      <span className="text-sm font-bold text-gray-800">/{questions.length}</span>
-    </div>
-  </div>
-
+            {/* Question Progress */}
+            <div className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 rounded-full shadow-md border border-purple-200">
+              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full text-white font-bold text-sm shadow-inner">
+                {currentQuestionIndex + 1}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500">ข้อที่</span>
+                <span className="text-sm font-bold text-gray-800">/{questions.length}</span>
+              </div>
+            </div>
 
             {/* User */}
             <div className="flex items-center gap-2 sm:gap-3 bg-white/80 px-3 py-1.5 rounded-full shadow-sm">
@@ -609,7 +593,7 @@ bg-gradient-to-r from-purple-600 via-purple-500 to-pink-400">
       </div>
     </header>
 
-    {/* Timer - ใหญ่ขึ้น */}
+    {/* Timer */}
     <div className="w-full max-w-5xl mt-20 sm:mt-24 px-4">
       <div className="relative w-full h-4 sm:h-5 bg-gray-200 rounded-full overflow-hidden shadow-inner">
         <div
@@ -631,7 +615,6 @@ bg-gradient-to-r from-purple-600 via-purple-500 to-pink-400">
       <div className="w-full -mt-8 sm:-mt-10">
         {/* Question */}
         <div className="text-center mb-8 sm:mb-10">
-
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 leading-relaxed">
             {currentQuestion.sentenceWithBlank}
           </h1>
@@ -647,7 +630,7 @@ bg-gradient-to-r from-purple-600 via-purple-500 to-pink-400">
           </p>
         </div>
 
-        {/* Options - ใหญ่ขึ้น */}
+        {/* Options */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
           {currentQuestion.options.map((option, index) => {
             const colors = [
@@ -687,83 +670,83 @@ bg-gradient-to-r from-purple-600 via-purple-500 to-pink-400">
           })}
         </div>
 
-          {/* Feedback - ใหญ่ตรงกลาง */}
-{feedback.show && (
-  <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
-    {/* Overlay สีดำโปร่งแสง */}
-    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fadeIn"></div>
-    
-    {/* กล่อง Feedback */}
-    <div className={`
-      relative max-w-2xl w-full p-8 sm:p-10 md:p-12 
-      rounded-3xl shadow-2xl text-center
-      transform animate-popIn
-      ${feedback.type === 'success' 
-        ? 'bg-gradient-to-br from-green-500 to-emerald-600 border-4 border-green-300' 
-        : 'bg-gradient-to-br from-red-500 to-rose-600 border-4 border-red-300'
-      }
-    `}>
-      {/* ไอคอนขนาดใหญ่ */}
-      <div className="mb-6">
-        {feedback.type === 'success' ? (
-          <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center">
-            <CheckCircle size={64} className="text-white" />
-          </div>
-        ) : (
-          <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center">
-            <XCircle size={64} className="text-white" />
+        {/* Feedback */}
+        {feedback.show && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fadeIn"></div>
+            
+            {/* Feedback Box */}
+            <div className={`
+              relative max-w-2xl w-full p-8 sm:p-10 md:p-12 
+              rounded-3xl shadow-2xl text-center
+              transform animate-popIn
+              ${feedback.type === 'success' 
+                ? 'bg-gradient-to-br from-green-500 to-emerald-600 border-4 border-green-300' 
+                : 'bg-gradient-to-br from-red-500 to-rose-600 border-4 border-red-300'
+              }
+            `}>
+              {/* Icon */}
+              <div className="mb-6">
+                {feedback.type === 'success' ? (
+                  <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center">
+                    <CheckCircle size={64} className="text-white" />
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center">
+                    <XCircle size={64} className="text-white" />
+                  </div>
+                )}
+              </div>
+
+              {/* Message */}
+              <p className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-4 drop-shadow-lg">
+                {feedback.message}
+              </p>
+
+              {/* Correct Answer (if wrong) */}
+              {feedback.type === 'error' && feedback.correct && (
+                <div className="mt-6 p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
+                  <p className="text-2xl sm:text-3xl text-white/90 mb-2">
+                    คำตอบที่ถูกต้อง:
+                  </p>
+                  <p className="text-5xl sm:text-6xl md:text-7xl font-bold text-yellow-300 drop-shadow-lg">
+                    {feedback.correct}
+                  </p>
+                  <p className="text-xl sm:text-2xl text-white/80 mt-4">
+                    {currentQuestion?.fullMeaning || currentQuestion?.meaning}
+                  </p>
+                </div>
+              )}
+
+              {/* Motivational Message */}
+              <div className="mt-8 text-center">
+                {feedback.type === 'success' ? (
+                  <div className="space-y-2">
+                    <div className="flex justify-center gap-2 text-4xl animate-bounce">
+                      <span>🎉</span>
+                      <span>⭐</span>
+                      <span>🎉</span>
+                    </div>
+                    <p className="text-white/90 text-2xl font-bold">เก่งมาก! ยอดเยี่ยม!</p>
+                    <p className="text-white/70 text-lg">เตรียมไปข้อต่อไป...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex justify-center gap-2 text-4xl">
+                      <span>💪</span>
+                      <span>✨</span>
+                      <span>🌻</span>
+                    </div>
+                    <p className="text-white/90 text-2xl font-bold">ไม่เป็นไรนะ!</p>
+                    <p className="text-white/70 text-lg">ครั้งหน้าต้องดีขึ้นแน่!</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
-      </div>
-
-      {/* ข้อความ Feedback */}
-      <p className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-4 drop-shadow-lg">
-        {feedback.message}
-      </p>
-
-      {/* คำตอบที่ถูกต้อง (กรณีผิด) */}
-      {feedback.type === 'error' && feedback.correct && (
-        <div className="mt-6 p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-          <p className="text-2xl sm:text-3xl text-white/90 mb-2">
-            คำตอบที่ถูกต้อง:
-          </p>
-          <p className="text-5xl sm:text-6xl md:text-7xl font-bold text-yellow-300 drop-shadow-lg">
-            {feedback.correct}
-          </p>
-          <p className="text-xl sm:text-2xl text-white/80 mt-4">
-            {currentQuestion?.fullMeaning || currentQuestion?.meaning}
-          </p>
-        </div>
-      )}
-{/* ตัวจับเวลา (ถ้าต้องการ) */}
-<div className="mt-8 text-center">
-  {feedback.type === 'success' ? (
-    <div className="space-y-2">
-      <div className="flex justify-center gap-2 text-4xl animate-bounce">
-        <span>🎉</span>
-        <span>⭐</span>
-        <span>🎉</span>
-      </div>
-      <p className="text-white/90 text-2xl font-bold">เก่งมาก! ยอดเยี่ยม!</p>
-      <p className="text-white/70 text-lg">เตรียมไปข้อต่อไป...</p>
-    </div>
-  ) : (
-    <div className="space-y-2">
-      <div className="flex justify-center gap-2 text-4xl">
-        <span>💪</span>
-        <span>✨</span>
-        <span>🌻</span>
-      </div>
-      <p className="text-white/90 text-2xl font-bold">ไม่เป็นไรนะ!</p>
-      <p className="text-white/70 text-lg">ครั้งหน้าต้องดีขึ้นแน่!</p>
-    </div>
-  )}
-</div>
-    </div>
-  </div>
-)}
       </div>
     </main>
   </div>
 );
-}
