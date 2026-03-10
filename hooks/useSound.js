@@ -16,7 +16,7 @@ export const useSound = () => {
       
       // Map ชื่อเสียงกับไฟล์
       const soundMap = {
-        'click': '/sounds/click.mp3',
+        'click': '/public/sounds/click.mp3',
         'success': '/sounds/success.mp3',
         'error': '/sounds/error.mp3',
         'time': '/sounds/time.mp3',      // เสียงเวลาหมด
