@@ -279,7 +279,6 @@ export default function SpellingGamePage() {
           ด่านที่ {selectedLevel}/10
         </h1>
         <div className={styles.gameStats}>
-          <span className={styles.score}>⭐ {score}</span>
           <span className={styles.progress}>
             {currentIndex + 1}/{questions.length}
           </span>
@@ -299,7 +298,6 @@ export default function SpellingGamePage() {
               ) : (
                 <div>
                   <p className={styles.hintText}>{currentWord.meaning}</p>
-                  <p className={styles.hintPinyin}>{currentWord.pinyin}</p>
                 </div>
               )}
             </div>
