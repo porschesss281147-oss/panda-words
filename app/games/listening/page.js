@@ -941,18 +941,19 @@ transition-all duration-150 border-4 border-yellow-600 tracking-wide
       </div>
 
 {/* Bottom Timer Bar */}
-<div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-3xl z-20">
+<div className="mt-6 w-[90%] max-w-3xl mx-auto z-20">
 
   {/* กรอบจีน */}
   <div className="relative p-1 rounded-full bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 shadow-xl">
 
     {/* แถบเวลา */}
     <div className="relative w-full h-6 sm:h-7 bg-red-900/80 rounded-full overflow-hidden border border-yellow-700 shadow-inner">
-    
+
       <div
         className="h-full bg-gradient-to-r from-red-900 via-red-600 to-yellow-500 transition-all duration-1000"
         style={{ width: `${(timeLeft / 30) * 100}%` }}
       />
+
       {/* แสงวิ่ง */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse">
       </div>
