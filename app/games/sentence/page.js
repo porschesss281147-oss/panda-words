@@ -558,61 +558,75 @@ export default function SentenceGamePage() {
 
       {/* Content */}
       <div className="relative z-10">
-        {/* Header */}
-        <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200">
-          <div className="w-full px-4 sm:px-6 lg:px-10 py-3">
-            <div className="flex items-center justify-between">
-              <button
-                onClick={goToLevelSelect}
-                className="text-gray-700 hover:text-gray-900 transition-colors flex items-center gap-2 bg-white/80 px-4 sm:px-5 py-2 rounded-full text-base sm:text-lg shadow-sm font-medium"
-              >
-                ← ออกจากเกม
-              </button>
+      {/* Header */}
+<header className="fixed top-0 left-0 w-full z-50 bg-red-900/90 backdrop-blur-md shadow-md border-b border-yellow-500/40">
+  <div className="w-full px-4 sm:px-6 lg:px-10 py-3">
+    <div className="flex items-center justify-between">
 
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-purple-500 to-pink-400">
-                เกมเติมประโยค
-              </h1>
+      {/* Exit Button */}
+      <button
+        onClick={goToLevelSelect}
+        className="text-yellow-200 hover:text-yellow-100 transition-colors flex items-center gap-2 bg-red-800/80 px-4 sm:px-5 py-2 rounded-full text-base sm:text-lg shadow-sm font-medium border border-yellow-500/40"
+      >
+        ← ออกจากเกม
+      </button>
 
-              <div className="flex items-center gap-3 sm:gap-4">
-                {/* Question Progress */}
-                <div className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 rounded-full shadow-md border border-purple-200">
-                  <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full text-white font-bold text-sm shadow-inner">
-                    {currentQuestionIndex + 1}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500">ข้อที่</span>
-                    <span className="text-sm font-bold text-gray-800">/{questions.length}</span>
-                  </div>
-                </div>
+      {/* Title */}
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500">
+        เกมเติมประโยค
+      </h1>
 
-                {/* User */}
-                <div className="flex items-center gap-2 sm:gap-3 bg-white/80 px-3 py-1.5 rounded-full shadow-sm">
-                  <span className="text-2xl sm:text-3xl">{user?.icon}</span>
-                  <span className="hidden sm:inline text-gray-700 font-medium text-base sm:text-lg">
-                    {user?.name}
-                  </span>
-                </div>
-              </div>
-            </div>
+      <div className="flex items-center gap-3 sm:gap-4">
+
+        {/* Question Progress */}
+        <div className="flex items-center gap-2 bg-gradient-to-r from-red-800 to-red-700 px-4 py-2 rounded-full shadow-md border border-yellow-500/40">
+
+          <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full text-red-900 font-bold text-sm shadow-inner">
+            {currentQuestionIndex + 1}
           </div>
-        </header>
 
-        {/* Timer */}
-        <div className="w-full max-w-5xl mt-20 sm:mt-24 px-4 mx-auto">
-          <div className="relative w-full h-4 sm:h-5 bg-gray-200 rounded-full overflow-hidden shadow-inner">
-            <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-red-500 via-orange-500 to-yellow-400 transition-all duration-1000"
-              style={{ width: `${(timeLeft / 30) * 100}%` }}
-            >
-              <div className="absolute top-0 right-0 w-4 h-full bg-white/30 blur-sm"></div>
-            </div>
-          </div>
-          <div className="flex justify-end items-center mt-2 text-gray-700 text-base sm:text-lg font-semibold">
-            <span className="bg-white/60 px-4 py-1.5 rounded-full shadow-sm">
-              ⏳ {timeLeft} วินาที
-            </span>
+          <div className="flex flex-col">
+            <span className="text-xs text-yellow-200">ข้อที่</span>
+            <span className="text-sm font-bold text-yellow-100">/{questions.length}</span>
           </div>
         </div>
+
+        {/* User */}
+        <div className="flex items-center gap-2 sm:gap-3 bg-red-800/80 px-3 py-1.5 rounded-full shadow-sm border border-yellow-500/40">
+          <span className="text-2xl sm:text-3xl">{user?.icon}</span>
+          <span className="hidden sm:inline text-yellow-200 font-medium text-base sm:text-lg">
+            {user?.name}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+       {/* Timer */}
+<div className="w-full max-w-5xl mt-20 sm:mt-24 px-4 mx-auto">
+
+  {/* Progress Bar */}
+  <div className="relative w-full h-5 sm:h-6 bg-red-900/40 rounded-full overflow-hidden border border-yellow-500/40 shadow-inner">
+
+    <div
+      className="absolute top-0 left-0 h-full bg-gradient-to-r from-red-600 via-red-500 to-yellow-400 transition-all duration-1000 shadow-[0_0_15px_rgba(250,204,21,0.5)]"
+      style={{ width: `${(timeLeft / 30) * 100}%` }}
+    >
+      {/* Glow effect */}
+      <div className="absolute top-0 right-0 w-6 h-full bg-yellow-200/40 blur-md"></div>
+    </div>
+
+  </div>
+
+  {/* Timer Text */}
+  <div className="flex justify-end items-center mt-3">
+    <span className="bg-gradient-to-r from-red-700 to-red-800 text-yellow-200 px-5 py-2 rounded-full shadow-md border border-yellow-400/50 font-semibold text-base sm:text-lg flex items-center gap-2">
+      ⏳ {timeLeft} วินาที
+    </span>
+  </div>
+
+</div>
 
         {/* Main Content */}
         <main className="flex-1 w-full max-w-5xl mx-auto flex flex-col items-center justify-center px-6 pt-10 min-h-[65vh]">
@@ -633,46 +647,47 @@ export default function SentenceGamePage() {
                 {currentQuestion.fullMeaning}
               </p>
             </div>
+{/* Options */}
+<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+  {currentQuestion.options.map((option, index) => {
 
-            {/* Options */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-              {currentQuestion.options.map((option, index) => {
-                const colors = [
-                  'from-teal-500 to-emerald-600',
-                  'from-sky-500 to-cyan-600',
-                  'from-indigo-500 to-purple-600',
-                  'from-pink-500 to-rose-600'
-                ];
+    const colors = [
+      'from-red-600 to-red-700',
+      'from-red-500 to-red-700',
+      'from-red-700 to-red-900',
+      'from-red-600 to-red-800'
+    ];
 
-                const isCorrectOption = feedback.show && option === currentQuestion.correct;
-                const isWrongOption = feedback.show && option === selectedAnswer && option !== currentQuestion.correct;
+    const isCorrectOption = feedback.show && option === currentQuestion.correct;
+    const isWrongOption = feedback.show && option === selectedAnswer && option !== currentQuestion.correct;
 
-                return (
-                  <button
-                    key={index}
-                    onClick={() => handleAnswer(option)}
-                    disabled={feedback.show || selectedAnswer !== null}
-                    className={`
-                      py-5 sm:py-6 md:py-7 px-3
-                      text-xl sm:text-2xl md:text-3xl lg:text-4xl
-                      font-bold
-                      rounded-2xl sm:rounded-3xl
-                      text-white
-                      bg-gradient-to-r ${colors[index % colors.length]}
-                      shadow-lg
-                      transform transition-all duration-200
-                      hover:scale-105 hover:shadow-xl
-                      disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
-                      ${isCorrectOption ? 'ring-4 ring-green-400 ring-offset-2' : ''}
-                      ${isWrongOption ? 'ring-4 ring-red-400 ring-offset-2' : ''}
-                      ${selectedAnswer === option && !feedback.show ? 'ring-4 ring-yellow-400 ring-offset-2' : ''}
-                    `}
-                  >
-                    {option}
-                  </button>
-                );
-              })}
-            </div>
+    return (
+      <button
+        key={index}
+        onClick={() => handleAnswer(option)}
+        disabled={feedback.show || selectedAnswer !== null}
+        className={`
+          py-5 sm:py-6 md:py-7 px-3
+          text-xl sm:text-2xl md:text-3xl lg:text-4xl
+          font-bold
+          rounded-2xl sm:rounded-3xl
+          text-yellow-200
+          bg-gradient-to-r ${colors[index % colors.length]}
+          border-2 border-yellow-400
+          shadow-lg shadow-red-900/40
+          transform transition-all duration-200
+          hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/30
+          disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+          ${isCorrectOption ? 'ring-4 ring-green-400 ring-offset-2' : ''}
+          ${isWrongOption ? 'ring-4 ring-red-400 ring-offset-2' : ''}
+          ${selectedAnswer === option && !feedback.show ? 'ring-4 ring-yellow-400 ring-offset-2' : ''}
+        `}
+      >
+        {option}
+      </button>
+    );
+  })}
+</div>
 
             {/* Feedback */}
             {feedback.show && (
