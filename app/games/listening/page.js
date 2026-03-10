@@ -806,9 +806,7 @@ return (
   {/* Audio Section */}
    <div className="text-center mb-10 sm:mb-12">
 
-  <div className="relative inline-block p-5 sm:p-6 
-    bg-black/30 backdrop-blur-md rounded-full 
-    mb-6 border-2 border-yellow-500/40 shadow-xl">
+  <div className="relative inline-block p-6 bg-black/30 backdrop-blur-md rounded-full mb-6 border-2 border-yellow-500/40 shadow-xl">
 
     {/* ปุ่มเสียง */}
     <button
