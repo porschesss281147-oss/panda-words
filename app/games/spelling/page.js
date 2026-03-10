@@ -268,95 +268,94 @@ export default function SpellingGamePage() {
     );
   }
 
-  // หน้าเล่นเกม
-  return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <button onClick={goToLevelSelect} className={styles.backButton}>
-          ← ออก
-        </button>
-        <h1 className={styles.title}>
-          ด่านที่ {selectedLevel}/10
-        </h1>
-        <div className={styles.gameStats}>
-          <span className={styles.progress}>
-            {currentIndex + 1}/{questions.length}
-          </span>
-        </div>
-      </header>
+ // หน้าเล่นเกม
+return (
+  <div className={styles.container}>
+    <header className={styles.header}>
+      <button onClick={goToLevelSelect} className={styles.backButton}>
+        ← ออก
+      </button>
+      <h1 className={styles.title}>
+        ด่านที่ {selectedLevel}/10
+      </h1>
+      <div className={styles.gameStats}>
+        <span className={styles.progress}>
+          {currentIndex + 1}/{questions.length}
+        </span>
+      </div>
+    </header>
 
-      <main className={styles.main}>
-        {currentWord && (
-          <div className={styles.gameArea}>
-            {/* คำใบ้ */}
-            <div className={styles.hintBox}>
-              <p className={styles.hintLabel}>คำใบ้:</p>
-              {!showHint ? (
-                <button onClick={handleHint} className={styles.showHintButton}>
-                  ดูคำใบ้
-                </button>
-              ) : (
-                <div>
-                  <p className={styles.hintText}>{currentWord.meaning}</p>
-                </div>
-              )}
-            </div>
-
-            {/* พื้นที่แสดงตัวอักษร */}
-            <div className={styles.spellingArea}>
-              <div className={styles.wordLength}>
-                {Array.from({ length: currentWord.word.length }).map((_, i) => (
-                  <span key={i} className={styles.wordDash}>_</span>
-                ))}
-              </div>
-              <p className={styles.wordLengthText}>
-                {currentWord.word.length} ตัวอักษร
-              </p>
-            </div>
-
-            {/* ฟอร์มป้อนคำตอบ */}
-            <form onSubmit={handleSubmit} className={styles.inputForm}>
-              <input
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                placeholder="พิมพ์คำศัพท์ภาษาจีน"
-                className={styles.input}
-                autoFocus
-                disabled={feedback.show}
-              />
-              <button
-                type="submit"
-                disabled={!userInput.trim() || feedback.show}
-                className={`${styles.submitButton} ${
-                  !userInput.trim() ? styles.submitButtonDisabled : ''
-                }`}
-              >
-                ตรวจสอบ
+    <main className={styles.main}>
+      {currentWord && (
+        <div className={styles.gameArea}>
+          {/* คำใบ้ */}
+          <div className={styles.hintBox}>
+            <p className={styles.hintLabel}>คำใบ้:</p>
+            {!showHint ? (
+              <button onClick={handleHint} className={styles.showHintButton}>
+                ดูคำใบ้
               </button>
-            </form>
-
-            {/* Feedback */}
-            {feedback.show && (
-              <div className={`${styles.feedback} ${styles[feedback.type]}`}>
-                {feedback.message}
-                {feedback.type === 'error' && (
-                  <p className={styles.correctAnswer}>
-                    คำตอบที่ถูก: "{currentWord.word}"
-                  </p>
-                )}
+            ) : (
+              <div>
+                <p className={styles.hintText}>{currentWord.meaning}</p>
               </div>
             )}
-
-            {/* Keyboard hint */}
-            <div className={styles.keyboardHint}>
-              <p className={styles.keyboardHintText}>
-                💡 พิมพ์คำศัพท์ภาษาจีน (ตัวเต็ม)
-              </p>
-            </div>
           </div>
-        )}
-      </main>
-    </div>
-  );
-}
+
+          {/* พื้นที่แสดงตัวอักษร */}
+          <div className={styles.spellingArea}>
+            <div className={styles.wordLength}>
+              {Array.from({ length: currentWord.word.length }).map((_, i) => (
+                <span key={i} className={styles.wordDash}>_</span>
+              ))}
+            </div>
+            <p className={styles.wordLengthText}>
+              {currentWord.word.length} ตัวอักษร
+            </p>
+          </div>
+
+          {/* ฟอร์มป้อนคำตอบ */}
+          <form onSubmit={handleSubmit} className={styles.inputForm}>
+            <input
+              type="text"
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              placeholder="พิมพ์คำศัพท์ภาษาจีน"
+              className={styles.input}
+              autoFocus
+              disabled={feedback.show}
+            />
+            <button
+              type="submit"
+              disabled={!userInput.trim() || feedback.show}
+              className={`${styles.submitButton} ${
+                !userInput.trim() ? styles.submitButtonDisabled : ''
+              }`}
+            >
+              ตรวจสอบ
+            </button>
+          </form>
+
+          {/* Feedback */}
+          {feedback.show && (
+            <div className={`${styles.feedback} ${styles[feedback.type]}`}>
+              {feedback.message}
+              {feedback.type === 'error' && (
+                <p className={styles.correctAnswer}>
+                  คำตอบที่ถูก: "{currentWord.word}"
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Keyboard hint */}
+          <div className={styles.keyboardHint}>
+            <p className={styles.keyboardHintText}>
+              💡 พิมพ์คำศัพท์ภาษาจีน (ตัวเต็ม)
+            </p>
+          </div>
+        </div>
+      )}
+    </main>
+  </div>
+);
