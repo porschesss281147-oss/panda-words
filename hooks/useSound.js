@@ -31,20 +31,23 @@ export const useSound = () => {
 
   }, []);
 
-  // unlock audio policy ของ browser
-  const unlockAudio = () => {
+ // unlock browser audio
+  const unlockAudio = useCallback(() => {
 
     if (unlockedRef.current) return;
 
-    const firstSound = soundsRef.current.click;
+    Object.values(soundsRef.current).forEach((audio) => {
 
-    if (firstSound) {
-      firstSound.volume = 0;
-      firstSound.play().catch(()=>{});
-      unlockedRef.current = true;
-    }
+      audio.volume = 0;
+      audio.play().catch(()=>{});
+      audio.pause();
+      audio.currentTime = 0;
 
-  };
+    });
+
+    unlockedRef.current = true;
+
+  }, []);
 
   const playSound = useCallback((soundName) => {
 
