@@ -755,112 +755,132 @@ console.log('User sentence:', userSentence);
   </div>
 </header>
 
-      {/* คำถาม */}
-<h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold mb-10 mt-6 sm:mt-8 md:mt-10 z-10 text-center">
-  {currentQuestion.thai}
-</h1>
+     <div className="relative z-10 pt-24 sm:pt-28 md:pt-32"> {/* เพิ่ม padding-top ให้ห่างจาก header */}
 
-      {/* คำศัพท์ให้ลาก - แบบสมบูรณ์ */}
-<div className="flex flex-wrap gap-4 mb-12 z-10 justify-center">
-  {availableWords.filter(item => !item.isUsed).map((item) => (
-    <div
-      key={item.id}
-      draggable
-      onDragStart={(e) => handleDragStart(e, item)}
-      className="
-        px-9 py-5 rounded-4xl text-4xl font-bold shadow-2xl cursor-move 
-        transition-all duration-300 transform hover:scale-105 hover:-translate-y-1
-        bg-gradient-to-br from-rose-700 via-red-700 to-red-800
-        text-white border-2 border-rose-400/30
-        relative overflow-hidden group
-      "
-      style={{
-        boxShadow: '0 25px 30px -12px rgba(153, 27, 27, 0.5)'
-      }}
-    >
-      {/* ลวดลายด้านใน */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(255,255,255,0.1)_0%,_transparent_50%)]"></div>
-      
-      {/* เอฟเฟกต์แสงเวลา hover */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-      
-      {/* ขอบเรืองแสง */}
-      <div className="absolute inset-0 rounded-4xl border border-red-200/20 group-hover:border-red-200/40 transition-colors duration-300"></div>
-      
-      <div className="relative z-10 font-black tracking-wider text-center">
-        <div className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">{item.word}</div>
-        <div className="text-sm text-rose-200 mt-1 font-light tracking-wider drop-shadow-md">
-          {item.pinyin}
-        </div>
-      </div>
-      
-      {/* จุดมุม */}
-      <div className="absolute top-2 left-2 w-1 h-1 bg-rose-300/50 rounded-full"></div>
-      <div className="absolute bottom-2 right-2 w-1 h-1 bg-rose-300/50 rounded-full"></div>
+    {/* คำถาม - จัดให้อยู่ตรงกลาง */}
+    <div className="flex justify-center px-4 mb-8 sm:mb-10 md:mb-12">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-center max-w-4xl bg-white/80 backdrop-blur-sm px-8 py-6 rounded-3xl shadow-xl border border-purple-200">
+        {currentQuestion.thai}
+      </h1>
     </div>
-  ))}
-</div>
 
-      {/* ช่องวางคำตอบ */}
-<div className="flex flex-wrap gap-4 mb-10 z-10 justify-center">
-  {dropZones.map((zone, index) => (
-    <div
-      key={index}
-      onDrop={(e) => handleDrop(e, index)}
-      onDragOver={handleDragOver}
-      onClick={() => handleRemoveWord(index)}
-      className={`
-        w-28 h-28 md:w-32 md:h-32 rounded-2xl flex flex-col items-center justify-center
-        text-xl md:text-2xl font-bold transition-all duration-300 cursor-pointer
-        transform hover:scale-105 hover:shadow-xl
-        ${zone.word 
-          ? "bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-lg border-2 border-emerald-300 animate-pulse-soft" 
-          : "bg-white/90 backdrop-blur-sm border-3 border-dashed border-amber-300 text-amber-400/70 hover:border-amber-500 hover:bg-amber-50/50 hover:text-amber-500 shadow-md"
-        }
-        relative overflow-hidden group
-      `}
-    >
-      {/* Decorative elements */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-300 to-transparent"></div>
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-300 to-transparent"></div>
-      </div>
-      
-      {zone.word ? (
-        <>
-          <span className="relative z-10 drop-shadow-lg">{zone.word}</span>
-          <span className="text-xs md:text-sm opacity-80 mt-1 font-light">{zone.pinyin}</span>
-          <span className="absolute bottom-1 right-1 text-[10px] opacity-50 group-hover:opacity-100 transition-opacity">
-            ✕
-          </span>
-        </>
-      ) : (
-        <div className="flex flex-col items-center">
-          <span className="text-4xl md:text-5xl mb-1 animate-bounce-slow">?</span>
-          <span className="text-xs md:text-sm font-light">วางที่นี่</span>
-        </div>
-      )}
-      
-      {/* Slot number */}
-      <div className="absolute top-1 left-1 text-xs font-bold opacity-30">
-        #{index + 1}
+    {/* คำศัพท์ให้ลาก - จัดให้อยู่ตรงกลาง */}
+    <div className="flex justify-center px-4 mb-12 sm:mb-14 md:mb-16">
+      <div className="flex flex-wrap gap-4 justify-center max-w-5xl">
+        {availableWords.filter(item => !item.isUsed).map((item) => (
+          <div
+            key={item.id}
+            draggable
+            onDragStart={(e) => handleDragStart(e, item)}
+            className="
+              px-8 py-4 sm:px-9 sm:py-5 rounded-3xl sm:rounded-4xl 
+              text-3xl sm:text-4xl font-bold shadow-2xl cursor-move 
+              transition-all duration-300 transform hover:scale-105 hover:-translate-y-1
+              bg-gradient-to-br from-rose-700 via-red-700 to-red-800
+              text-white border-2 border-rose-400/30
+              relative overflow-hidden group
+            "
+            style={{
+              boxShadow: '0 25px 30px -12px rgba(153, 27, 27, 0.5)'
+            }}
+          >
+            {/* ลวดลายด้านใน */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(255,255,255,0.1)_0%,_transparent_50%)]"></div>
+            
+            {/* เอฟเฟกต์แสงเวลา hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            
+            {/* ขอบเรืองแสง */}
+            <div className="absolute inset-0 rounded-3xl sm:rounded-4xl border border-red-200/20 group-hover:border-red-200/40 transition-colors duration-300"></div>
+            
+            <div className="relative z-10 font-black tracking-wider text-center">
+              <div className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">{item.word}</div>
+              <div className="text-xs sm:text-sm text-rose-200 mt-1 font-light tracking-wider drop-shadow-md">
+                {item.pinyin}
+              </div>
+            </div>
+            
+            {/* จุดมุม */}
+            <div className="absolute top-2 left-2 w-1 h-1 bg-rose-300/50 rounded-full"></div>
+            <div className="absolute bottom-2 right-2 w-1 h-1 bg-rose-300/50 rounded-full"></div>
+          </div>
+        ))}
       </div>
     </div>
-  ))}
-</div>
 
-     <div className="flex justify-center mt-8">
-  {/* ปุ่มตรวจคำตอบ */}
-  <button
-    onClick={checkAnswer}
-    disabled={dropZones.some(zone => !zone.word)}
-    className="relative px-14 py-5 text-2xl font-bold text-white rounded-[70px] 
-    bg-gradient-to-b from-red-500 via-red-600 to-red-800 shadow-[0_8px_0_#7f1d1d] 
-    active:translate-y-2 active:shadow-[0_4px_0_#7f1d1d] transition-all 
-    duration-150 border-4 border-yellow-500 tracking-wide"
-  >
-    ตรวจคำตอบ
-  </button>
+    {/* ช่องวางคำตอบ - จัดให้อยู่ตรงกลาง */}
+    <div className="flex justify-center px-4 mb-12 sm:mb-14 md:mb-16">
+      <div className="flex flex-wrap gap-4 justify-center max-w-4xl">
+        {dropZones.map((zone, index) => (
+          <div
+            key={index}
+            onDrop={(e) => handleDrop(e, index)}
+            onDragOver={handleDragOver}
+            onClick={() => handleRemoveWord(index)}
+            className={`
+              w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 
+              rounded-xl sm:rounded-2xl flex flex-col items-center justify-center
+              text-xl sm:text-2xl md:text-2xl font-bold transition-all duration-300 cursor-pointer
+              transform hover:scale-105 hover:shadow-xl
+              ${zone.word 
+                ? "bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-lg border-2 border-emerald-300 animate-pulse-soft" 
+                : "bg-white/90 backdrop-blur-sm border-3 border-dashed border-amber-300 text-amber-400/70 hover:border-amber-500 hover:bg-amber-50/50 hover:text-amber-500 shadow-md"
+              }
+              relative overflow-hidden group
+            `}
+          >
+            {/* Decorative elements */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-300 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-300 to-transparent"></div>
+            </div>
+            
+            {zone.word ? (
+              <>
+                <span className="relative z-10 drop-shadow-lg text-center">{zone.word}</span>
+                <span className="text-[10px] sm:text-xs md:text-sm opacity-80 mt-1 font-light text-center">{zone.pinyin}</span>
+                <span className="absolute bottom-1 right-1 text-[8px] sm:text-[10px] opacity-50 group-hover:opacity-100 transition-opacity">
+                  ✕
+                </span>
+              </>
+            ) : (
+              <div className="flex flex-col items-center">
+                <span className="text-3xl sm:text-4xl md:text-5xl mb-1 animate-bounce-slow">?</span>
+                <span className="text-[10px] sm:text-xs md:text-sm font-light">วางที่นี่</span>
+              </div>
+            )}
+            
+            {/* Slot number */}
+            <div className="absolute top-1 left-1 text-[8px] sm:text-xs font-bold opacity-30">
+              #{index + 1}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* ปุ่มตรวจคำตอบ - จัดให้อยู่ตรงกลาง */}
+    <div className="flex justify-center px-4 pb-12 sm:pb-16 md:pb-20">
+      <button
+        onClick={checkAnswer}
+        disabled={dropZones.some(zone => !zone.word)}
+        className="
+          relative px-12 sm:px-14 py-4 sm:py-5 
+          text-xl sm:text-2xl font-bold text-white 
+          rounded-[50px] sm:rounded-[70px]
+          bg-gradient-to-b from-red-500 via-red-600 to-red-800 
+          shadow-[0_6px_0_#7f1d1d] sm:shadow-[0_8px_0_#7f1d1d]
+          active:translate-y-1 sm:active:translate-y-2 
+          active:shadow-[0_3px_0_#7f1d1d] sm:active:shadow-[0_4px_0_#7f1d1d]
+          transition-all duration-150 
+          border-2 sm:border-4 border-yellow-500 tracking-wide
+          disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0
+          disabled:active:shadow-[0_6px_0_#7f1d1d] sm:disabled:active:shadow-[0_8px_0_#7f1d1d]
+        "
+      >
+        ตรวจคำตอบ
+      </button>
+  </div>
 </div>
 
     {/* Feedback - ใหญ่ตรงกลาง */}
@@ -963,10 +983,8 @@ console.log('User sentence:', userSentence);
         ⏳ {timeLeft} วินาที
       </span>
     </div>
-
   </div>
 </div>
-      
-    </div>
+</div>
   );
 }
