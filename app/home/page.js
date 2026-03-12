@@ -282,13 +282,13 @@ export default function HomePage() {
     };
 
     const unlockedLevels = Object.values(user.unlockedLevels || {}).reduce((a, b) => a + b, 0);
-    const challengesCompleted = user.challengesCompleted || 0;
+  const challengesCompleted = user.challengesCompleted || 0;
 
     return { 
-      gamesPlayed: realStats.gamesPlayed, 
-      totalScore: realStats.totalScore, 
-      unlockedLevels, 
-      challengesCompleted 
+      gamesPlayed: user.gamesPlayed || realStats.gamesPlayed || 0, 
+    totalScore: user.totalScore || realStats.totalScore || 0, 
+    unlockedLevels, 
+    challengesCompleted 
     };
   };
 
