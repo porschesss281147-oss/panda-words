@@ -164,79 +164,79 @@ export const useSound = () => {
     }
   }, []);
 
-  // ⏰ เสียงเวลาหมด - เสียง "กิ่งๆๆๆ" เหมือนนาฬิกาปลุก
-  const playTimeout = useCallback(async () => {
-    try {
-      const ctx = audioContextRef.current;
-      if (!ctx) return false;
-      if (ctx.state !== 'running') await ctx.resume();
+ // ⏰ เสียงเวลาหมด - เสียง "กิ่งๆๆๆ" ดังขึ้น
+const playTimeout = useCallback(async () => {
+  try {
+    const ctx = audioContextRef.current;
+    if (!ctx) return false;
+    if (ctx.state !== 'running') await ctx.resume();
 
-      const now = ctx.currentTime;
+    const now = ctx.currentTime;
+    
+    console.log('⏰ กำลังเล่นเสียงหมดเวลา (ดังขึ้น)...');
+    
+    // เสียง "กิ่ง" 5 ครั้ง
+    for (let i = 0; i < 5; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
       
-      console.log('⏰ กำลังเล่นเสียงหมดเวลา...');
-      
-      // เสียง "กิ่ง" 5 ครั้ง
-      for (let i = 0; i < 5; i++) {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        
-        // เสียงแรกดังสุด
-        if (i === 0) {
-          osc.type = 'square';
-          osc.frequency.value = 880; // สูง
-          gain.gain.value = 0.5;
-        } 
-        // เสียงถัดไปลดหลั่น
-        else if (i === 1) {
-          osc.type = 'square';
-          osc.frequency.value = 740;
-          gain.gain.value = 0.4;
-        }
-        else if (i === 2) {
-          osc.type = 'square';
-          osc.frequency.value = 660;
-          gain.gain.value = 0.35;
-        }
-        else {
-          osc.type = 'square';
-          osc.frequency.value = 523;
-          gain.gain.value = 0.3;
-        }
-        
-        gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.2 + 0.1);
-        
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        
-        osc.start(now + i * 0.2);
-        osc.stop(now + i * 0.2 + 0.1);
+      // เสียงแรกดังสุด
+      if (i === 0) {
+        osc.type = 'square';
+        osc.frequency.value = 880; // สูง
+        gain.gain.value = 1.2;  // 
+      } 
+      // เสียงถัดไปลดหลั่น
+      else if (i === 1) {
+        osc.type = 'square';
+        osc.frequency.value = 740;
+        gain.gain.value = 1.0;  // 
       }
-
-      // เสียง "กิ่ง" ทีละ 2 ครั้งเร็วๆ
-      for (let i = 0; i < 2; i++) {
-        const oscFast = ctx.createOscillator();
-        const gainFast = ctx.createGain();
-        
-        oscFast.type = 'square';
-        oscFast.frequency.value = 660;
-        gainFast.gain.value = 0.5;
-        
-        gainFast.gain.exponentialRampToValueAtTime(0.01, now + 1.2 + i * 0.15 + 0.08);
-        
-        oscFast.connect(gainFast);
-        gainFast.connect(ctx.destination);
-        
-        oscFast.start(now + 1.2 + i * 0.15);
-        oscFast.stop(now + 1.2 + i * 0.15 + 0.08);
+      else if (i === 2) {
+        osc.type = 'square';
+        osc.frequency.value = 660;
+        gain.gain.value = 0.9;  // 
+      }
+      else {
+        osc.type = 'square';
+        osc.frequency.value = 523;
+        gain.gain.value = 0.8;  // 
       }
       
-      console.log('✅ เล่นเสียงหมดเวลาเรียบร้อย');
-      return true;
-    } catch (e) {
-      console.error('❌ playTimeout error:', e);
-      return false;
+      gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.2 + 0.1);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start(now + i * 0.2);
+      osc.stop(now + i * 0.2 + 0.1);
     }
-  }, []);
+
+    // เสียง "กิ่ง" ทีละ 2 ครั้งเร็วๆ
+    for (let i = 0; i < 2; i++) {
+      const oscFast = ctx.createOscillator();
+      const gainFast = ctx.createGain();
+      
+      oscFast.type = 'square';
+      oscFast.frequency.value = 660;
+      gainFast.gain.value = 1.1;  // 
+      
+      gainFast.gain.exponentialRampToValueAtTime(0.01, now + 1.2 + i * 0.15 + 0.08);
+      
+      oscFast.connect(gainFast);
+      gainFast.connect(ctx.destination);
+      
+      oscFast.start(now + 1.2 + i * 0.15);
+      oscFast.stop(now + 1.2 + i * 0.15 + 0.08);
+    }
+    
+    console.log('✅ เล่นเสียงหมดเวลาเรียบร้อย (ดังขึ้น)');
+    return true;
+  } catch (e) {
+    console.error('❌ playTimeout error:', e);
+    return false;
+  }
+}, []);
 
   // เสียงเวลาหมดแบบสั้น (สำหรับ compatibility)
   const playTime = useCallback(async () => {
