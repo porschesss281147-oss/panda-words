@@ -10,7 +10,7 @@ import { LogOut, Gamepad2, Trophy, Target, Volume2, Sparkles, Award, Users, X, H
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, logout } = useUser();
+  const { user, logout, getGameStats } = useUser();
   const { leaderboard, loading: leaderboardLoading, getUserRank } = useLeaderboard();
   const { playSound } = useSound();
   
@@ -19,6 +19,16 @@ export default function HomePage() {
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [activeTab, setActiveTab] = useState('game1');
+  
+  // ✅ State สำหรับเก็บสถิติจริงจาก Firebase
+  const [realStats, setRealStats] = useState({
+    gamesPlayed: 0,
+    totalScore: 0,
+    perfectGames: 0,
+    averageAccuracy: 0,
+    gameStats: {}
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
 
   // ข้อมูลเกมทั้ง 4 เกม
   const gamesInfo = [
@@ -116,6 +126,63 @@ export default function HomePage() {
     }
   ];
 
+  // ✅ โหลดสถิติจริงจาก Firebase
+  useEffect(() => {
+    const loadRealStats = async () => {
+      if (user) {
+        setLoadingStats(true);
+        try {
+          console.log('📊 Loading real stats from Firebase...');
+          
+          // ดึงสถิติแยกตามเกม
+          const gameStats = await getGameStats();
+          console.log('✅ Game stats loaded:', gameStats);
+          
+          // คำนวณสถิติรวม
+          let totalScore = 0;
+          let gamesPlayed = 0;
+          let totalCorrect = 0;
+          let totalQuestions = 0;
+          
+          Object.values(gameStats).forEach(stat => {
+            totalScore += stat.totalScore || 0;
+            gamesPlayed += stat.played || 0;
+            // คำนวณ accuracy (ถ้ามีข้อมูล)
+            if (stat.averageScore) {
+              totalCorrect += (stat.averageScore * stat.played) / 10;
+              totalQuestions += stat.played * 10;
+            }
+          });
+          
+          const averageAccuracy = totalQuestions > 0 
+            ? Math.round((totalCorrect / totalQuestions) * 100) 
+            : 0;
+          
+          setRealStats({
+            gamesPlayed,
+            totalScore,
+            perfectGames: user?.stats?.perfectGames || 0,
+            averageAccuracy,
+            gameStats
+          });
+          
+          console.log('✅ Real stats calculated:', {
+            gamesPlayed,
+            totalScore,
+            averageAccuracy
+          });
+          
+        } catch (error) {
+          console.error('❌ Error loading stats:', error);
+        } finally {
+          setLoadingStats(false);
+        }
+      }
+    };
+    
+    loadRealStats();
+  }, [user, getGameStats]);
+
   // ถ้าไม่มี user ให้กลับไปหน้า login
   useEffect(() => {
     if (!user) {
@@ -173,7 +240,39 @@ export default function HomePage() {
     window.speechSynthesis.speak(utterance);
   };
 
-  // คำนวณสถิติจริง
+  // ✅ ฟังก์ชันรีเฟรชสถิติ (เรียกใช้หลังจากเล่นเกม)
+  const refreshStats = async () => {
+    if (user) {
+      setLoadingStats(true);
+      try {
+        const gameStats = await getGameStats();
+        
+        let totalScore = 0;
+        let gamesPlayed = 0;
+        
+        Object.values(gameStats).forEach(stat => {
+          totalScore += stat.totalScore || 0;
+          gamesPlayed += stat.played || 0;
+        });
+        
+        setRealStats({
+          gamesPlayed,
+          totalScore,
+          perfectGames: user?.stats?.perfectGames || 0,
+          averageAccuracy: realStats.averageAccuracy,
+          gameStats
+        });
+        
+        console.log('✅ Stats refreshed');
+      } catch (error) {
+        console.error('❌ Error refreshing stats:', error);
+      } finally {
+        setLoadingStats(false);
+      }
+    }
+  };
+
+  // คำนวณสถิติ (fallback)
   const calculateStats = () => {
     if (!user) return { 
       gamesPlayed: 0, 
@@ -182,12 +281,15 @@ export default function HomePage() {
       challengesCompleted: 0 
     };
 
-    const gamesPlayed = user.gamesPlayed || 0;
-    const totalScore = user.totalScore || 0;
     const unlockedLevels = Object.values(user.unlockedLevels || {}).reduce((a, b) => a + b, 0);
     const challengesCompleted = user.challengesCompleted || 0;
 
-    return { gamesPlayed, totalScore, unlockedLevels, challengesCompleted };
+    return { 
+      gamesPlayed: realStats.gamesPlayed, 
+      totalScore: realStats.totalScore, 
+      unlockedLevels, 
+      challengesCompleted 
+    };
   };
 
   const stats = calculateStats();
@@ -252,7 +354,9 @@ export default function HomePage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">เล่นไปแล้ว</p>
-                <p className="text-2xl font-bold text-gray-800">{stats.gamesPlayed}</p>
+                <p className="text-2xl font-bold text-gray-800">
+                  {loadingStats ? '...' : stats.gamesPlayed}
+                </p>
                 <p className="text-xs text-gray-400">เกม</p>
               </div>
             </div>
@@ -280,7 +384,9 @@ export default function HomePage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">คะแนนรวม</p>
-                <p className="text-2xl font-bold text-gray-800">{stats.totalScore}</p>
+                <p className="text-2xl font-bold text-gray-800">
+                  {loadingStats ? '...' : stats.totalScore.toLocaleString()}
+                </p>
                 <p className="text-xs text-gray-400">คะแนน</p>
               </div>
             </div>
@@ -341,9 +447,16 @@ export default function HomePage() {
                         10 ด่าน
                       </span>
                       <span className="bg-white/20 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm">
-                        ด่านที่ {user.unlockedLevels[game.id] || 1} / 10
+                        ด่านที่ {user.unlockedLevels?.[game.id] || 1} / 10
                       </span>
                     </div>
+                    {/* แสดงสถิติเฉพาะเกม (ถ้ามี) */}
+                    {realStats.gameStats[game.id] && realStats.gameStats[game.id].played > 0 && (
+                      <div className="mt-2 text-xs text-white/80">
+                        เล่นแล้ว {realStats.gameStats[game.id].played} ครั้ง • 
+                        เฉลี่ย {realStats.gameStats[game.id].averageScore} คะแนน
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -509,6 +622,16 @@ export default function HomePage() {
               )}
             </div>
           </div>
+
+          {/* ปุ่มรีเฟรชสถิติ (ซ่อนไว้สำหรับดีบัก) */}
+          {process.env.NODE_ENV === 'development' && (
+            <button
+              onClick={refreshStats}
+              className="fixed bottom-4 left-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm z-50"
+            >
+              🔄 รีเฟรชสถิติ
+            </button>
+          )}
         </main>
       </div>
 
