@@ -247,9 +247,7 @@ export function UserProvider({ children }) {
       const currentHistory = user.gameHistory || [];
       const newHistory = [gameResult, ...currentHistory].slice(0, 50);
       
-      // คำนวณค่าใหม่
-      const newGamesPlayed = (user.gamesPlayed || 0) + 1;
-      const newTotalScore = (user.totalScore || 0) + (result.score || 0);
+     const scorePoints = (result.correct || 0) * 10;
       
       // คำนวณสถิติใน stats
       const newPerfectGames = (user.stats?.perfectGames || 0) + (result.score === 100 ? 1 : 0);
@@ -257,8 +255,8 @@ export function UserProvider({ children }) {
       
       const updates = {
         gameHistory: newHistory,
-        totalScore: newTotalScore,                    // ✅ อัปเดตที่ระดับบนสุด
-        gamesPlayed: newGamesPlayed,                  // ✅ อัปเดตที่ระดับบนสุด
+        totalScore: newTotalScore,                   
+        gamesPlayed: newGamesPlayed,                  
         stats: {
           perfectGames: newPerfectGames,
           totalPlayTime: user.stats?.totalPlayTime || 0,
