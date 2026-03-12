@@ -184,23 +184,23 @@ export const useSound = () => {
         if (i === 0) {
           osc.type = 'square';
           osc.frequency.value = 880; // สูง
-          gain.gain.value = 0.25;
+          gain.gain.value = 0.5;
         } 
         // เสียงถัดไปลดหลั่น
         else if (i === 1) {
           osc.type = 'square';
           osc.frequency.value = 740;
-          gain.gain.value = 0.2;
+          gain.gain.value = 0.4;
         }
         else if (i === 2) {
           osc.type = 'square';
           osc.frequency.value = 660;
-          gain.gain.value = 0.18;
+          gain.gain.value = 0.35;
         }
         else {
           osc.type = 'square';
           osc.frequency.value = 523;
-          gain.gain.value = 0.15;
+          gain.gain.value = 0.3;
         }
         
         gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.2 + 0.1);
@@ -219,7 +219,7 @@ export const useSound = () => {
         
         oscFast.type = 'square';
         oscFast.frequency.value = 660;
-        gainFast.gain.value = 0.2;
+        gainFast.gain.value = 0.5;
         
         gainFast.gain.exponentialRampToValueAtTime(0.01, now + 1.2 + i * 0.15 + 0.08);
         
