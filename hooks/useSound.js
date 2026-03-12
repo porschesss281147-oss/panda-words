@@ -1,199 +1,198 @@
 // hooks/useSound.js
 'use client';
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 
 export const useSound = () => {
   const audioContextRef = useRef(null);
+  const [isAudioReady, setIsAudioReady] = useState(false);
 
-  // สร้าง Audio Context (ต้องรอ user interaction)
-  const getAudioContext = useCallback(() => {
+  // สร้าง Audio Context
+  const initAudioContext = useCallback(() => {
     if (typeof window === 'undefined') return null;
     
-    if (!audioContextRef.current) {
+    try {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (AudioContextClass) {
-        audioContextRef.current = new AudioContextClass();
+      if (!AudioContextClass) {
+        console.log('❌ Web Audio API not supported');
+        return null;
       }
+
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContextClass();
+        console.log('🎵 AudioContext created:', audioContextRef.current.state);
+      }
+      return audioContextRef.current;
+    } catch (e) {
+      console.error('Error creating AudioContext:', e);
+      return null;
     }
-    return audioContextRef.current;
   }, []);
 
-  // เสียงคลิก (สั้น เร็ว)
+  // ปลดล็อกอัตโนมัติเมื่อ user คลิก
+  useEffect(() => {
+    const handleUserInteraction = async () => {
+      const ctx = initAudioContext();
+      if (ctx && ctx.state === 'suspended') {
+        try {
+          await ctx.resume();
+          console.log('✅ AudioContext resumed by user');
+          setIsAudioReady(true);
+        } catch (e) {
+          console.error('Failed to resume:', e);
+        }
+      } else if (ctx && ctx.state === 'running') {
+        setIsAudioReady(true);
+      }
+    };
+
+    window.addEventListener('click', handleUserInteraction, { once: true });
+    window.addEventListener('touchstart', handleUserInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener('click', handleUserInteraction);
+      window.removeEventListener('touchstart', handleUserInteraction);
+    };
+  }, [initAudioContext]);
+
+  // เสียงคลิก
   const playClick = useCallback(() => {
+    console.log('🎯 playClick called');
+    
     try {
-      const audioCtx = getAudioContext();
-      if (!audioCtx || audioCtx.state === 'suspended') return;
+      const ctx = audioContextRef.current;
+      if (!ctx) {
+        console.log('❌ No AudioContext');
+        return false;
+      }
+      
+      if (ctx.state !== 'running') {
+        console.log('⏸️ AudioContext not running, state:', ctx.state);
+        return false;
+      }
 
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
       
-      oscillator.type = 'sine';
-      oscillator.frequency.value = 600;
-      gainNode.gain.value = 0.1;
+      osc.type = 'sine';
+      osc.frequency.value = 600;
+      gain.gain.value = 0.2;
       
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
       
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 0.05);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.08);
+      
+      console.log('✅ Click sound played');
+      return true;
     } catch (e) {
-      console.log('Click sound error:', e);
+      console.error('❌ playClick error:', e);
+      return false;
     }
-  }, [getAudioContext]);
+  }, []);
 
-  // เสียงสำเร็จ (ขึ้น-ลง)
+  // เสียงสำเร็จ
   const playSuccess = useCallback(() => {
+    console.log('🎯 playSuccess called');
+    
     try {
-      const audioCtx = getAudioContext();
-      if (!audioCtx || audioCtx.state === 'suspended') return;
+      const ctx = audioContextRef.current;
+      if (!ctx || ctx.state !== 'running') return false;
 
-      const now = audioCtx.currentTime;
+      const now = ctx.currentTime;
+      const notes = [523.25, 659.25, 783.99]; // C, E, G
       
-      // โน้ต C - E - G
-      [523.25, 659.25, 783.99].forEach((freq, i) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
         
         osc.type = 'sine';
         osc.frequency.value = freq;
-        gain.gain.value = 0.1;
+        gain.gain.value = 0.15;
         
         osc.connect(gain);
-        gain.connect(audioCtx.destination);
+        gain.connect(ctx.destination);
         
-        osc.start(now + i * 0.1);
-        osc.stop(now + i * 0.1 + 0.3);
-        
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.3);
+        osc.start(now + i * 0.15);
+        osc.stop(now + i * 0.15 + 0.3);
       });
+      
+      console.log('✅ Success sound played');
+      return true;
     } catch (e) {
-      console.log('Success sound error:', e);
+      console.error('❌ playSuccess error:', e);
+      return false;
     }
-  }, [getAudioContext]);
+  }, []);
 
-  // เสียงผิดพลาด (ต่ำลง)
+  // เสียงผิด
   const playError = useCallback(() => {
+    console.log('🎯 playError called');
+    
     try {
-      const audioCtx = getAudioContext();
-      if (!audioCtx || audioCtx.state === 'suspended') return;
+      const ctx = audioContextRef.current;
+      if (!ctx || ctx.state !== 'running') return false;
 
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
       
-      oscillator.type = 'sawtooth';
-      oscillator.frequency.value = 200;
-      gainNode.gain.value = 0.15;
+      osc.type = 'sawtooth';
+      osc.frequency.value = 300;
+      gain.gain.value = 0.2;
       
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
       
-      oscillator.start();
-      oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
-      oscillator.stop(audioCtx.currentTime + 0.4);
+      osc.start();
+      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.3);
+      osc.stop(ctx.currentTime + 0.4);
       
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+      console.log('✅ Error sound played');
+      return true;
     } catch (e) {
-      console.log('Error sound error:', e);
+      console.error('❌ playError error:', e);
+      return false;
     }
-  }, [getAudioContext]);
+  }, []);
 
-  // เสียงหมดเวลา (ติ๊กๆ)
+  // เสียงเวลาหมด
   const playTime = useCallback(() => {
+    console.log('🎯 playTime called');
+    
     try {
-      const audioCtx = getAudioContext();
-      if (!audioCtx || audioCtx.state === 'suspended') return;
+      const ctx = audioContextRef.current;
+      if (!ctx || ctx.state !== 'running') return false;
 
       for (let i = 0; i < 3; i++) {
         setTimeout(() => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
           
           osc.type = 'square';
-          osc.frequency.value = 400 - i * 50;
-          gain.gain.value = 0.1;
-          
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.08);
-        }, i * 150);
-      }
-    } catch (e) {
-      console.log('Time sound error:', e);
-    }
-  }, [getAudioContext]);
-
-  // เสียง tick (นาฬิกา)
-  const playTick = useCallback(() => {
-    try {
-      const audioCtx = getAudioContext();
-      if (!audioCtx || audioCtx.state === 'suspended') return;
-
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      
-      oscillator.type = 'sine';
-      oscillator.frequency.value = 800;
-      gainNode.gain.value = 0.05;
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 0.03);
-    } catch (e) {
-      console.log('Tick sound error:', e);
-    }
-  }, [getAudioContext]);
-
-  // เสียงเตือน
-  const playWarning = useCallback(() => {
-    try {
-      const audioCtx = getAudioContext();
-      if (!audioCtx || audioCtx.state === 'suspended') return;
-
-      for (let i = 0; i < 2; i++) {
-        setTimeout(() => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          
-          osc.type = 'triangle';
-          osc.frequency.value = 300 + i * 100;
+          osc.frequency.value = 500 - i * 50;
           gain.gain.value = 0.15;
           
           osc.connect(gain);
-          gain.connect(audioCtx.destination);
+          gain.connect(ctx.destination);
           
           osc.start();
-          osc.stop(audioCtx.currentTime + 0.2);
+          osc.stop(ctx.currentTime + 0.1);
         }, i * 200);
       }
+      
+      console.log('✅ Time sound played');
+      return true;
     } catch (e) {
-      console.log('Warning sound error:', e);
+      console.error('❌ playTime error:', e);
+      return false;
     }
-  }, [getAudioContext]);
+  }, []);
 
-  // ฟังก์ชันหลักสำหรับเรียกใช้เสียง
+  // ฟังก์ชันหลัก
   const playSound = useCallback((soundName) => {
-    if (typeof window === 'undefined') return;
-
-    // ปลุก Audio Context (ต้องเกิดจาก user interaction)
-    const audioCtx = getAudioContext();
-    if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume().then(() => {
-        // เล่นเสียงหลังจาก resume
-        playSoundByName(soundName);
-      }).catch(e => console.log('AudioContext resume error:', e));
-      return;
-    }
-
-    playSoundByName(soundName);
-  }, [getAudioContext]);
-
-  // เลือกเล่นเสียงตามชื่อ
-  const playSoundByName = useCallback((soundName) => {
+    console.log(`🎵 Attempting to play: ${soundName}`);
+    
     const soundMap = {
       'click': playClick,
       'success': playSuccess,
@@ -201,29 +200,42 @@ export const useSound = () => {
       'time': playTime,
       'achievement': playSuccess,
       'start': playClick,
-      'tick': playTick,
-      'warning': playWarning
+      'tick': playClick,
+      'warning': playError
     };
 
     const soundFn = soundMap[soundName];
     if (soundFn) {
-      soundFn();
+      const result = soundFn();
+      if (!result) {
+        console.log(`⚠️ Failed to play ${soundName}`);
+        
+        // Fallback: ลอง resume AudioContext
+        const ctx = audioContextRef.current;
+        if (ctx && ctx.state === 'suspended') {
+          ctx.resume().then(() => {
+            console.log('✅ AudioContext resumed, trying again...');
+            soundFn();
+          });
+        }
+      }
     } else {
       console.warn('⚠️ Sound not found:', soundName);
     }
-  }, [playClick, playSuccess, playError, playTime, playTick, playWarning]);
+  }, [playClick, playSuccess, playError, playTime]);
 
-  // ฟังก์ชันสำหรับปลดล็อกเสียง (เรียกจากปุ่ม)
-  const unlockAudio = useCallback(async () => {
-    const audioCtx = getAudioContext();
-    if (audioCtx && audioCtx.state === 'suspended') {
-      await audioCtx.resume();
-      playClick(); // ทดสอบเสียง
-    }
-  }, [getAudioContext, playClick]);
+  // ทดสอบเสียง
+  const testSound = useCallback(() => {
+    console.log('🔊 Testing sounds...');
+    playClick();
+    setTimeout(() => playSuccess(), 500);
+    setTimeout(() => playError(), 1000);
+    setTimeout(() => playTime(), 1500);
+  }, [playClick, playSuccess, playError, playTime]);
 
   return { 
     playSound,
-    unlockAudio
+    testSound,
+    isAudioReady
   };
 };
