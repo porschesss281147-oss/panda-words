@@ -559,7 +559,7 @@ export default function SentenceGamePage() {
       {/* Content */}
       <div className="relative z-10">
       {/* Header */}
-<header className="fixed top-0 left-0 w-full z-50 bg-red-900/90 backdrop-blur-md shadow-md border-b border-yellow-500/40">
+<header className="fixed top-0 left-0 w-full z-50 bg-White backdrop-blur-md shadow-md border-b border-yellow-500/40">
   <div className="w-full px-4 sm:px-6 lg:px-10 py-3">
     <div className="flex items-center justify-between">
 
@@ -628,21 +628,6 @@ export default function SentenceGamePage() {
 
 </div>
 
-// เพิ่มตรงส่วน Header หรือที่ไหนก็ได้
-{process.env.NODE_ENV === 'development' && (
-  <button
-    onClick={() => {
-      playSound('click');
-      setTimeout(() => playSound('success'), 500);
-      setTimeout(() => playSound('error'), 1000);
-      setTimeout(() => playSound('timeout'), 1500);
-      setTimeout(() => playSound('tick'), 2000);
-    }}
-    className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
-  >
-    ทดสอบเสียง
-  </button>
-)} 
         {/* Main Content */}
         <main className="flex-1 w-full max-w-5xl mx-auto flex flex-col items-center justify-center px-6 pt-10 min-h-[65vh]">
           <div className="w-full">
