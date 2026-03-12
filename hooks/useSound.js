@@ -29,21 +29,32 @@ export const useSound = () => {
     }
   }, []);
 
+  // ฟังก์ชันปลดล็อกเสียง (ต้องเรียกก่อนเล่น)
+  const unlockAudio = useCallback(async () => {
+    const ctx = audioContextRef.current || initAudioContext();
+    if (ctx) {
+      if (ctx.state === 'suspended') {
+        try {
+          await ctx.resume();
+          console.log('✅ AudioContext resumed');
+          setIsAudioReady(true);
+          return true;
+        } catch (e) {
+          console.error('Failed to resume:', e);
+          return false;
+        }
+      } else if (ctx.state === 'running') {
+        setIsAudioReady(true);
+        return true;
+      }
+    }
+    return false;
+  }, [initAudioContext]);
+
   // ปลดล็อกอัตโนมัติเมื่อ user คลิก
   useEffect(() => {
     const handleUserInteraction = async () => {
-      const ctx = initAudioContext();
-      if (ctx && ctx.state === 'suspended') {
-        try {
-          await ctx.resume();
-          console.log('✅ AudioContext resumed by user');
-          setIsAudioReady(true);
-        } catch (e) {
-          console.error('Failed to resume:', e);
-        }
-      } else if (ctx && ctx.state === 'running') {
-        setIsAudioReady(true);
-      }
+      await unlockAudio();
     };
 
     window.addEventListener('click', handleUserInteraction, { once: true });
@@ -53,13 +64,14 @@ export const useSound = () => {
       window.removeEventListener('click', handleUserInteraction);
       window.removeEventListener('touchstart', handleUserInteraction);
     };
-  }, [initAudioContext]);
+  }, [unlockAudio]);
 
   // เสียงคลิก
-  const playClick = useCallback(() => {
+  const playClick = useCallback(async () => {
     console.log('🎯 playClick called');
     
     try {
+      // ตรวจสอบและ resume AudioContext ทุกครั้ง
       const ctx = audioContextRef.current;
       if (!ctx) {
         console.log('❌ No AudioContext');
@@ -67,8 +79,8 @@ export const useSound = () => {
       }
       
       if (ctx.state !== 'running') {
-        console.log('⏸️ AudioContext not running, state:', ctx.state);
-        return false;
+        console.log('⏸️ AudioContext not running, resuming...');
+        await ctx.resume();
       }
 
       const osc = ctx.createOscillator();
@@ -93,12 +105,14 @@ export const useSound = () => {
   }, []);
 
   // เสียงสำเร็จ
-  const playSuccess = useCallback(() => {
+  const playSuccess = useCallback(async () => {
     console.log('🎯 playSuccess called');
     
     try {
       const ctx = audioContextRef.current;
-      if (!ctx || ctx.state !== 'running') return false;
+      if (!ctx) return false;
+      
+      if (ctx.state !== 'running') await ctx.resume();
 
       const now = ctx.currentTime;
       const notes = [523.25, 659.25, 783.99]; // C, E, G
@@ -127,12 +141,14 @@ export const useSound = () => {
   }, []);
 
   // เสียงผิด
-  const playError = useCallback(() => {
+  const playError = useCallback(async () => {
     console.log('🎯 playError called');
     
     try {
       const ctx = audioContextRef.current;
-      if (!ctx || ctx.state !== 'running') return false;
+      if (!ctx) return false;
+      
+      if (ctx.state !== 'running') await ctx.resume();
 
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -157,27 +173,33 @@ export const useSound = () => {
   }, []);
 
   // เสียงเวลาหมด
-  const playTime = useCallback(() => {
+  const playTime = useCallback(async () => {
     console.log('🎯 playTime called');
     
     try {
       const ctx = audioContextRef.current;
-      if (!ctx || ctx.state !== 'running') return false;
+      if (!ctx) return false;
+      
+      if (ctx.state !== 'running') await ctx.resume();
 
       for (let i = 0; i < 3; i++) {
         setTimeout(() => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          
-          osc.type = 'square';
-          osc.frequency.value = 500 - i * 50;
-          gain.gain.value = 0.15;
-          
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          
-          osc.start();
-          osc.stop(ctx.currentTime + 0.1);
+          try {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.type = 'square';
+            osc.frequency.value = 500 - i * 50;
+            gain.gain.value = 0.15;
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.start();
+            osc.stop(ctx.currentTime + 0.1);
+          } catch (e) {
+            console.log('Timeout sound error:', e);
+          }
         }, i * 200);
       }
       
@@ -190,8 +212,11 @@ export const useSound = () => {
   }, []);
 
   // ฟังก์ชันหลัก
-  const playSound = useCallback((soundName) => {
+  const playSound = useCallback(async (soundName) => {
     console.log(`🎵 Attempting to play: ${soundName}`);
+    
+    // ปลดล็อกก่อนเล่นทุกครั้ง
+    await unlockAudio();
     
     const soundMap = {
       'click': playClick,
@@ -206,36 +231,30 @@ export const useSound = () => {
 
     const soundFn = soundMap[soundName];
     if (soundFn) {
-      const result = soundFn();
-      if (!result) {
-        console.log(`⚠️ Failed to play ${soundName}`);
-        
-        // Fallback: ลอง resume AudioContext
-        const ctx = audioContextRef.current;
-        if (ctx && ctx.state === 'suspended') {
-          ctx.resume().then(() => {
-            console.log('✅ AudioContext resumed, trying again...');
-            soundFn();
-          });
-        }
+      try {
+        await soundFn();
+      } catch (e) {
+        console.error(`Error playing ${soundName}:`, e);
       }
     } else {
       console.warn('⚠️ Sound not found:', soundName);
     }
-  }, [playClick, playSuccess, playError, playTime]);
+  }, [playClick, playSuccess, playError, playTime, unlockAudio]);
 
   // ทดสอบเสียง
-  const testSound = useCallback(() => {
+  const testSound = useCallback(async () => {
     console.log('🔊 Testing sounds...');
-    playClick();
+    await unlockAudio();
+    await playClick();
     setTimeout(() => playSuccess(), 500);
     setTimeout(() => playError(), 1000);
     setTimeout(() => playTime(), 1500);
-  }, [playClick, playSuccess, playError, playTime]);
+  }, [playClick, playSuccess, playError, playTime, unlockAudio]);
 
   return { 
     playSound,
     testSound,
+    unlockAudio,
     isAudioReady
   };
 };
