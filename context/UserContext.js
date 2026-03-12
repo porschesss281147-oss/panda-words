@@ -224,59 +224,70 @@ export function UserProvider({ children }) {
     return false;
   };
 
-  // ✅ เพิ่มผลการเล่นเกม (แก้ไขให้ถูกต้อง)
-  const addGameResult = async (result) => {
-    if (!user) return null;
+ // ✅ เพิ่มผลการเล่นเกม (แก้ไขให้ถูกต้อง)
+const addGameResult = async (result) => {
+  if (!user) return null;
+  
+  try {
+    setError(null);
     
-    try {
-      setError(null);
-      
-      // บันทึกผลการเล่นลงใน collection games
-      const gamesRef = collection(db, 'games');
-      const gameResult = {
-        userId: user.id,
-        userName: user.name,
-        userIcon: user.icon,
-        ...result,
-        timestamp: new Date().toISOString()
-      };
-      
-      const docRef = await addDoc(gamesRef, gameResult);
-      
-      // ดึงประวัติเกมปัจจุบัน
-      const currentHistory = user.gameHistory || [];
-      const newHistory = [gameResult, ...currentHistory].slice(0, 50);
-      
-     const scorePoints = (result.correct || 0) * 10;
-      
-      // คำนวณสถิติใน stats
-      const newPerfectGames = (user.stats?.perfectGames || 0) + (result.score === 100 ? 1 : 0);
-      const newAverageAccuracy = Math.round(newTotalScore / (newGamesPlayed * 10));
-      
-      const updates = {
-        gameHistory: newHistory,
-        totalScore: newTotalScore,                   
-        gamesPlayed: newGamesPlayed,                  
-        stats: {
-          perfectGames: newPerfectGames,
-          totalPlayTime: user.stats?.totalPlayTime || 0,
-          averageAccuracy: newAverageAccuracy
-        }
-      };
-      
-      await updateUserData(updates);
-      
-      console.log(`📊 Game result saved: ${result.gameId} score ${result.score}`);
-      console.log(`📊 New total: ${newTotalScore} points, ${newGamesPlayed} games`);
-      
-      return { id: docRef.id, ...gameResult };
-      
-    } catch (error) {
-      console.error('Error adding game result:', error);
-      setError('เกิดข้อผิดพลาดในการบันทึกผลการเล่น');
-      return null;
-    }
-  };
+    // บันทึกผลการเล่นลงใน collection games
+    const gamesRef = collection(db, 'games');
+    const gameResult = {
+      userId: user.id,
+      userName: user.name,
+      userIcon: user.icon,
+      ...result,
+      timestamp: new Date().toISOString()
+    };
+    
+    const docRef = await addDoc(gamesRef, gameResult);
+    
+    // ดึงประวัติเกมปัจจุบัน
+    const currentHistory = user.gameHistory || [];
+    const newHistory = [gameResult, ...currentHistory].slice(0, 50);
+    
+    // ✅ คำนวณคะแนนจากจำนวนข้อที่ถูก
+    const correctCount = result.correct || result.correctCount || 0;
+    const scorePoints = correctCount * 10;
+    
+    // ✅ ประกาศตัวแปรก่อนใช้งาน
+    const currentTotalScore = user.totalScore || 0;
+    const currentGamesPlayed = user.gamesPlayed || 0;
+    
+    const newGamesPlayed = currentGamesPlayed + 1;
+    const newTotalScore = currentTotalScore + scorePoints;
+    
+    // ✅ คำนวณสถิติ
+    const newPerfectGames = (user.stats?.perfectGames || 0) + (result.score === 100 ? 1 : 0);
+    const newAverageAccuracy = newGamesPlayed > 0 
+      ? Math.round(newTotalScore / (newGamesPlayed * 10)) 
+      : 0;
+    
+    const updates = {
+      gameHistory: newHistory,
+      totalScore: newTotalScore,
+      gamesPlayed: newGamesPlayed,
+      stats: {
+        perfectGames: newPerfectGames,
+        totalPlayTime: user.stats?.totalPlayTime || 0,
+        averageAccuracy: newAverageAccuracy
+      }
+    };
+    
+    await updateUserData(updates);
+    
+    console.log(`📊 Game result saved: ${result.gameId} score ${result.score}`);
+    console.log(`📊 Points added: ${scorePoints}, New total: ${newTotalScore}`);
+    
+    return { id: docRef.id, ...gameResult };
+    
+  } catch (error) {
+    console.error('Error adding game result:', error);
+    setError('เกิดข้อผิดพลาดในการบันทึกผลการเล่น');
+    return null;
+  }
+};
 
   // เพิ่มเวลาเล่น
   const addPlayTime = async (minutes) => {
