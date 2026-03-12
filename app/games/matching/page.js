@@ -22,9 +22,14 @@ export default function MatchingGamePage() {
     setTimeout(() => playSound('time'), 900);
   };
 
-  useEffect(() => {
+ useEffect(() => {
     console.log('🎵 Sound hook check in useEffect:', { playSound: !!playSound });
+    const unlockAudioOnLoad = async () => {
+      await playSound('click');
+    };
+    unlockAudioOnLoad();
   }, [playSound]);
+
   
   
   // State หลัก
@@ -51,6 +56,7 @@ export default function MatchingGamePage() {
   const unlockedLevel = user?.unlockedLevels?.matching || 1;
 
   useEffect(() => {
+     useEffect(() => {
     if (feedback.show) {
       if (feedback.type === 'success') {
         playSound('success');
@@ -71,6 +77,7 @@ export default function MatchingGamePage() {
 
   const startNewGame = () => {
     setLoading(true);
+     playSound('start');
     
     try {
       // สุ่มประโยค 10 ข้อ
@@ -94,6 +101,7 @@ export default function MatchingGamePage() {
       initializeRound(newQuestions[0]);
   } catch (error) {
     console.error('Error starting game:', error);
+   playSound('error');
     setFeedback({
       show: true,
       message: 'เกิดข้อผิดพลาด กรุณาลองใหม่',
@@ -273,6 +281,7 @@ export default function MatchingGamePage() {
   const checkAnswer = () => {
   // ตรวจสอบว่าวางครบทุกช่องหรือยัง
   if (dropZones.some(zone => !zone.word)) {
+    playSound('warning');
     setFeedback({
       show: true,
       message: '⚠️ วางคำศัพท์ให้ครบทุกช่องก่อน',
@@ -299,6 +308,7 @@ console.log('User sentence:', userSentence);
   setTimerActive(false);
   
   if (isCorrect) {
+    playSound('success');
     setScore(prev => prev + 1);
     setFeedback({
       show: true,
@@ -318,8 +328,7 @@ console.log('User sentence:', userSentence);
       moveToNextQuestion();
     }, 1500); // ลดจาก 3000 เป็น 1500
   } else {
-   
-    
+    playSound('error');
     setFeedback({
       show: true,
       message: '✗ ผิด!',
@@ -363,7 +372,10 @@ console.log('User sentence:', userSentence);
   const passed = finalScore >= 80;
   
   if (passed) {
-      playSound('success'); // เล่นเสียง success เมื่อผ่าน
+      playSound('success'); // ✅ เสียงผ่าน
+      playSound('achievement'); // ✅ เสียงพิเศษ
+    } else {
+      playSound('error'); // ✅ เสียงไม่ผ่าน
     }
 
   addGameResult({
@@ -386,16 +398,19 @@ console.log('User sentence:', userSentence);
 };
 
   const playAgain = () => {
+    playSound('click');
     startNewGame();
   };
 
   const startGame = (level) => {
+    playSound('click');
     setSelectedLevel(level);
     setGameStarted(true);
     setShowResult(false);
   };
 
   const goToLevelSelect = () => {
+    playSound('click');
     setGameStarted(false);
     setShowResult(false);
   };
