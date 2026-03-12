@@ -66,7 +66,7 @@ export const useSound = () => {
     };
   }, [unlockAudio]);
 
-  // 🎮 เสียงคลิก - เสียงนุ่มๆ เหมาะกับเกม
+  // 🎮 เสียงคลิก
   const playClick = useCallback(async () => {
     try {
       const ctx = audioContextRef.current;
@@ -95,7 +95,7 @@ export const useSound = () => {
     }
   }, []);
 
-  // 🎉 เสียงสำเร็จ - เสียงจังหวะสนุกๆ สไตล์จีน
+  // 🎉 เสียงสำเร็จ
   const playSuccess = useCallback(async () => {
     try {
       const ctx = audioContextRef.current;
@@ -103,12 +103,11 @@ export const useSound = () => {
       if (ctx.state !== 'running') await ctx.resume();
 
       const now = ctx.currentTime;
-      // ทำนองสไตล์จีน (Do Re Mi Sol)
       const notes = [
-        { freq: 523.25, time: 0, dur: 0.15 }, // Do
-        { freq: 587.33, time: 0.2, dur: 0.15 }, // Re
-        { freq: 659.25, time: 0.4, dur: 0.15 }, // Mi
-        { freq: 783.99, time: 0.6, dur: 0.25 }  // Sol
+        { freq: 523.25, time: 0, dur: 0.15 },
+        { freq: 587.33, time: 0.2, dur: 0.15 },
+        { freq: 659.25, time: 0.4, dur: 0.15 },
+        { freq: 783.99, time: 0.6, dur: 0.25 }
       ];
       
       notes.forEach((note) => {
@@ -127,19 +126,6 @@ export const useSound = () => {
         osc.start(now + note.time);
         osc.stop(now + note.time + note.dur);
       });
-
-      // เพิ่มฮาร์โมนี
-      setTimeout(() => {
-        const osc2 = ctx.createOscillator();
-        const gain2 = ctx.createGain();
-        osc2.type = 'triangle';
-        osc2.frequency.value = 392.00; // Sol
-        gain2.gain.value = 0.1;
-        osc2.connect(gain2);
-        gain2.connect(ctx.destination);
-        osc2.start(now + 0.4);
-        osc2.stop(now + 0.8);
-      }, 0);
       
       return true;
     } catch (e) {
@@ -148,7 +134,7 @@ export const useSound = () => {
     }
   }, []);
 
-  // ❌ เสียงผิด - เสียงโทนต่ำ เศร้าๆ
+  // ❌ เสียงผิด
   const playError = useCallback(async () => {
     try {
       const ctx = audioContextRef.current;
@@ -179,13 +165,15 @@ export const useSound = () => {
   }, []);
 
   // ⏰ เสียงเวลาหมด - เสียง "กิ่งๆๆๆ" เหมือนนาฬิกาปลุก
-  const playTime = useCallback(async () => {
+  const playTimeout = useCallback(async () => {
     try {
       const ctx = audioContextRef.current;
       if (!ctx) return false;
       if (ctx.state !== 'running') await ctx.resume();
 
       const now = ctx.currentTime;
+      
+      console.log('⏰ กำลังเล่นเสียงหมดเวลา...');
       
       // เสียง "กิ่ง" 5 ครั้ง
       for (let i = 0; i < 5; i++) {
@@ -242,13 +230,18 @@ export const useSound = () => {
         oscFast.stop(now + 1.2 + i * 0.15 + 0.08);
       }
       
-      console.log('⏰ หมดเวลา: กิ่งๆๆๆ');
+      console.log('✅ เล่นเสียงหมดเวลาเรียบร้อย');
       return true;
     } catch (e) {
-      console.error('❌ playTime error:', e);
+      console.error('❌ playTimeout error:', e);
       return false;
     }
   }, []);
+
+  // เสียงเวลาหมดแบบสั้น (สำหรับ compatibility)
+  const playTime = useCallback(async () => {
+    return playTimeout();
+  }, [playTimeout]);
 
   // 🏆 เสียงได้คะแนน
   const playScore = useCallback(async () => {
@@ -292,7 +285,6 @@ export const useSound = () => {
       if (ctx.state !== 'running') await ctx.resume();
 
       const now = ctx.currentTime;
-      // ทำนองขึ้นๆ
       for (let i = 0; i < 3; i++) {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -357,14 +349,14 @@ export const useSound = () => {
       'click': playClick,
       'success': playSuccess,
       'error': playError,
-      'time': playTime,
+      'time': playTimeout,      // ✅ ใช้ playTimeout
+      'timeout': playTimeout,    // ✅ เพิ่ม key 'timeout'
       'score': playScore,
       'levelUp': playLevelUp,
       'tick': playTick,
       'start': playClick,
       'correct': playSuccess,
       'wrong': playError,
-      'timeout': playTime,
       'achievement': playSuccess,
       'warning': playError
     };
@@ -379,7 +371,7 @@ export const useSound = () => {
     } else {
       console.warn('⚠️ ไม่พบเสียง:', soundName);
     }
-  }, [playClick, playSuccess, playError, playTime, playScore, playLevelUp, playTick, unlockAudio]);
+  }, [playClick, playSuccess, playError, playTimeout, playScore, playLevelUp, playTick, unlockAudio]);
 
   // ทดสอบเสียง
   const testSound = useCallback(async () => {
@@ -399,7 +391,7 @@ export const useSound = () => {
     await new Promise(r => setTimeout(r, 800));
     
     console.log('4. หมดเวลา (กิ่งๆๆๆ)');
-    await playTime();
+    await playTimeout();
     await new Promise(r => setTimeout(r, 2000));
     
     console.log('5. ได้คะแนน');
@@ -408,7 +400,7 @@ export const useSound = () => {
     
     console.log('6. ขึ้นด่าน');
     await playLevelUp();
-  }, [playClick, playSuccess, playError, playTime, playScore, playLevelUp, unlockAudio]);
+  }, [playClick, playSuccess, playError, playTimeout, playScore, playLevelUp, unlockAudio]);
 
   return { 
     playSound,
