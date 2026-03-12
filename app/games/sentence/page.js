@@ -79,7 +79,7 @@ export default function SentenceGamePage() {
     if (timerActive && !gameCompleted && !showResult && !feedback.show && questions.length > 0) {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
-          if (prev <= 3) {
+          if (prev <= 5) {
             playSound('tick');
           }
           if (prev <= 1) {
