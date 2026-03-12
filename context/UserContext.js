@@ -121,6 +121,7 @@ export function UserProvider({ children }) {
         const newUser = {
           name: name.trim(),
           icon: icon,
+          totalScore: 0,
           createdAt: new Date().toISOString(),
           lastLogin: new Date().toISOString(),
           unlockedLevels: {
