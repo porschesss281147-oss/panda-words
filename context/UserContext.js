@@ -127,10 +127,7 @@ export function UserProvider({ children }) {
             sentence: 1,
             matching: 1,
             listening: 1,
-            spelling: 1,
-            falling: 1,
-            memory: 1,
-            puzzle: 1
+            spelling: 1
           },
           stats: {
             totalScore: 0,
@@ -365,10 +362,7 @@ export function UserProvider({ children }) {
         sentence: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
         matching: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
         listening: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
-        spelling: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
-        falling: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
-        memory: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
-        puzzle: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 }
+        spelling: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 }
       };
       
       querySnapshot.forEach(doc => {
@@ -404,10 +398,7 @@ export function UserProvider({ children }) {
         sentence: 1,
         matching: 1,
         listening: 1,
-        spelling: 1,
-        falling: 1,
-        memory: 1,
-        puzzle: 1
+        spelling: 1
       },
       stats: {
         totalScore: 0,
