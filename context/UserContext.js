@@ -273,6 +273,7 @@ export function UserProvider({ children }) {
       
       const updates = {
         gameHistory: newHistory,
+        totalScore: newTotalScore,
         stats: {
           ...user.stats,
           gamesPlayed,
