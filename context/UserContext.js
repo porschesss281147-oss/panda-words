@@ -13,7 +13,8 @@ import {
   getDocs,
   orderBy,
   limit,
-  increment
+  increment,
+  deleteDoc
 } from '@/lib/firebase';
 
 const UserContext = createContext();
@@ -25,9 +26,22 @@ export function UserProvider({ children }) {
 
   // โหลดข้อมูลจาก localStorage เมื่อเริ่มต้น
   useEffect(() => {
-    const savedUserId = localStorage.getItem('userId');
+    const savedUserId = localStorage.getItem('pandaWordsUserId');
+    const savedUserData = localStorage.getItem('pandaWordsUserData');
+    
     if (savedUserId) {
+      // ถ้ามี userId ให้โหลดจาก Firebase
       loadUserFromFirebase(savedUserId);
+    } else if (savedUserData) {
+      // ถ้ามี userData (fallback) ให้ใช้ข้อมูลนั้น
+      try {
+        const parsedUser = JSON.parse(savedUserData);
+        setUser(parsedUser);
+        setLoading(false);
+      } catch (e) {
+        console.error('Error parsing saved user data:', e);
+        setLoading(false);
+      }
     } else {
       setLoading(false);
     }
@@ -37,13 +51,20 @@ export function UserProvider({ children }) {
   const loadUserFromFirebase = async (userId) => {
     try {
       setError(null);
+      console.log('📥 Loading user from Firebase:', userId);
+      
       const userDoc = await getDoc(doc(db, 'users', userId));
       if (userDoc.exists()) {
-        setUser({ id: userId, ...userDoc.data() });
+        const userData = { id: userId, ...userDoc.data() };
+        setUser(userData);
+        
+        // บันทึกข้อมูลลง localStorage เป็น backup
+        localStorage.setItem('pandaWordsUserData', JSON.stringify(userData));
+        console.log('✅ User loaded:', userData.name);
       } else {
-        // ถ้าไม่พบผู้ใช้ใน Firebase ให้ลบ localStorage
-        localStorage.removeItem('userId');
-        setError('ไม่พบข้อมูลผู้ใช้');
+        console.log('❌ User not found in Firebase');
+        localStorage.removeItem('pandaWordsUserId');
+        localStorage.removeItem('pandaWordsUserData');
       }
     } catch (error) {
       console.error('Error loading user:', error);
@@ -53,92 +74,155 @@ export function UserProvider({ children }) {
     }
   };
 
-  // สร้างผู้ใช้ใหม่
+  // สร้าง ID จากชื่อ
+  const generateUserId = (name, icon) => {
+    // ลบช่องว่าง, ตัวอักษรพิเศษ, ทำให้เป็น lowercase
+    const cleanName = name.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const iconCode = icon.codePointAt(0).toString(16);
+    return `${cleanName}-${iconCode}`;
+  };
+
+  // สร้างหรือค้นหาผู้ใช้
   const createUser = async (name, icon) => {
     try {
       setError(null);
+      setLoading(true);
       
-      // ตรวจสอบชื่อซ้ำ (optional)
-      const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('name', '==', name));
-      const querySnapshot = await getDocs(q);
+      // สร้าง ID จากชื่อและไอคอน
+      const userId = generateUserId(name, icon);
+      console.log('🔍 Checking for user:', userId);
       
-      if (!querySnapshot.empty) {
-        return { 
-          success: false, 
-          error: 'ชื่อนี้มีผู้ใช้แล้ว กรุณาใช้ชื่ออื่น' 
+      // ตรวจสอบว่ามีผู้ใช้นี้ใน Firebase หรือไม่
+      const userRef = doc(db, 'users', userId);
+      const userDoc = await getDoc(userRef);
+      
+      if (userDoc.exists()) {
+        // ✅ พบผู้ใช้เดิม - ดึงข้อมูลมาใช้
+        const existingUser = { id: userId, ...userDoc.data() };
+        
+        // อัปเดต lastLogin
+        await updateDoc(userRef, {
+          lastLogin: new Date().toISOString()
+        });
+        
+        // บันทึก session
+        localStorage.setItem('pandaWordsUserId', userId);
+        localStorage.setItem('pandaWordsUserData', JSON.stringify(existingUser));
+        
+        setUser(existingUser);
+        console.log('✅ พบผู้ใช้เดิม:', existingUser.name);
+        
+        return { success: true, user: existingUser };
+        
+      } else {
+        // ❌ ไม่พบผู้ใช้ - สร้างผู้ใช้ใหม่
+        console.log('🆕 Creating new user:', name);
+        
+        const newUser = {
+          name: name.trim(),
+          icon: icon,
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString(),
+          unlockedLevels: {
+            sentence: 1,
+            matching: 1,
+            listening: 1,
+            spelling: 1,
+            falling: 1,
+            memory: 1,
+            puzzle: 1
+          },
+          stats: {
+            totalScore: 0,
+            gamesPlayed: 0,
+            perfectGames: 0,
+            totalPlayTime: 0,
+            averageAccuracy: 0
+          },
+          achievements: [],
+          settings: {
+            sound: true,
+            music: true,
+            volume: 0.7,
+            language: 'th'
+          },
+          gameHistory: []
         };
+
+        // บันทึกลง Firestore
+        await setDoc(userRef, newUser);
+        
+        // บันทึก session
+        localStorage.setItem('pandaWordsUserId', userId);
+        localStorage.setItem('pandaWordsUserData', JSON.stringify({ id: userId, ...newUser }));
+        
+        const createdUser = { id: userId, ...newUser };
+        setUser(createdUser);
+        
+        console.log('✅ สร้างผู้ใช้ใหม่:', createdUser.name);
+        return { success: true, user: createdUser };
       }
-
-      // สร้าง ID จากชื่อ + timestamp
-      const userId = `${name}-${Date.now()}`;
-      
-      const newUser = {
-        name,
-        icon,
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-        unlockedLevels: {
-          memory: 1,
-          matching: 1,
-          spelling: 1,
-          listening: 1
-        },
-        totalScore: 0,
-        gamesPlayed: 0,
-        challengesCompleted: 0,
-        perfectGames: 0,
-        totalPlayTime: 0,
-        achievements: [],
-        settings: {
-          sound: true,
-          music: true,
-          language: 'th'
-        }
-      };
-
-      // บันทึกลง Firestore
-      await setDoc(doc(db, 'users', userId), newUser);
-      
-      // บันทึก ID ลง localStorage
-      localStorage.setItem('userId', userId);
-      
-      setUser({ id: userId, ...newUser });
-      return { success: true, user: { id: userId, ...newUser } };
       
     } catch (error) {
-      console.error('Error creating user:', error);
+      console.error('Error creating/finding user:', error);
+      setError(error.message);
       return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
   // ออกจากระบบ
-  const logout = useCallback(() => {
-    localStorage.removeItem('userId');
-    setUser(null);
-    setError(null);
-  }, []);
+  const logout = useCallback(async () => {
+    try {
+      if (user) {
+        // อัปเดต lastLogout ใน Firebase
+        const userRef = doc(db, 'users', user.id);
+        await updateDoc(userRef, {
+          lastLogout: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      console.error('Error updating logout time:', error);
+    } finally {
+      // ลบข้อมูลจาก localStorage
+      localStorage.removeItem('pandaWordsUserId');
+      localStorage.removeItem('pandaWordsUserData');
+      setUser(null);
+      setError(null);
+      console.log('👋 Logged out');
+    }
+  }, [user]);
 
   // อัพเดทข้อมูลผู้ใช้
   const updateUserData = async (newData) => {
-    if (!user) return false;
+    if (!user) return { success: false, error: 'No user logged in' };
     
     try {
       setError(null);
       const userRef = doc(db, 'users', user.id);
+      
       const updatedData = { 
         ...newData,
         lastUpdated: new Date().toISOString() 
       };
       
       await updateDoc(userRef, updatedData);
-      setUser(prev => ({ ...prev, ...updatedData }));
-      return true;
+      
+      // อัพเดท state
+      const updatedUser = { ...user, ...updatedData };
+      setUser(updatedUser);
+      
+      // อัพเดท localStorage
+      localStorage.setItem('pandaWordsUserData', JSON.stringify(updatedUser));
+      
+      console.log('✅ User updated:', updatedUser.name);
+      return { success: true, user: updatedUser };
       
     } catch (error) {
       console.error('Error updating user:', error);
-      setError('เกิดข้อผิดพลาดในการอัพเดทข้อมูล');
-      return false;
+      setError(error.message);
+      return { success: false, error: error.message };
     }
   };
 
@@ -146,13 +230,17 @@ export function UserProvider({ children }) {
   const unlockLevel = async (gameId, level) => {
     if (!user) return false;
     
-    const currentUnlocked = user.unlockedLevels?.[gameId] || 1;
-    if (level > currentUnlocked) {
+    const currentLevel = user.unlockedLevels?.[gameId] || 1;
+    if (level > currentLevel) {
       const updatedLevels = {
         ...user.unlockedLevels,
         [gameId]: level
       };
-      return await updateUserData({ unlockedLevels: updatedLevels });
+      const result = await updateUserData({ unlockedLevels: updatedLevels });
+      if (result.success) {
+        console.log(`🔓 Unlocked ${gameId} level ${level}`);
+      }
+      return result.success;
     }
     return false;
   };
@@ -176,19 +264,30 @@ export function UserProvider({ children }) {
       
       const docRef = await addDoc(gamesRef, gameResult);
       
-      // คำนวณสถิติใหม่
-      const updates = {
-        gamesPlayed: (user.gamesPlayed || 0) + 1,
-        totalScore: (user.totalScore || 0) + (result.score || 0)
-      };
+      // ดึงประวัติเกมปัจจุบัน
+      const currentHistory = user.gameHistory || [];
+      const newHistory = [gameResult, ...currentHistory].slice(0, 50); // เก็บแค่ 50 รายการล่าสุด
       
-      // ถ้าได้คะแนนเต็ม
-      if (result.score === 100) {
-        updates.perfectGames = (user.perfectGames || 0) + 1;
-      }
+      // คำนวณสถิติใหม่
+      const gamesPlayed = (user.stats?.gamesPlayed || 0) + 1;
+      const totalScore = (user.stats?.totalScore || 0) + (result.score || 0);
+      const perfectGames = (user.stats?.perfectGames || 0) + (result.score === 100 ? 1 : 0);
+      const averageAccuracy = Math.round(totalScore / gamesPlayed);
+      
+      const updates = {
+        gameHistory: newHistory,
+        stats: {
+          ...user.stats,
+          gamesPlayed,
+          totalScore,
+          perfectGames,
+          averageAccuracy
+        }
+      };
       
       await updateUserData(updates);
       
+      console.log(`📊 Game result saved: ${result.gameId} score ${result.score}`);
       return { id: docRef.id, ...gameResult };
       
     } catch (error) {
@@ -202,8 +301,10 @@ export function UserProvider({ children }) {
   const addPlayTime = async (minutes) => {
     if (!user) return;
     
-    const totalPlayTime = (user.totalPlayTime || 0) + minutes;
-    await updateUserData({ totalPlayTime });
+    const totalPlayTime = (user.stats?.totalPlayTime || 0) + minutes;
+    await updateUserData({
+      stats: { ...user.stats, totalPlayTime }
+    });
   };
 
   // เพิ่ม Achievement
@@ -217,6 +318,7 @@ export function UserProvider({ children }) {
         earnedAt: new Date().toISOString()
       }];
       await updateUserData({ achievements: newAchievements });
+      console.log('🏆 Achievement unlocked:', achievement.name);
     }
   };
 
@@ -229,7 +331,7 @@ export function UserProvider({ children }) {
   };
 
   // ดึงประวัติการเล่น
-  const getGameHistory = async (limit = 10) => {
+  const getGameHistory = async (limitCount = 10) => {
     if (!user) return [];
     
     try {
@@ -238,7 +340,7 @@ export function UserProvider({ children }) {
         gamesRef, 
         where('userId', '==', user.id),
         orderBy('timestamp', 'desc'),
-        limit(limit)
+        limit(limitCount)
       );
       
       const querySnapshot = await getDocs(q);
@@ -260,10 +362,13 @@ export function UserProvider({ children }) {
       const querySnapshot = await getDocs(q);
       
       const stats = {
-        memory: { played: 0, totalScore: 0, bestScore: 0 },
-        matching: { played: 0, totalScore: 0, bestScore: 0 },
-        spelling: { played: 0, totalScore: 0, bestScore: 0 },
-        listening: { played: 0, totalScore: 0, bestScore: 0 }
+        sentence: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
+        matching: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
+        listening: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
+        spelling: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
+        falling: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
+        memory: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
+        puzzle: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 }
       };
       
       querySnapshot.forEach(doc => {
@@ -272,6 +377,13 @@ export function UserProvider({ children }) {
           stats[game.gameId].played++;
           stats[game.gameId].totalScore += game.score || 0;
           stats[game.gameId].bestScore = Math.max(stats[game.gameId].bestScore, game.score || 0);
+        }
+      });
+      
+      // คำนวณค่าเฉลี่ย
+      Object.keys(stats).forEach(key => {
+        if (stats[key].played > 0) {
+          stats[key].averageScore = Math.round(stats[key].totalScore / stats[key].played);
         }
       });
       
@@ -289,20 +401,58 @@ export function UserProvider({ children }) {
     
     const resetData = {
       unlockedLevels: {
-        memory: 1,
+        sentence: 1,
         matching: 1,
+        listening: 1,
         spelling: 1,
-        listening: 1
+        falling: 1,
+        memory: 1,
+        puzzle: 1
       },
-      totalScore: 0,
-      gamesPlayed: 0,
-      challengesCompleted: 0,
-      perfectGames: 0,
-      totalPlayTime: 0,
-      achievements: []
+      stats: {
+        totalScore: 0,
+        gamesPlayed: 0,
+        perfectGames: 0,
+        totalPlayTime: 0,
+        averageAccuracy: 0
+      },
+      achievements: [],
+      gameHistory: []
     };
     
     await updateUserData(resetData);
+    console.log('🔄 Progress reset');
+  };
+
+  // ลบบัญชีผู้ใช้
+  const deleteAccount = async () => {
+    if (!user) return false;
+    
+    try {
+      // ลบข้อมูลผู้ใช้
+      await deleteDoc(doc(db, 'users', user.id));
+      
+      // ลบประวัติการเล่นทั้งหมด (optional)
+      const gamesRef = collection(db, 'games');
+      const q = query(gamesRef, where('userId', '==', user.id));
+      const querySnapshot = await getDocs(q);
+      
+      const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+      
+      // ลบ session
+      localStorage.removeItem('pandaWordsUserId');
+      localStorage.removeItem('pandaWordsUserData');
+      setUser(null);
+      
+      console.log('🗑️ Account deleted');
+      return true;
+      
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      setError(error.message);
+      return false;
+    }
   };
 
   return (
@@ -315,6 +465,7 @@ export function UserProvider({ children }) {
       // Auth functions
       createUser,
       logout,
+      deleteAccount,
       
       // User data functions
       updateUserData,
@@ -370,11 +521,23 @@ export const useUserStats = () => {
   const { user } = useUser();
   
   return {
-    totalScore: user?.totalScore || 0,
-    gamesPlayed: user?.gamesPlayed || 0,
-    challengesCompleted: user?.challengesCompleted || 0,
-    perfectGames: user?.perfectGames || 0,
-    totalPlayTime: user?.totalPlayTime || 0,
+    totalScore: user?.stats?.totalScore || 0,
+    gamesPlayed: user?.stats?.gamesPlayed || 0,
+    perfectGames: user?.stats?.perfectGames || 0,
+    totalPlayTime: user?.stats?.totalPlayTime || 0,
+    averageAccuracy: user?.stats?.averageAccuracy || 0,
     achievements: user?.achievements?.length || 0
   };
+};
+
+// Custom hook สำหรับเช็คระดับด่าน
+export const useLevel = (gameId) => {
+  const { user } = useUser();
+  return user?.unlockedLevels?.[gameId] || 1;
+};
+
+// Custom hook สำหรับเช็คการตั้งค่า
+export const useSetting = (key) => {
+  const { user } = useUser();
+  return user?.settings?.[key];
 };
