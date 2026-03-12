@@ -109,6 +109,7 @@ export default function LoginPage() {
               playSound('click');  // เสียงคลิก (optional)
               setName(e.target.value);
             }}
+            onKeyPress={handleKeyPress}
             className={styles.input}
           />
 
