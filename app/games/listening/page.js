@@ -24,6 +24,11 @@ export default function ListeningGamePage() {
 
   useEffect(() => {
     console.log('🎵 Sound hook check in useEffect:', { playSound: !!playSound });
+    // ปลดล็อกเสียงอัตโนมัติเมื่อโหลดหน้า
+    const unlockAudioOnLoad = async () => {
+      await playSound('click');
+    };
+    unlockAudioOnLoad();
   }, [playSound]);
   
   // State หลัก
@@ -47,8 +52,23 @@ export default function ListeningGamePage() {
   
   const timerRef = useRef(null);
   const game = games.find(g => g.id === 'listening');
-  const unlockedLevel = user?.unlockedLevels?.listening || 1; // เปลี่ยนกลับเป็น unlockedLevel
+  const unlockedLevel = user?.unlockedLevels?.listening || 1;
   
+  // ✅ เพิ่มปุ่มทดสอบเสียงสำหรับ development
+  const TestSoundButton = () => {
+    if (process.env.NODE_ENV === 'development') {
+      return (
+        <button
+          onClick={testSound}
+          className="fixed top-20 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm z-50"
+        >
+          🔊 ทดสอบเสียง
+        </button>
+      );
+    }
+    return null;
+  };
+
   // เล่นเสียงตาม feedback
   useEffect(() => {
     if (feedback.show) {
@@ -70,145 +90,104 @@ export default function ListeningGamePage() {
   }, [gameStarted, selectedLevel]);
 
   const startNewGame = () => {
-  setLoading(true);
-  
-  try {
-    console.log('🎮 Starting new game, level:', selectedLevel);
+    setLoading(true);
+    playSound('start'); // ✅ เสียงเริ่มเกม
     
-    // ทดสอบว่า hsk3 มีข้อมูลหรือไม่
-    console.log('📚 Testing HSK3 data...');
-    
-    const newQuestions = generateListeningQuestions(selectedLevel, 10);
-    console.log('📋 Generated questions:', newQuestions);
-    
-    // ถ้าไม่มีคำถาม ให้ใช้คำถามสำรอง
-    if (!newQuestions || newQuestions.length === 0) {
-      console.warn('⚠️ No questions generated, using fallback questions');
+    try {
+      console.log('🎮 Starting new game, level:', selectedLevel);
       
-      const fallbackQuestions = [
-        {
-          id: 1,
-          audio: '你好',
-          chinese: '你好',
-          pinyin: 'nǐ hǎo',
-          meaning: 'สวัสดี',
-          options: ['你好', '再见', '谢谢', '对不起'],
-          correct: '你好',
-          sentence: '你好吗？',
-          sentence_pinyin: 'nǐ hǎo ma？',
-          sentence_th: 'คุณสบายดีไหม'
-        },
-        {
-          id: 2,
-          audio: '再见',
-          chinese: '再见',
-          pinyin: 'zàijiàn',
-          meaning: 'ลาก่อน',
-          options: ['你好', '再见', '谢谢', '对不起'],
-          correct: '再见',
-          sentence: '明天见。',
-          sentence_pinyin: 'míngtiān jiàn。',
-          sentence_th: 'เจอกันพรุ่งนี้'
-        },
-        {
-          id: 3,
-          audio: '谢谢',
-          chinese: '谢谢',
-          pinyin: 'xièxiè',
-          meaning: 'ขอบคุณ',
-          options: ['你好', '再见', '谢谢', '对不起'],
-          correct: '谢谢',
-          sentence: '谢谢你。',
-          sentence_pinyin: 'xièxiè nǐ。',
-          sentence_th: 'ขอบคุณ'
-        },
-        {
-          id: 4,
-          audio: '对不起',
-          chinese: '对不起',
-          pinyin: 'duìbuqǐ',
-          meaning: 'ขอโทษ',
-          options: ['你好', '再见', '谢谢', '对不起'],
-          correct: '对不起',
-          sentence: '对不起，我错了。',
-          sentence_pinyin: 'duìbuqǐ, wǒ cuò le。',
-          sentence_th: 'ขอโทษ ฉันผิดเอง'
-        },
-        {
-          id: 5,
-          audio: '没关系',
-          chinese: '没关系',
-          pinyin: 'méiguānxi',
-          meaning: 'ไม่เป็นไร',
-          options: ['你好', '再见', '谢谢', '没关系'],
-          correct: '没关系',
-          sentence: '没关系。',
-          sentence_pinyin: 'méiguānxi。',
-          sentence_th: 'ไม่เป็นไร'
-        },
-        {
-          id: 6,
-          audio: '是',
-          chinese: '是',
-          pinyin: 'shì',
-          meaning: 'ใช่',
-          options: ['是', '不是', '好', '不好'],
-          correct: '是',
-          sentence: '我是学生。',
-          sentence_pinyin: 'wǒ shì xuéshēng。',
-          sentence_th: 'ฉันเป็นนักเรียน'
-        },
-        {
-          id: 7,
-          audio: '不是',
-          chinese: '不是',
-          pinyin: 'búshì',
-          meaning: 'ไม่ใช่',
-          options: ['是', '不是', '好', '不好'],
-          correct: '不是',
-          sentence: '我不是老师。',
-          sentence_pinyin: 'wǒ búshì lǎoshī。',
-          sentence_th: 'ฉันไม่ใช่ครู'
-        },
-        {
-          id: 8,
-          audio: '好',
-          chinese: '好',
-          pinyin: 'hǎo',
-          meaning: 'ดี',
-          options: ['好', '不好', '是', '不是'],
-          correct: '好',
-          sentence: '今天天气很好。',
-          sentence_pinyin: 'jīntiān tiānqì hěn hǎo。',
-          sentence_th: 'วันนี้อากาศดี'
-        },
-        {
-          id: 9,
-          audio: '不好',
-          chinese: '不好',
-          pinyin: 'bùhǎo',
-          meaning: 'ไม่ดี',
-          options: ['好', '不好', '是', '不是'],
-          correct: '不好',
-          sentence: '今天天气不好。',
-          sentence_pinyin: 'jīntiān tiānqì bùhǎo。',
-          sentence_th: 'วันนี้อากาศไม่ดี'
-        },
-        {
-          id: 10,
-          audio: '可以',
-          chinese: '可以',
-          pinyin: 'kěyǐ',
-          meaning: 'ได้',
-          options: ['可以', '不可以', '好', '不好'],
-          correct: '可以',
-          sentence: '我可以进来吗？',
-          sentence_pinyin: 'wǒ kěyǐ jìnlái ma？',
-          sentence_th: 'ฉันเข้าได้ไหม'
-        }
-      ];
+      // ทดสอบว่า hsk3 มีข้อมูลหรือไม่
+      console.log('📚 Testing HSK3 data...');
       
-      setQuestions(fallbackQuestions);
+      const newQuestions = generateListeningQuestions(selectedLevel, 10);
+      console.log('📋 Generated questions:', newQuestions);
+      
+      // ถ้าไม่มีคำถาม ให้ใช้คำถามสำรอง
+      if (!newQuestions || newQuestions.length === 0) {
+        console.warn('⚠️ No questions generated, using fallback questions');
+        
+        const fallbackQuestions = [
+          {
+            id: 1,
+            audio: '你好',
+            chinese: '你好',
+            pinyin: 'nǐ hǎo',
+            meaning: 'สวัสดี',
+            options: ['你好', '再见', '谢谢', '对不起'],
+            correct: '你好',
+            sentence: '你好吗？',
+            sentence_pinyin: 'nǐ hǎo ma？',
+            sentence_th: 'คุณสบายดีไหม'
+          },
+          {
+            id: 2,
+            audio: '再见',
+            chinese: '再见',
+            pinyin: 'zàijiàn',
+            meaning: 'ลาก่อน',
+            options: ['你好', '再见', '谢谢', '对不起'],
+            correct: '再见',
+            sentence: '明天见。',
+            sentence_pinyin: 'míngtiān jiàn。',
+            sentence_th: 'เจอกันพรุ่งนี้'
+          },
+          {
+            id: 3,
+            audio: '谢谢',
+            chinese: '谢谢',
+            pinyin: 'xièxiè',
+            meaning: 'ขอบคุณ',
+            options: ['你好', '再见', '谢谢', '对不起'],
+            correct: '谢谢',
+            sentence: '谢谢你。',
+            sentence_pinyin: 'xièxiè nǐ。',
+            sentence_th: 'ขอบคุณ'
+          },
+          {
+            id: 4,
+            audio: '对不起',
+            chinese: '对不起',
+            pinyin: 'duìbuqǐ',
+            meaning: 'ขอโทษ',
+            options: ['你好', '再见', '谢谢', '对不起'],
+            correct: '对不起',
+            sentence: '对不起，我错了。',
+            sentence_pinyin: 'duìbuqǐ, wǒ cuò le。',
+            sentence_th: 'ขอโทษ ฉันผิดเอง'
+          },
+          {
+            id: 5,
+            audio: '没关系',
+            chinese: '没关系',
+            pinyin: 'méiguānxi',
+            meaning: 'ไม่เป็นไร',
+            options: ['你好', '再见', '谢谢', '没关系'],
+            correct: '没关系',
+            sentence: '没关系。',
+            sentence_pinyin: 'méiguānxi。',
+            sentence_th: 'ไม่เป็นไร'
+          }
+        ];
+        
+        setQuestions(fallbackQuestions);
+        setCurrentQuestionIndex(0);
+        setScore(0);
+        setTimeLeft(30);
+        setAnswerHistory([]);
+        setGameCompleted(false);
+        setShowResult(false);
+        setFeedback({ show: false, message: '', type: '', correct: '' });
+        setTimerActive(true);
+        setSelectedAnswer(null);
+        
+        console.log('✅ Using fallback questions');
+        setLoading(false);
+        return;
+      }
+      
+      // ถ้ามีคำถามจาก hsk3
+      console.log('✅ Using HSK3 questions');
+      setQuestions(newQuestions);
       setCurrentQuestionIndex(0);
       setScore(0);
       setTimeLeft(30);
@@ -219,45 +198,26 @@ export default function ListeningGamePage() {
       setTimerActive(true);
       setSelectedAnswer(null);
       
-      playSound('start');
-      console.log('✅ Using fallback questions');
+    } catch (error) {
+      console.error('❌ Error starting game:', error);
+      playSound('error'); // ✅ เสียง error
+      setFeedback({
+        show: true,
+        message: 'เกิดข้อผิดพลาด กรุณาลองใหม่',
+        type: 'error',
+        correct: ''
+      });
+    } finally {
       setLoading(false);
-      return;
     }
-    
-    // ถ้ามีคำถามจาก hsk3
-    console.log('✅ Using HSK3 questions');
-    setQuestions(newQuestions);
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    setTimeLeft(30);
-    setAnswerHistory([]);
-    setGameCompleted(false);
-    setShowResult(false);
-    setFeedback({ show: false, message: '', type: '', correct: '' });
-    setTimerActive(true);
-    setSelectedAnswer(null);
-    
-    playSound('start');
-    
-  } catch (error) {
-    console.error('❌ Error starting game:', error);
-    setFeedback({
-      show: true,
-      message: 'เกิดข้อผิดพลาด กรุณาลองใหม่',
-      type: 'error',
-      correct: ''
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // Timer effect
   useEffect(() => {
     if (timerActive && !gameCompleted && !showResult && !feedback.show && questions.length > 0) {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
+          // ✅ เสียงเตือนเมื่อเหลือ 5,4,3,2 วินาที
           if (prev <= 5 && prev > 0) {
             playSound('tick');
           }
@@ -277,7 +237,7 @@ export default function ListeningGamePage() {
   const handleTimeOut = () => {
     if (!questions.length || currentQuestionIndex >= questions.length) return;
     
-    playSound('time');
+    playSound('time'); // ✅ เสียงหมดเวลา
     setTimerActive(false);
     
     const currentQuestion = questions[currentQuestionIndex];
@@ -304,7 +264,7 @@ export default function ListeningGamePage() {
     }, 2000);
   };
 
-  // ฟังก์ชันอ่านออกเสียง
+  // ฟังก์ชันอ่านออกเสียง (ไม่มีเสียงเกม)
   const speak = (text) => {
     if (!window.speechSynthesis) {
       setAudioPermission(false);
@@ -329,19 +289,21 @@ export default function ListeningGamePage() {
     window.speechSynthesis.speak(utterance);
   };
 
-const handlePlaySound = () => {
-  if (!currentQuestion) return
-  speak(currentQuestion.audio || currentQuestion.chinese)
-}
+  const handlePlaySound = () => {
+    if (!currentQuestion) return;
+    // ✅ ไม่มีเสียงเกมตรงนี้
+    speak(currentQuestion.audio || currentQuestion.chinese);
+  };
 
   const handleSelectAnswer = (answer) => {
     if (feedback.show) return;
-    playSound('click');
+    playSound('click'); // ✅ เสียงคลิกเลือกคำตอบ
     setSelectedAnswer(answer);
   };
 
   const checkAnswer = () => {
     if (!selectedAnswer) {
+      playSound('warning'); // ✅ เสียงเตือน
       setFeedback({
         show: true,
         message: '⚠️ กรุณาเลือกคำตอบ',
@@ -362,6 +324,7 @@ const handlePlaySound = () => {
     setTimerActive(false);
     
     if (isCorrect) {
+      playSound('success'); // ✅ เสียงถูกต้อง
       setScore(prev => prev + 1);
       setFeedback({
         show: true,
@@ -381,6 +344,7 @@ const handlePlaySound = () => {
         moveToNextQuestion();
       }, 1500);
     } else {
+      playSound('error'); // ✅ เสียงผิด
       setFeedback({
         show: true,
         message: '✗ ผิด!',
@@ -423,7 +387,10 @@ const handlePlaySound = () => {
     const passed = finalScore >= 80;
     
     if (passed) {
-      playSound('success');
+      playSound('success'); // ✅ เสียงผ่าน
+      playSound('achievement'); // ✅ เสียงพิเศษ
+    } else {
+      playSound('error'); // ✅ เสียงไม่ผ่าน
     }
 
     addGameResult({
@@ -446,16 +413,19 @@ const handlePlaySound = () => {
   };
 
   const playAgain = () => {
+    playSound('click'); // ✅ เสียงคลิก
     startNewGame();
   };
 
   const startGame = (level) => {
+    playSound('click'); // ✅ เสียงคลิกเลือกระดับ
     setSelectedLevel(level);
     setGameStarted(true);
     setShowResult(false);
   };
 
   const goToLevelSelect = () => {
+    playSound('click'); // ✅ เสียงคลิกกลับ
     setGameStarted(false);
     setShowResult(false);
   };
@@ -480,97 +450,100 @@ const handlePlaySound = () => {
   }
   
   // เลือกด่าน
-if (!gameStarted) {
-  return (
-    <div 
-      className="min-h-screen"
-      style={{ 
-        background: 'linear-gradient(135deg, #f89d25, #dfbcbbed 0%, #f89d25 100%)'
-      }}
-    >
-      <header className="bg-white/80 backdrop-blur-md border-b border-white/40">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+  if (!gameStarted) {
+    return (
+      <>
+        <TestSoundButton />
+        <div 
+          className="min-h-screen"
+          style={{ 
+            background: 'linear-gradient(135deg, #f89d25, #dfbcbbed 0%, #f89d25 100%)'
+          }}
+        >
+          <header className="bg-white/80 backdrop-blur-md border-b border-white/40">
+            <div className="max-w-6xl mx-auto px-4 py-4">
+              <div className="flex items-center justify-between">
 
-            <button
-              onClick={() => router.push('/home')}
-              className="text-gray-600 hover:text-gray-800 transition flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow"
-            >
-              ← กลับ
-            </button>
+                <button
+                  onClick={() => router.push('/home')}
+                  className="text-gray-600 hover:text-gray-800 transition flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow"
+                >
+                  ← กลับ
+                </button>
 
-            <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">
-              {game?.title || 'เกมฟังเสียง'}
-            </h1>
+                <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">
+                  {game?.title || 'เกมฟังเสียง'}
+                </h1>
 
-            <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow">
-              <span className="text-2xl">{user?.icon}</span>
-              <span className="text-gray-700 font-medium">{user?.name}</span>
+                <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow">
+                  <span className="text-2xl">{user?.icon}</span>
+                  <span className="text-gray-700 font-medium">{user?.name}</span>
+                </div>
+
+              </div>
+            </div>
+          </header>
+
+          <main className="max-w-4xl mx-auto px-4 py-12">
+
+            <div className="text-center mb-12">
+              <span className="text-8xl mb-4 block animate-bounce">🎧</span>
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">เกมฟังเสียง</h2>
+              <p className="text-lg text-gray-600">ฟังเสียงแล้วเลือกคำศัพท์ที่ถูกต้อง</p>
             </div>
 
-          </div>
+            <h3 className="text-2xl font-bold text-gray-800 text-center mb-6">
+              เลือกระดับด่าน
+            </h3>
+
+            <div className="grid grid-cols-5 gap-4 mb-10">
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((level) => {
+                const isUnlocked = level <= unlockedLevel;
+                const isCurrent = level === unlockedLevel;
+
+                return (
+                  <button
+                    key={level}
+                    onClick={() => isUnlocked && startGame(level)}
+                    disabled={!isUnlocked}
+                    className={`
+                      aspect-square rounded-2xl text-3xl font-bold
+                      flex flex-col items-center justify-center
+                      transition-all duration-300 transform border-2
+                      ${isUnlocked 
+                        ? isCurrent
+                          ? 'bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-xl scale-105 ring-4 ring-orange-200 border-transparent'
+                          : 'bg-white border-orange-300 text-orange-500 shadow hover:scale-110 hover:shadow-lg'
+                        : 'bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed'
+                      }
+                    `}
+                  >
+                    <span>{level}</span>
+                    {!isUnlocked && <span className="text-2xl mt-2">🔒</span>}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-700 font-medium">ความคืบหน้า</span>
+                <span className="text-orange-500 font-semibold">{unlockedLevel}/10 ด่าน</span>
+              </div>
+
+              <div className="w-full bg-gray-200 rounded-full h-3 mt-3 overflow-hidden">
+                <div 
+                  className="bg-gradient-to-r from-orange-400 to-amber-500 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${(unlockedLevel / 10) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+
+          </main>
         </div>
-      </header>
-
-      <main className="max-w-4xl mx-auto px-4 py-12">
-
-        <div className="text-center mb-12">
-          <span className="text-8xl mb-4 block animate-bounce">🎧</span>
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">เกมฟังเสียง</h2>
-          <p className="text-lg text-gray-600">ฟังเสียงแล้วเลือกคำศัพท์ที่ถูกต้อง</p>
-        </div>
-
-        <h3 className="text-2xl font-bold text-gray-800 text-center mb-6">
-          เลือกระดับด่าน
-        </h3>
-
-        <div className="grid grid-cols-5 gap-4 mb-10">
-          {Array.from({ length: 10 }, (_, i) => i + 1).map((level) => {
-            const isUnlocked = level <= unlockedLevel;
-            const isCurrent = level === unlockedLevel;
-
-            return (
-              <button
-                key={level}
-                onClick={() => isUnlocked && startGame(level)}
-                disabled={!isUnlocked}
-                className={`
-                  aspect-square rounded-2xl text-3xl font-bold
-                  flex flex-col items-center justify-center
-                  transition-all duration-300 transform border-2
-                  ${isUnlocked 
-                    ? isCurrent
-                      ? 'bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-xl scale-105 ring-4 ring-orange-200 border-transparent'
-                      : 'bg-white border-orange-300 text-orange-500 shadow hover:scale-110 hover:shadow-lg'
-                    : 'bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed'
-                  }
-                `}
-              >
-                <span>{level}</span>
-                {!isUnlocked && <span className="text-2xl mt-2">🔒</span>}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center justify-between">
-            <span className="text-gray-700 font-medium">ความคืบหน้า</span>
-            <span className="text-orange-500 font-semibold">{unlockedLevel}/10 ด่าน</span>
-          </div>
-
-          <div className="w-full bg-gray-200 rounded-full h-3 mt-3 overflow-hidden">
-            <div 
-              className="bg-gradient-to-r from-orange-400 to-amber-500 h-3 rounded-full transition-all duration-500"
-              style={{ width: `${(unlockedLevel / 10) * 100}%` }}
-            ></div>
-          </div>
-        </div>
-
-      </main>
-    </div>
-  );
-}
+      </>
+    );
+  }
 
   // หน้าสรุปผล
   if (showResult) {
@@ -579,159 +552,162 @@ if (!gameStarted) {
     const passed = finalScore >= 80;
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-blue-50 to-purple-100">
-        <header className="bg-white/70 backdrop-blur-md shadow-sm border-b border-blue-200/50">
-          <div className="max-w-6xl mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <button
-                onClick={goToLevelSelect}
-                className="text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-2 bg-white/60 px-4 py-2 rounded-full"
-              >
-                ← กลับ
-              </button>
-              <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                ผลการเล่น
-              </h1>
-              <div className="flex items-center gap-2 bg-white/60 px-3 py-1 rounded-full">
-                <span className="text-2xl">{user?.icon}</span>
-                <span className="text-blue-700 font-medium">{user?.name}</span>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <main className="max-w-4xl mx-auto px-4 py-8">
-          <div className="bg-white/80 backdrop-blur-md rounded-3xl p-8 shadow-xl border border-white/60">
-            <div className="text-center mb-8">
-              <div className="inline-block px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full text-sm font-semibold mb-4 shadow-lg">
-                ด่านที่ {selectedLevel}
-              </div>
-              <h2 className="text-4xl font-bold text-gray-800 mb-2">สรุปผลการเรียน</h2>
-              <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-400 mx-auto rounded-full"></div>
-            </div>
-
-            <div className="text-center mb-8">
-              <div className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                {finalScore}
-              </div>
-              <div className="text-xl text-gray-600 mt-2">คะแนน</div>
-            </div>
-
-            <div className="text-center mb-8">
-              {passed ? (
-                <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-400 to-emerald-400 text-white px-8 py-3 rounded-full shadow-lg">
-                  <CheckCircle size={28} />
-                  <span className="text-xl font-semibold">ผ่าน! ยอดเยี่ยม! 🎉</span>
+      <>
+        <TestSoundButton />
+        <div className="min-h-screen bg-gradient-to-br from-blue-100 via-blue-50 to-purple-100">
+          <header className="bg-white/70 backdrop-blur-md shadow-sm border-b border-blue-200/50">
+            <div className="max-w-6xl mx-auto px-4 py-4">
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={goToLevelSelect}
+                  className="text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-2 bg-white/60 px-4 py-2 rounded-full"
+                >
+                  ← กลับ
+                </button>
+                <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                  ผลการเล่น
+                </h1>
+                <div className="flex items-center gap-2 bg-white/60 px-3 py-1 rounded-full">
+                  <span className="text-2xl">{user?.icon}</span>
+                  <span className="text-blue-700 font-medium">{user?.name}</span>
                 </div>
-              ) : (
-                <div className="inline-flex flex-col items-center gap-3">
-                  <div className="bg-gradient-to-r from-red-400 to-pink-400 text-white px-8 py-3 rounded-full shadow-lg flex items-center gap-2">
-                    <XCircle size={28} />
-                    <span className="text-xl font-semibold">ไม่ผ่าน</span>
+              </div>
+            </div>
+          </header>
+
+          <main className="max-w-4xl mx-auto px-4 py-8">
+            <div className="bg-white/80 backdrop-blur-md rounded-3xl p-8 shadow-xl border border-white/60">
+              <div className="text-center mb-8">
+                <div className="inline-block px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full text-sm font-semibold mb-4 shadow-lg">
+                  ด่านที่ {selectedLevel}
+                </div>
+                <h2 className="text-4xl font-bold text-gray-800 mb-2">สรุปผลการเรียน</h2>
+                <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-400 mx-auto rounded-full"></div>
+              </div>
+
+              <div className="text-center mb-8">
+                <div className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                  {finalScore}
+                </div>
+                <div className="text-xl text-gray-600 mt-2">คะแนน</div>
+              </div>
+
+              <div className="text-center mb-8">
+                {passed ? (
+                  <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-400 to-emerald-400 text-white px-8 py-3 rounded-full shadow-lg">
+                    <CheckCircle size={28} />
+                    <span className="text-xl font-semibold">ผ่าน! ยอดเยี่ยม! 🎉</span>
                   </div>
-                  <p className="text-gray-600">ต้องได้ 80 คะแนนขึ้นไป</p>
+                ) : (
+                  <div className="inline-flex flex-col items-center gap-3">
+                    <div className="bg-gradient-to-r from-red-400 to-pink-400 text-white px-8 py-3 rounded-full shadow-lg flex items-center gap-2">
+                      <XCircle size={28} />
+                      <span className="text-xl font-semibold">ไม่ผ่าน</span>
+                    </div>
+                    <p className="text-gray-600">ต้องได้ 80 คะแนนขึ้นไป</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-4 text-center shadow-md border border-blue-200">
+                  <div className="text-3xl font-bold text-blue-600 mb-1">{score}</div>
+                  <div className="text-blue-500 text-sm">ถูกต้อง</div>
                 </div>
-              )}
-            </div>
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-4 text-center shadow-md border border-orange-200">
+                  <div className="text-3xl font-bold text-orange-600 mb-1">{totalQuestions - score}</div>
+                  <div className="text-orange-500 text-sm">ผิด</div>
+                </div>
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-4 text-center shadow-md border border-green-200">
+                  <div className="text-3xl font-bold text-green-600 mb-1">{totalQuestions}</div>
+                  <div className="text-green-500 text-sm">ทั้งหมด</div>
+                </div>
+              </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-4 text-center shadow-md border border-blue-200">
-                <div className="text-3xl font-bold text-blue-600 mb-1">{score}</div>
-                <div className="text-blue-500 text-sm">ถูกต้อง</div>
-              </div>
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-4 text-center shadow-md border border-orange-200">
-                <div className="text-3xl font-bold text-orange-600 mb-1">{totalQuestions - score}</div>
-                <div className="text-orange-500 text-sm">ผิด</div>
-              </div>
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-4 text-center shadow-md border border-green-200">
-                <div className="text-3xl font-bold text-green-600 mb-1">{totalQuestions}</div>
-                <div className="text-green-500 text-sm">ทั้งหมด</div>
-              </div>
-            </div>
-
-            {questions.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="text-2xl">📚</span>
-                  คำศัพท์ที่ได้เรียน
-                </h3>
-                
-                <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                  {questions.map((q, index) => {
-                    const historyItem = answerHistory[index] || {};
-                    return (
-                      <div key={index} className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-100 shadow-sm hover:shadow-md transition-all">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <span className="bg-blue-200 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
-                                ข้อ {index + 1}
-                              </span>
-                              {historyItem.correct ? (
-                                <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs flex items-center gap-1">
-                                  <CheckCircle size={12} /> ถูกต้อง
+              {questions.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <span className="text-2xl">📚</span>
+                    คำศัพท์ที่ได้เรียน
+                  </h3>
+                  
+                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                    {questions.map((q, index) => {
+                      const historyItem = answerHistory[index] || {};
+                      return (
+                        <div key={index} className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-100 shadow-sm hover:shadow-md transition-all">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <span className="bg-blue-200 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                                  ข้อ {index + 1}
                                 </span>
-                              ) : (
-                                <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs flex items-center gap-1">
-                                  <XCircle size={12} /> ผิด
-                                </span>
+                                {historyItem.correct ? (
+                                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                                    <CheckCircle size={12} /> ถูกต้อง
+                                  </span>
+                                ) : (
+                                  <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                                    <XCircle size={12} /> ผิด
+                                  </span>
+                                )}
+                              </div>
+                              
+                              <p className="text-2xl font-bold text-blue-700 mb-1">{q.chinese}</p>
+                              <p className="text-purple-600 mb-1">{q.pinyin}</p>
+                              <p className="text-gray-700">{q.meaning}</p>
+                              
+                              {q.sentence && (
+                                <div className="mt-2 p-2 bg-blue-50 rounded-lg">
+                                  <p className="text-sm text-gray-600">ตัวอย่าง: {q.sentence}</p>
+                                  <p className="text-xs text-gray-500">{q.sentence_th}</p>
+                                </div>
                               )}
                             </div>
                             
-                            <p className="text-2xl font-bold text-blue-700 mb-1">{q.chinese}</p>
-                            <p className="text-purple-600 mb-1">{q.pinyin}</p>
-                            <p className="text-gray-700">{q.meaning}</p>
-                            
-                            {q.sentence && (
-                              <div className="mt-2 p-2 bg-blue-50 rounded-lg">
-                                <p className="text-sm text-gray-600">ตัวอย่าง: {q.sentence}</p>
-                                <p className="text-xs text-gray-500">{q.sentence_th}</p>
-                              </div>
-                            )}
+                            <button
+                              onClick={() => speak(q.chinese)}
+                              className="ml-4 p-3 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition-colors"
+                              title="ฟังเสียง"
+                            >
+                              <Volume2 size={20} />
+                            </button>
                           </div>
-                          
-                          <button
-                            onClick={() => speak(q.chinese)}
-                            className="ml-4 p-3 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition-colors"
-                            title="ฟังเสียง"
-                          >
-                            <Volume2 size={20} />
-                          </button>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
-
-            <div className="flex gap-4">
-              <button
-                onClick={playAgain}
-                className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-600 hover:to-purple-600 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
-              >
-                <RotateCcw size={20} />
-                เล่นอีกครั้ง
-              </button>
-              {passed && selectedLevel < 10 && (
-                <button
-                  onClick={() => startGame(selectedLevel + 1)}
-                  className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-white py-4 rounded-xl font-bold text-lg hover:from-green-500 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
-                >
-                  ด่านต่อไป
-                </button>
               )}
-              <button
-                onClick={goToLevelSelect}
-                className="flex-1 bg-gradient-to-r from-gray-400 to-gray-500 text-white py-4 rounded-xl font-bold text-lg hover:from-gray-500 hover:to-gray-600 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
-              >
-                <Home size={20} />
-                เลือกด่าน
-              </button>
+
+              <div className="flex gap-4">
+                <button
+                  onClick={playAgain}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-600 hover:to-purple-600 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                >
+                  <RotateCcw size={20} />
+                  เล่นอีกครั้ง
+                </button>
+                {passed && selectedLevel < 10 && (
+                  <button
+                    onClick={() => startGame(selectedLevel + 1)}
+                    className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-white py-4 rounded-xl font-bold text-lg hover:from-green-500 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                  >
+                    ด่านต่อไป
+                  </button>
+                )}
+                <button
+                  onClick={goToLevelSelect}
+                  className="flex-1 bg-gradient-to-r from-gray-400 to-gray-500 text-white py-4 rounded-xl font-bold text-lg hover:from-gray-500 hover:to-gray-600 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                >
+                  <Home size={20} />
+                  เลือกด่าน
+                </button>
+              </div>
             </div>
-          </div>
-        </main>
-      </div>
+          </main>
+        </div>
+      </>
     );
   }
 
@@ -744,341 +720,340 @@ if (!gameStarted) {
   }
 
   return (
-    <div 
-      className="min-h-screen flex flex-col items-center justify-center relative px-6"
-      style={{
-        background: "#f4efe6",
-      }}
-    >
-      {/* Background ภาพจาง */}
-      <div className="absolute inset-0  opacity-80 flex justify-center items-center pointer-events-none">
-        <img src="/4.png" alt="background" className="w-full h-full object-cover" />
-      </div>
-      
-      <header className="fixed top-0 left-0 w-full z-50 bg-white/70 backdrop-blur-md shadow-sm border-b border-blue-200/50">
-        <div className="w-full px-4 md:px-6 lg:px-10 py-4">
-          <div className="flex items-center justify-between">
-            {/* Exit Button */}
-            <button
-              onClick={goToLevelSelect}
-              className="flex items-center gap-2 bg-gradient-to-r from-red-700 to-red-500 hover:from-red-700 hover:to-red-600 font-bold text-yellow-400 transition-all px-4 py-2 rounded-full text-sm md:text-base shadow-md border border-yellow-600"
-            >
-              ← ออกจากเกม
-            </button>
+    <>
+      <TestSoundButton />
+      <div className="relative min-h-screen overflow-hidden">
 
-            <h1 className="absolute left-1/2 -translate-x-1/2 text-lg md:text-3xl font-bold text-black">
-  เกมฟังเสียง
-</h1>
+        {/* Background */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url('/panda-words/abc.png')` }} 
+        />
+        <div className="absolute inset-0 bg-white/20" />
 
-            {/* Right Section */}
-            <div className="flex items-center gap-3 md:gap-4">
-              {/* Question Progress */}
-              <div className="relative w-24 md:w-32 h-8 md:h-10 bg-blue-900/40 rounded-full overflow-hidden border-2 border-yellow-500 shadow-md">
-                <div 
-                  className={`absolute top-0 left-0 h-full bg-gradient-to-r  to-red-700 transition-all duration-1000 ease-linear ${
-                    timeLeft <= 5 ? 'animate-pulse' : ''
-                  }`}
-                  style={{ width: `${progress}%` }}
-                >
-                  <div className="absolute top-0 right-0 w-8 h-full bg-yellow-200/30 blur-sm"></div>
+        <header className="fixed top-0 left-0 w-full z-50 bg-white/70 backdrop-blur-md shadow-sm border-b border-blue-200/50">
+          <div className="w-full px-4 md:px-6 lg:px-10 py-4">
+            <div className="flex items-center justify-between">
+              {/* Exit Button */}
+              <button
+                onClick={goToLevelSelect}
+                className="flex items-center gap-2 bg-gradient-to-r from-red-700 to-red-500 hover:from-red-700 hover:to-red-600 font-bold text-yellow-400 transition-all px-4 py-2 rounded-full text-sm md:text-base shadow-md border border-yellow-600"
+              >
+                ← ออกจากเกม
+              </button>
+
+              <h1 className="absolute left-1/2 -translate-x-1/2 text-lg md:text-3xl font-bold text-black">
+                เกมฟังเสียง
+              </h1>
+
+              {/* Right Section */}
+              <div className="flex items-center gap-3 md:gap-4">
+                {/* Question Progress */}
+                <div className="relative w-24 md:w-32 h-8 md:h-10 bg-blue-900/40 rounded-full overflow-hidden border-2 border-yellow-500 shadow-md">
+                  <div 
+                    className={`absolute top-0 left-0 h-full bg-gradient-to-r to-red-700 transition-all duration-1000 ease-linear ${
+                      timeLeft <= 5 ? 'animate-pulse' : ''
+                    }`}
+                    style={{ width: `${progress}%` }}
+                  >
+                    <div className="absolute top-0 right-0 w-8 h-full bg-yellow-200/30 blur-sm"></div>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs md:text-sm font-bold text-yellow-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.7)]">
+                      ข้อที่ {currentQuestionIndex + 1}/{questions.length}
+                    </span>
+                  </div>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-xs md:text-sm font-bold text-yellow-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.7)]">
-                    ข้อที่ {currentQuestionIndex + 1}/{questions.length}
+
+                {/* User */}
+                <div className="flex items-center gap-2 bg-white/60 px-3 py-1 rounded-full">
+                  <span className="text-xl md:text-2xl">{user?.icon}</span>
+                  <span className="hidden md:block text-gray-700 font-medium">
+                    {user?.name}
                   </span>
                 </div>
               </div>
+            </div>
+          </div>
+        </header>
 
-              {/* User */}
-              <div className="flex items-center gap-2 bg-white/60 px-3 py-1 rounded-full">
-                <span className="text-xl md:text-2xl">{user?.icon}</span>
-                <span className="hidden md:block text-gray-700 font-medium">
-                  {user?.name}
+        <div className="h-20 sm:h-24 md:h-28"></div>
+        
+        {/* Main Game Area */}
+        <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6">
+
+          {/* Audio Section */}
+          <div className="text-center mb-10 sm:mb-12">
+            <div className="relative inline-block p-6 bg-black/30 backdrop-blur-md rounded-full mb-6 border-2 border-yellow-500/40 shadow-xl">
+
+              {/* ปุ่มเสียง */}
+              <button
+                onClick={handlePlaySound}
+                disabled={isPlaying || !audioPermission}
+                className={`
+                  w-28 h-28 md:w-36 md:h-36 rounded-full
+                  bg-gradient-to-br from-red-600 via-red-500 to-amber-400
+                  text-white text-5xl md:text-6xl
+                  shadow-[0_10px_25px_rgba(0,0,0,0.4)]
+                  transform transition-all duration-300
+                  ${isPlaying
+                    ? 'scale-110 ring-8 ring-yellow-300/60 animate-pulse'
+                    : 'hover:scale-105 hover:ring-4 hover:ring-yellow-300/40'}
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  flex items-center justify-center
+                `}
+              >
+                {isPlaying ? '🔊' : '🔈'}
+              </button>
+
+              {isPlaying && (
+                <div className="absolute inset-0 flex items-center justify-center gap-1 pointer-events-none">
+                  {[...Array(5)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-2 h-10 bg-yellow-300 rounded-full animate-sound-wave"
+                      style={{ animationDelay: `${i * 0.1}s` }}
+                    />
+                  ))}
+                </div>
+              )}
+                  
+              {!audioPermission && (
+                <div className="mt-4 p-4 bg-red-500/80 text-white rounded-xl">
+                  ⚠️ เบราว์เซอร์ของคุณไม่รองรับการอ่านออกเสียง
+                </div>
+              )}
+            </div>
+
+            {/* Options Section */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-Grey text-center mb-6 drop-shadow-lg">
+                💡 ฟังเสียงให้ดี แล้วเลือกคำตอบที่ถูกต้อง
+              </h2>
+              
+              <div className="grid grid-cols-2 gap-5 md:gap-7">
+                {currentQuestion.options.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSelectAnswer(option)}
+                    disabled={feedback.show}
+                    className={`
+                      relative
+                      p-5 md:p-7
+                      rounded-xl
+                      text-3xl md:text-4xl
+                      font-bold
+                      transition-all duration-300
+                      transform
+
+                      ${
+                        selectedAnswer === option
+                          ? 'scale-105 ring-4 ring-yellow-300'
+                          : 'hover:scale-105 hover:-translate-y-1'
+                      }
+
+                      bg-gradient-to-br
+                      from-amber-900
+                      via-yellow-800
+                      to-amber-700
+
+                      text-yellow-100
+
+                      shadow-[0_12px_25px_rgba(0,0,0,0.5)]
+                      border-[5px] border-amber-950
+
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                    `}
+                  >
+                    {/* texture ไม้ */}
+                    <div className="absolute inset-0 bg-[url('/wood-texture.png')] opacity-30 mix-blend-overlay"></div>
+
+                    {/* ลายไม้เข้ม */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30 rounded-xl"></div>
+
+                    {/* highlight ไม้ */}
+                    <div className="absolute top-0 left-0 w-full h-3 bg-white/10 rounded-t-xl"></div>
+
+                    {/* ตัวอักษร */}
+                    <span className="relative z-10 drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">
+                      {option}
+                    </span>
+
+                    {/* ป้าย A B C D */}
+                    <div className="absolute top-2 right-2 w-7 h-7 bg-amber-950/80 rounded-full flex items-center justify-center text-sm font-bold text-yellow-300 border border-yellow-700">
+                      {String.fromCharCode(65 + index)}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Check Button */}
+            <div className="text-center">
+              <button
+                onClick={checkAnswer}
+                disabled={!selectedAnswer || feedback.show}
+                className={`
+                  px-16 py-5 text-2xl font-bold text-white rounded-[70px]
+                  shadow-[0_8px_0_#7f1d1d] active:translate-y-2 active:shadow-[0_4px_0_#7f1d1d]
+                  transition-all duration-150 border-4 border-yellow-600 tracking-wide
+                  ${!selectedAnswer 
+                    ? 'bg-gray-400 cursor-not-allowed opacity-50' 
+                    : 'bg-gradient-to-b from-red-800 via-red-600 to-yellow-500 hover:from-red-900 hover:to-yellow-600 shadow-[0_6px_0_#7f1d1d] active:translate-y-1 active:shadow-[0_3px_0_#7f1d1d]'
+                  }
+                `}
+              >
+                ตรวจคำตอบ
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom Timer Bar */}
+          <div className="w-[90%] max-w-3xl mx-auto mt-10">
+            {/* กรอบจีน */}
+            <div className="relative p-1 rounded-full bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 shadow-xl">
+
+              {/* แถบเวลา */}
+              <div className="relative w-full h-6 sm:h-7 bg-red-900/80 rounded-full overflow-hidden border border-yellow-700 shadow-inner">
+
+                <div
+                  className="h-full bg-gradient-to-r from-red-900 via-red-600 to-yellow-500 transition-all duration-1000"
+                  style={{ width: `${(timeLeft / 30) * 100}%` }}
+                />
+                {/* แสงวิ่ง */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse">
+                </div>
+              </div>
+              {/* ตัวเลขเวลา */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-yellow-200 font-bold text-base sm:text-lg tracking-widest drop-shadow-lg">
+                  ⏳ {timeLeft} วินาที
                 </span>
               </div>
             </div>
           </div>
-        </div>
-      </header>
 
-<div className="pt-15"></div>
-      {/* Main Game Area */}
-<div className="relative z-10 w-full max-w-4xl mx-auto">
+          {/* Feedback Modal */}
+          {feedback.show && (
+            <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
+              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fadeIn"></div>
+              
+              <div className={`
+                relative max-w-2xl w-full p-8 sm:p-10 md:p-12 
+                rounded-3xl shadow-2xl text-center
+                transform animate-popIn
+                ${feedback.type === 'success' 
+                  ? 'bg-gradient-to-br from-green-500 to-emerald-600 border-4 border-green-300' 
+                  : feedback.type === 'error'
+                    ? 'bg-gradient-to-br from-red-500 to-rose-600 border-4 border-red-300'
+                    : 'bg-gradient-to-br from-yellow-500 to-orange-500 border-4 border-yellow-300'
+                }
+              `}>
+                <div className="mb-6">
+                  {feedback.type === 'success' ? (
+                    <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center">
+                      <CheckCircle size={64} className="text-white" />
+                    </div>
+                  ) : feedback.type === 'error' ? (
+                    <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center">
+                      <XCircle size={64} className="text-white" />
+                    </div>
+                  ) : (
+                    <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center">
+                      <span className="text-6xl">⚠️</span>
+                    </div>
+                  )}
+                </div>
 
-  {/* Audio Section */}
-<div className="text-center mb-12">
+                <p className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-4 drop-shadow-lg">
+                  {feedback.message}
+                </p>
 
-  <div className="relative inline-block p-6 bg-black/30 backdrop-blur-md rounded-full mb-6 border-2 border-yellow-500/40 shadow-xl">
+                {feedback.type === 'error' && feedback.correct && (
+                  <div className="mt-6 p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
+                    <p className="text-2xl sm:text-3xl text-white/90 mb-2">
+                      คำตอบที่ถูกต้อง:
+                    </p>
+                    <p className="text-5xl sm:text-6xl md:text-7xl font-bold text-yellow-300 drop-shadow-lg">
+                      {feedback.correct}
+                    </p>
+                    <p className="text-xl sm:text-2xl text-white/80 mt-4">
+                      {currentQuestion?.meaning}
+                    </p>
+                  </div>
+                )}
 
-    {/* ปุ่มเสียง */}
-    <button
-      onClick={handlePlaySound}
-      disabled={isPlaying || !audioPermission}
-      className={`
-        w-28 h-28 md:w-36 md:h-36 rounded-full
-        bg-gradient-to-br from-red-600 via-red-500 to-amber-400
-        text-white text-5xl md:text-6xl
-        shadow-[0_10px_25px_rgba(0,0,0,0.4)]
-        transform transition-all duration-300
-        ${isPlaying
-          ? 'scale-110 ring-8 ring-yellow-300/60 animate-pulse'
-          : 'hover:scale-105 hover:ring-4 hover:ring-yellow-300/40'}
-        disabled:opacity-50 disabled:cursor-not-allowed
-        flex items-center justify-center
-      `}
-    >
-      {isPlaying ? '🔊' : '🔈'}
-    </button>
-
-    
-    {isPlaying && (
-      <div className="absolute inset-0 flex items-center justify-center gap-1 pointer-events-none">
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={i}
-            className="w-2 h-10 bg-yellow-300 rounded-full animate-sound-wave"
-            style={{ animationDelay: `${i * 0.1}s` }}
-          />
-        ))}
-      </div>
-    )}
-          
-          {!audioPermission && (
-            <div className="mt-4 p-4 bg-red-500/80 text-white rounded-xl">
-              ⚠️ เบราว์เซอร์ของคุณไม่รองรับการอ่านออกเสียง
+                <div className="mt-8 text-center">
+                  {feedback.type === 'success' ? (
+                    <div className="space-y-2">
+                      <div className="flex justify-center gap-2 text-4xl animate-bounce">
+                        <span>🎉</span>
+                        <span>⭐</span>
+                        <span>🎉</span>
+                      </div>
+                      <p className="text-white/90 text-2xl font-bold">เก่งมาก! ยอดเยี่ยม!</p>
+                    </div>
+                  ) : feedback.type === 'error' ? (
+                    <div className="space-y-2">
+                      <div className="flex justify-center gap-2 text-4xl">
+                        <span>💪</span>
+                        <span>✨</span>
+                        <span>🌻</span>
+                      </div>
+                      <p className="text-white/90 text-2xl font-bold">ไม่เป็นไรนะ!</p>
+                      <p className="text-white/70 text-lg">ครั้งหน้าต้องดีขึ้นแน่!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-white/90 text-2xl font-bold">กรุณาเลือกคำตอบก่อน</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
-        </div>
 
-        {/* Options Section */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-Grey text-center mb-6 drop-shadow-lg">
-            เลือกคำตอบที่ถูกต้อง:
-          </h2>
-          
-         <div className="grid grid-cols-2 gap-5 md:gap-7">
-  {currentQuestion.options.map((option, index) => (
-    <button
-      key={index}
-      onClick={() => handleSelectAnswer(option)}
-      disabled={feedback.show}
-      className={`
-        relative
-        p-5 md:p-7
-        rounded-xl
-        text-3xl md:text-4xl
-        font-bold
-        transition-all duration-300
-        transform
-
-        ${
-          selectedAnswer === option
-            ? 'scale-105 ring-4 ring-yellow-300'
-            : 'hover:scale-105 hover:-translate-y-1'
-        }
-
-        bg-gradient-to-br
-        from-amber-900
-        via-yellow-800
-        to-amber-700
-
-        text-yellow-100
-
-        shadow-[0_12px_25px_rgba(0,0,0,0.5)]
-        border-[5px] border-amber-950
-
-        disabled:opacity-50 disabled:cursor-not-allowed
-      `}
-    >
-
-      {/* texture ไม้ */}
-      <div className="absolute inset-0 bg-[url('/wood-texture.png')] opacity-30 mix-blend-overlay"></div>
-
-      {/* ลายไม้เข้ม */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30 rounded-xl"></div>
-
-      {/* highlight ไม้ */}
-      <div className="absolute top-0 left-0 w-full h-3 bg-white/10 rounded-t-xl"></div>
-
-      {/* ตัวอักษร */}
-      <span className="relative z-10 drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">
-        {option}
-      </span>
-
-      {/* ป้าย A B C D */}
-      <div className="absolute top-2 right-2 w-7 h-7 bg-amber-950/80 rounded-full flex items-center justify-center text-sm font-bold text-yellow-300 border border-yellow-700">
-        {String.fromCharCode(65 + index)}
-      </div>
-
-    </button>
-  ))}
-</div>
-</div>
-
-        {/* Check Button */}
-        <div className="text-center">
-          <button
-            onClick={checkAnswer}
-            disabled={!selectedAnswer || feedback.show}
-            className={`
-            px-16 py-5 text-2xl font-bold text-white rounded-[70px]
-shadow-[0_8px_0_#7f1d1d] active:translate-y-2 active:shadow-[0_4px_0_#7f1d1d]
-transition-all duration-150 border-4 border-yellow-600 tracking-wide
-              ${!selectedAnswer 
-              ? 'bg-gray-400 cursor-not-allowed opacity-50' 
-: 'bg-gradient-to-b from-red-800 via-red-600 to-yellow-500 hover:from-red-900 hover:to-yellow-600 shadow-[0_6px_0_#7f1d1d] active:translate-y-1 active:shadow-[0_3px_0_#7f1d1d]'
+          {/* CSS for sound wave animation */}
+          <style jsx>{`
+            @keyframes sound-wave {
+              0%, 100% {
+                transform: scaleY(0.5);
               }
-            `}
-          >
-            ตรวจคำตอบ
-          </button>
-        </div>
-
-        {/* Hint */}
-        <div className="mt-8 text-center">
-          <p className="text-/80 text-lg">
-            💡 ฟังเสียงให้ดี แล้วเลือกคำตอบที่ถูกต้อง
-          </p>
+              50% {
+                transform: scaleY(1.5);
+              }
+            }
+            
+            .animate-sound-wave {
+              animation: sound-wave 0.8s ease-in-out infinite;
+            }
+            
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            
+            @keyframes popIn {
+              from {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+              }
+              to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+              }
+            }
+            
+            .animate-fadeIn {
+              animation: fadeIn 0.3s ease-out;
+            }
+            
+            .animate-popIn {
+              animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+          `}</style>
         </div>
       </div>
-
-      {/* Feedback Modal */}
-      {feedback.show && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fadeIn"></div>
-          
-          <div className={`
-            relative max-w-2xl w-full p-8 sm:p-10 md:p-12 
-            rounded-3xl shadow-2xl text-center
-            transform animate-popIn
-            ${feedback.type === 'success' 
-              ? 'bg-gradient-to-br from-green-500 to-emerald-600 border-4 border-green-300' 
-              : feedback.type === 'error'
-                ? 'bg-gradient-to-br from-red-500 to-rose-600 border-4 border-red-300'
-                : 'bg-gradient-to-br from-yellow-500 to-orange-500 border-4 border-yellow-300'
-            }
-          `}>
-            <div className="mb-6">
-              {feedback.type === 'success' ? (
-                <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center">
-                  <CheckCircle size={64} className="text-white" />
-                </div>
-              ) : feedback.type === 'error' ? (
-                <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center">
-                  <XCircle size={64} className="text-white" />
-                </div>
-              ) : (
-                <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center">
-                  <span className="text-6xl">⚠️</span>
-                </div>
-              )}
-            </div>
-
-            <p className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-4 drop-shadow-lg">
-              {feedback.message}
-            </p>
-
-            {feedback.type === 'error' && feedback.correct && (
-              <div className="mt-6 p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                <p className="text-2xl sm:text-3xl text-white/90 mb-2">
-                  คำตอบที่ถูกต้อง:
-                </p>
-                <p className="text-5xl sm:text-6xl md:text-7xl font-bold text-yellow-300 drop-shadow-lg">
-                  {feedback.correct}
-                </p>
-                <p className="text-xl sm:text-2xl text-white/80 mt-4">
-                  {currentQuestion?.meaning}
-                </p>
-              </div>
-            )}
-
-            <div className="mt-8 text-center">
-              {feedback.type === 'success' ? (
-                <div className="space-y-2">
-                  <div className="flex justify-center gap-2 text-4xl animate-bounce">
-                    <span>🎉</span>
-                    <span>⭐</span>
-                    <span>🎉</span>
-                  </div>
-                  <p className="text-white/90 text-2xl font-bold">เก่งมาก! ยอดเยี่ยม!</p>
-                </div>
-              ) : feedback.type === 'error' ? (
-                <div className="space-y-2">
-                  <div className="flex justify-center gap-2 text-4xl">
-                    <span>💪</span>
-                    <span>✨</span>
-                    <span>🌻</span>
-                  </div>
-                  <p className="text-white/90 text-2xl font-bold">ไม่เป็นไรนะ!</p>
-                  <p className="text-white/70 text-lg">ครั้งหน้าต้องดีขึ้นแน่!</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-white/90 text-2xl font-bold">กรุณาเลือกคำตอบก่อน</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Bottom Timer Bar */}
-<div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-[100%] z-20">
-    <div className="w-full h-6 bg-gray-800/70 rounded-full overflow-hidden border border-yellow-700 shadow-inner">
-  <div
-    className="h-full bg-gradient-to-r from-red-900 via-red-700 to-yellow-600 transition-all duration-1000"
-    style={{ width: `${(timeLeft / 30) * 100}%` }}
-  ></div>
-</div>
-
-    <div className="absolute inset-0 flex items-center justify-center">
-      <span className="text-white font-bold text-lg tracking-widest drop-shadow-lg">
-        ⏳ {timeLeft} วินาที
-      </span>
-    
-  </div>
-</div>
-
-      {/* CSS for sound wave animation */}
-      <style jsx>{`
-        @keyframes sound-wave {
-          0%, 100% {
-            transform: scaleY(0.5);
-          }
-          50% {
-            transform: scaleY(1.5);
-          }
-        }
-        
-        .animate-sound-wave {
-          animation: sound-wave 0.8s ease-in-out infinite;
-        }
-        
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes popIn {
-          from {
-            opacity: 0;
-            transform: scale(0.8) translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-          }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-        
-        .animate-popIn {
-          animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-      `}</style>
-    </div>
-  </div>
+    </>
   );
 }
