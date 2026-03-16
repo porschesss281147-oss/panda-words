@@ -443,7 +443,7 @@ if (showResult) {
               {/* Keyboard hint */}
               <div className={styles.keyboardHint}>
                 <p className={styles.keyboardHintText}>
-                  💡 พิมพ์คำศัพท์ภาษาจีน (ตัวเต็ม)
+                  💡 พิมพ์คำศัพท์ภาษาจีน (ตัวย่อ)
                 </p>
               </div>
             </div>
