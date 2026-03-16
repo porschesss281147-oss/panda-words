@@ -258,82 +258,105 @@ export default function SpellingGamePage() {
   }
 
   // หน้าสรุปผล
-  if (showResult) {
-    const totalQuestions = questions.length;
-    const finalScore = Math.round((score / totalQuestions) * 100);
-    const passed = finalScore >= 80;
+if (showResult) {
+  const totalQuestions = questions.length;
+  const finalScore = Math.round((score / totalQuestions) * 100);
+  const passed = finalScore >= 80;
+  
+  // ฟังก์ชันอ่านออกเสียง
+  const speak = (text) => {
+    if (!text || typeof window === 'undefined' || !window.speechSynthesis) return;
     
-    return (
-      <>
-        <TestSoundButton />
-        <div className={styles.container}>
-          <header className={styles.header}>
-            <button onClick={goToLevelSelect} className={styles.backButton}>
-              ← เลือกด่าน
-            </button>
-            <h1 className={styles.title}>ผลการเล่น</h1>
-            <div className={styles.userInfo}>
-              <span className={styles.userIcon}>{user?.icon}</span>
-              <span className={styles.userName}>{user?.name}</span>
+    playSound('click');
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'zh-CN';
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+  };
+  
+  return (
+    <>
+      <TestSoundButton />
+      <div className={styles.container}>
+        <header className={styles.header}>
+          <button onClick={goToLevelSelect} className={styles.backButton}>
+            ← เลือกด่าน
+          </button>
+          <h1 className={styles.title}>ผลการเล่น</h1>
+          <div className={styles.userInfo}>
+            <span className={styles.userIcon}>{user?.icon}</span>
+            <span className={styles.userName}>{user?.name}</span>
+          </div>
+        </header>
+
+        <main className={styles.main}>
+          <div className={styles.resultCard}>
+            <h2 className={styles.resultTitle}>ด่านที่ {selectedLevel}</h2>
+            
+            <div className={styles.scoreBoard}>
+              <div className={styles.scoreItem}>
+                <span className={styles.scoreLabel}>คะแนน</span>
+                <span className={`${styles.scoreValue} ${passed ? styles.scorePass : styles.scoreFail}`}>
+                  {finalScore}
+                </span>
+              </div>
+              <div className={styles.scoreItem}>
+                <span className={styles.scoreLabel}>ถูกต้อง</span>
+                <span className={styles.scoreValue}>{score}/{totalQuestions}</span>
+              </div>
             </div>
-          </header>
 
-          <main className={styles.main}>
-            <div className={styles.resultCard}>
-              <h2 className={styles.resultTitle}>ด่านที่ {selectedLevel}</h2>
-              
-              <div className={styles.scoreBoard}>
-                <div className={styles.scoreItem}>
-                  <span className={styles.scoreLabel}>คะแนน</span>
-                  <span className={`${styles.scoreValue} ${passed ? styles.scorePass : styles.scoreFail}`}>
-                    {finalScore}
-                  </span>
-                </div>
-                <div className={styles.scoreItem}>
-                  <span className={styles.scoreLabel}>ถูกต้อง</span>
-                  <span className={styles.scoreValue}>{score}/{totalQuestions}</span>
-                </div>
-              </div>
+            <div className={styles.passStatus}>
+              {passed ? (
+                <span className={styles.passBadge}>ผ่าน! 🎉</span>
+              ) : (
+                <span className={styles.failBadge}>ไม่ผ่าน (ต้องได้ 80% ขึ้นไป)</span>
+              )}
+            </div>
 
-              <div className={styles.passStatus}>
-                {passed ? (
-                  <span className={styles.passBadge}>ผ่าน! 🎉</span>
-                ) : (
-                  <span className={styles.failBadge}>ไม่ผ่าน (ต้องได้ 80% ขึ้นไป)</span>
-                )}
-              </div>
-
-              <div className={styles.wordsLearned}>
-                <h3 className={styles.wordsTitle}>📚 คำศัพท์ที่ได้เรียน</h3>
-                <div className={styles.wordsGrid}>
-                  {questions.map((word, index) => (
-                    <div key={index} className={styles.wordCard}>
+            <div className={styles.wordsLearned}>
+              <h3 className={styles.wordsTitle}>📚 คำศัพท์ที่ได้เรียน</h3>
+              <div className={styles.wordsGrid}>
+                {questions.map((word, index) => (
+                  <div key={index} className={styles.wordCard}>
+                    <div className={styles.wordHeader}>
                       <span className={styles.wordChinese}>{word.word}</span>
-                      <span className={styles.wordPinyin}>{word.pinyin}</span>
-                      <span className={styles.wordHint}>{word.meaning}</span>
+                      <button
+                        onClick={() => speak(word.word)}
+                        className={styles.speakButton}
+                        title="ฟังเสียงอ่าน"
+                      >
+                        🔊
+                      </button>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className={styles.resultButtons}>
-                <button onClick={playAgain} className={styles.playAgainButton}>
-                  เล่นอีกครั้ง
-                </button>
-                <button 
-                  onClick={() => selectedLevel < 10 ? startGame(selectedLevel + 1) : goToLevelSelect()} 
-                  className={styles.nextLevelButton}
-                  disabled={selectedLevel >= 10}
-                >
-                  {selectedLevel < 10 ? 'ด่านต่อไป' : 'ด่านสูงสุดแล้ว'}
-                </button>
+                    <span className={styles.wordPinyin}>{word.pinyin}</span>
+                    <span className={styles.wordHint}>{word.meaning}</span>
+                  </div>
+                ))}
               </div>
             </div>
-          </main>
-        </div>
-      </>
-    );
-  }
+
+            <div className={styles.resultButtons}>
+              <button onClick={playAgain} className={styles.playAgainButton}>
+                เล่นอีกครั้ง
+              </button>
+              <button 
+                onClick={() => selectedLevel < 10 ? startGame(selectedLevel + 1) : goToLevelSelect()} 
+                className={styles.nextLevelButton}
+                disabled={selectedLevel >= 10}
+              >
+                {selectedLevel < 10 ? 'ด่านต่อไป' : 'ด่านสูงสุดแล้ว'}
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    </>
+  );
+}
 
   // หน้าเล่นเกม
   return (
