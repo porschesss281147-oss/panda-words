@@ -79,7 +79,7 @@ export default function SentenceGamePage() {
     if (timerActive && !gameCompleted && !showResult && !feedback.show && questions.length > 0) {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
-          if (prev <= 5) {
+          if (prev <= 3) {
             playSound('tick');
           }
           if (prev <= 1) {
@@ -98,7 +98,7 @@ export default function SentenceGamePage() {
   const handleTimeOut = () => {
     if (!questions.length || currentQuestionIndex >= questions.length) return;
     
-    playSound('timeout');
+    playSound('error');
     setTimerActive(false);
     const currentQuestion = questions[currentQuestionIndex];
     
@@ -179,46 +179,36 @@ export default function SentenceGamePage() {
     }
   };
 
- const finishGame = () => {
-  setGameCompleted(true);
-  setTimerActive(false);
+  const finishGame = () => {
+    setGameCompleted(true);
+    setTimerActive(false);
+    
+    const totalQuestions = questions.length;
+    const finalScore = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+    const passed = finalScore >= 80;
+    
+    if (passed) {
+      playSound('achievement');
+    }
 
-  // คำนวณคะแนนจาก state โดยตรง
-  const totalQuestions = questions.length;
-  const correctAnswers = score; // ใช้ค่าปัจจุบัน
-  const finalScore = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+    addGameResult({
+      gameId: 'sentence',
+      level: selectedLevel,
+      score: finalScore,
+      correct: score,
+      total: totalQuestions,
+      passed,
+      details: answerHistory
+    });
 
-  const passed = finalScore >= 80;
+    if (passed && selectedLevel < 10) {
+      unlockLevel('sentence', selectedLevel + 1);
+    }
 
-  if (passed) {
-    playSound('achievement');
-  }
-
-  // แสดงใน console เพื่อ debug
-  console.log('=== Game Finished ===');
-  console.log('Total Questions:', totalQuestions);
-  console.log('Correct Answers:', correctAnswers);
-  console.log('Final Score:', finalScore);
-  console.log('Passed:', passed);
-
-  // บันทึกผล
-  addGameResult({
-    gameId: 'sentence',
-    level: selectedLevel,
-    score: finalScore,
-    words: totalQuestions,
-    correctAnswers: correctAnswers
-  });
-
-  if (passed && selectedLevel < 10) {
-    unlockLevel('sentence', selectedLevel + 1);
-  }
-
-  // ใช้ setTimeout เพื่อให้ state อัพเดทก่อนแสดงผล
-  setTimeout(() => {
-    setShowResult(true);
-  }, 2000);
-};
+    setTimeout(() => {
+      setShowResult(true);
+    }, 2000);
+  };
 
   const playAgain = () => {
     startNewGame();
@@ -569,7 +559,7 @@ export default function SentenceGamePage() {
       {/* Content */}
       <div className="relative z-10">
       {/* Header */}
-<header className="fixed top-0 left-0 w-full z-50 bg-White backdrop-blur-md shadow-md border-b border-yellow-500/40">
+<header className="fixed top-0 left-0 w-full z-50 bg-red-900/90 backdrop-blur-md shadow-md border-b border-yellow-500/40">
   <div className="w-full px-4 sm:px-6 lg:px-10 py-3">
     <div className="flex items-center justify-between">
 
