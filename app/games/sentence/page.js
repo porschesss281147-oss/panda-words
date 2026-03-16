@@ -180,33 +180,35 @@ export default function SentenceGamePage() {
   };
 
   const finishGame = () => {
-    setGameCompleted(true);
-    setTimerActive(false);
-    
-    const totalQuestions = questions.length;
-    const finalScore = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
-    const passed = finalScore >= 80;
-    
-    if (passed) {
-      playSound('achievement');
-    }
+  setGameCompleted(true);
+  setTimerActive(false);
 
-    addGameResult({
-      gameId: 'sentence',
-      level: selectedLevel,
-      score: finalScore,
-      words: questions.length,
-      correctAnswers: score + 1
-     });
+  const totalQuestions = questions.length;
+  const finalScore =
+    totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
 
-     if (selectedLevel < 10) {
-            unlockLevel('sentence', selectedLevel + 1);
-          }
+  const passed = finalScore >= 80;
 
-    setTimeout(() => {
-      setShowResult(true);
-    }, 2000);
-  };
+  if (passed) {
+    playSound('achievement');
+  }
+
+  addGameResult({
+    gameId: 'sentence',
+    level: selectedLevel,
+    score: finalScore,
+    words: questions.length,
+    correctAnswers: score
+  });
+
+  if (passed && selectedLevel < 10) {
+    unlockLevel('sentence', selectedLevel + 1);
+  }
+
+  setTimeout(() => {
+    setShowResult(true);
+  }, 2000);
+};
 
   const playAgain = () => {
     startNewGame();
