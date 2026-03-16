@@ -5,12 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { useLeaderboard } from '@/context/LeaderboardContext';
 import { useSound } from '@/hooks/useSound';
-import { games, allHsk } from '@/data/games';
-import { 
-  LogOut, Gamepad2, Trophy, Target, Volume2, Sparkles, Award, 
-  Users, X, HelpCircle, BookOpen, CheckCircle, Star, Zap, Crown, 
-  Clock, Layout, Pencil, Repeat, Headphones, GripHorizontal 
-} from 'lucide-react';
+import { games, allHsk, hsk1, hsk2, hsk3 } from '@/data/games';
+import { LogOut, Gamepad2, Trophy, Target, Volume2, Sparkles, Award, Users, X, HelpCircle, BookOpen, CheckCircle, Star, Zap, Crown, Clock, Layout, VolumeX, Volume1, Volume, Pencil, ArrowRight, Repeat, Speaker, Headphones, GripHorizontal } from 'lucide-react';
 
 export default function HomePage() {
   const router = useRouter();
@@ -18,13 +14,13 @@ export default function HomePage() {
   const { leaderboard, loading: leaderboardLoading, getUserRank } = useLeaderboard();
   const { playSound } = useSound();
   
-  // State
   const [isPlaying, setIsPlaying] = useState(false);
   const [wordOfDay, setWordOfDay] = useState(null);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [activeTab, setActiveTab] = useState('game1');
-  const [latestScores, setLatestScores] = useState({});
+  
+  // ✅ State สำหรับเก็บสถิติจริงจาก Firebase
   const [realStats, setRealStats] = useState({
     gamesPlayed: 0,
     totalScore: 0,
@@ -116,47 +112,33 @@ export default function HomePage() {
         'ใช้คำศัพท์ระดับ HSK 1-3 จำนวน 600 คำ',
         'มีทั้งหมด 10 ด่าน ด่านละ 10 ข้อ',
         'แต่ละข้อไม่มีจำกัดเวลา',
-        'ตอบผิดสามารถตอบใหม่ได้',
+        'ตอบผิดสามารถตอบใหม่ได้เพื่อให้ทบทวนและจำคำศัพท์ได้ดียิ่งขึ้น',
         'คะแนนข้อละ 10 คะแนน (เต็ม 100 คะแนนต่อด่าน)',
         'ต้องได้ 80 คะแนนขึ้นไปถึงจะปลดล็อกด่านถัดไป'
       ],
       howToPlay: [
         'กด "ดูคำใบ้" เพื่อดูความหมายภาษาไทย',
-        'ดูจำนวนตัวอักษร',
-        'พิมพ์คำศัพท์ภาษาจีนให้ถูกต้อง',
+        '"ดูคำใบ้" จำนวนตัวอักษร',
+        'พิมพ์คำศัพท์ภาษาจีนตัวเต็มให้ถูกต้อง',
         'กดตรวจสอบ ถ้าผิดจะแสดงคำตอบที่ถูกต้อง'
       ],
       tips: 'ฝึกเขียนตัวอักษรจีนให้ถูกต้องตามลำดับขีด'
     }
   ];
 
-  // 📊 คำนวณคะแนนล่าสุดจาก gameResults
-  useEffect(() => {
-    if (user?.gameResults) {
-      const sorted = [...user.gameResults].sort((a, b) => 
-        new Date(b.date) - new Date(a.date)
-      );
-
-      const scores = {};
-      sorted.forEach(result => {
-        if (!scores[result.gameId]) {
-          scores[result.gameId] = result.score;
-        }
-      });
-
-      console.log('🎯 Latest scores:', scores);
-      setLatestScores(scores);
-    }
-  }, [user]);
-
-  // 📊 โหลดสถิติจาก Firebase
+  // ✅ โหลดสถิติจริงจาก Firebase
   useEffect(() => {
     const loadRealStats = async () => {
       if (user) {
         setLoadingStats(true);
         try {
-          const gameStats = await getGameStats();
+          console.log('📊 Loading real stats from Firebase...');
           
+          // ดึงสถิติแยกตามเกม
+          const gameStats = await getGameStats();
+          console.log('✅ Game stats loaded:', gameStats);
+          
+          // คำนวณสถิติรวม
           let totalScore = 0;
           let gamesPlayed = 0;
           let totalCorrect = 0;
@@ -165,6 +147,7 @@ export default function HomePage() {
           Object.values(gameStats).forEach(stat => {
             totalScore += stat.totalScore || 0;
             gamesPlayed += stat.played || 0;
+            // คำนวณ accuracy (ถ้ามีข้อมูล)
             if (stat.averageScore) {
               totalCorrect += (stat.averageScore * stat.played) / 10;
               totalQuestions += stat.played * 10;
@@ -183,6 +166,12 @@ export default function HomePage() {
             gameStats
           });
           
+          console.log('✅ Real stats calculated:', {
+            gamesPlayed,
+            totalScore,
+            averageAccuracy
+          });
+          
         } catch (error) {
           console.error('❌ Error loading stats:', error);
         } finally {
@@ -194,20 +183,21 @@ export default function HomePage() {
     loadRealStats();
   }, [user, getGameStats]);
 
-  // 🔐 ตรวจสอบการล็อกอิน
+  // ถ้าไม่มี user ให้กลับไปหน้า login
   useEffect(() => {
     if (!user) {
       router.push('/');
     }
   }, [user, router]);
 
-  // 🎲 สุ่มคำศัพท์
+  // สุ่มคำศัพท์เมื่อโหลดหน้า
   useEffect(() => {
     if (user) {
       generateNewWord();
     }
   }, [user]);
 
+  // ฟังก์ชันสุ่มคำศัพท์ใหม่
   const generateNewWord = () => {
     playSound('click');
     
@@ -217,11 +207,13 @@ export default function HomePage() {
       setWordOfDay({
         chinese: word.chinese,
         thai: word.thai,
-        pinyin: word.pinyin
+        pinyin: word.pinyin,
+        type: 'hsk'
       });
     }
   };
 
+  // ฟังก์ชันอ่านออกเสียง
   const speak = (text) => {
     playSound('click');
     
@@ -240,11 +232,15 @@ export default function HomePage() {
 
     utterance.onstart = () => setIsPlaying(true);
     utterance.onend = () => setIsPlaying(false);
-    utterance.onerror = () => setIsPlaying(false);
+    utterance.onerror = () => {
+      setIsPlaying(false);
+      alert('ไม่สามารถอ่านเสียงได้');
+    };
 
     window.speechSynthesis.speak(utterance);
   };
 
+  // ✅ ฟังก์ชันรีเฟรชสถิติ (เรียกใช้หลังจากเล่นเกม)
   const refreshStats = async () => {
     if (user) {
       setLoadingStats(true);
@@ -259,13 +255,15 @@ export default function HomePage() {
           gamesPlayed += stat.played || 0;
         });
         
-        setRealStats(prev => ({
-          ...prev,
+        setRealStats({
           gamesPlayed,
           totalScore,
+          perfectGames: user?.stats?.perfectGames || 0,
+          averageAccuracy: realStats.averageAccuracy,
           gameStats
-        }));
+        });
         
+        console.log('✅ Stats refreshed');
       } catch (error) {
         console.error('❌ Error refreshing stats:', error);
       } finally {
@@ -274,6 +272,7 @@ export default function HomePage() {
     }
   };
 
+  // คำนวณสถิติ (fallback)
   const calculateStats = () => {
     if (!user) return { 
       gamesPlayed: 0, 
@@ -283,19 +282,18 @@ export default function HomePage() {
     };
 
     const unlockedLevels = Object.values(user.unlockedLevels || {}).reduce((a, b) => a + b, 0);
-    const challengesCompleted = user.challengesCompleted || 0;
+  const challengesCompleted = user.challengesCompleted || 0;
 
     return { 
       gamesPlayed: user.gamesPlayed || realStats.gamesPlayed || 0, 
-      totalScore: user.totalScore || realStats.totalScore || 0, 
-      unlockedLevels, 
-      challengesCompleted 
+    totalScore: user.totalScore || realStats.totalScore || 0, 
+    unlockedLevels, 
+    challengesCompleted 
     };
   };
 
   const stats = calculateStats();
   const userRank = getUserRank(user?.id);
-  const totalLatestScore = Object.values(latestScores).reduce((a, b) => a + b, 0);
 
   if (!user) {
     return null;
@@ -346,9 +344,11 @@ export default function HomePage() {
         {/* Main Content */}
         <main className="max-w-6xl mx-auto px-4 py-8">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            {/* เล่นไปแล้ว */}
-            <div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div 
+              onClick={() => playSound('click')}
+              className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4 transform hover:scale-105 transition-all cursor-pointer hover:shadow-lg"
+            >
               <div className="bg-blue-100 p-3 rounded-full">
                 <Gamepad2 className="text-blue-600" size={24} />
               </div>
@@ -361,8 +361,10 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ปลดล็อกแล้ว */}
-            <div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4">
+            <div 
+              onClick={() => playSound('click')}
+              className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4 transform hover:scale-105 transition-all cursor-pointer hover:shadow-lg"
+            >
               <div className="bg-green-100 p-3 rounded-full">
                 <Target className="text-green-600" size={24} />
               </div>
@@ -373,41 +375,29 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* คะแนนเฉลี่ย */}
-            <div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4">
+            <div 
+              onClick={() => playSound('click')}
+              className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4 transform hover:scale-105 transition-all cursor-pointer hover:shadow-lg"
+            >
               <div className="bg-purple-100 p-3 rounded-full">
-                <Award className="text-purple-600" size={24} />
+                <Trophy className="text-purple-600" size={24} />
               </div>
               <div>
-                <p className="text-sm text-gray-500">คะแนนเฉลี่ย</p>
+                <p className="text-sm text-gray-500">คะแนนรวม</p>
                 <p className="text-2xl font-bold text-gray-800">
-                  {loadingStats ? '...' : stats.totalScore}
+                  {loadingStats ? '...' : stats.totalScore.toLocaleString()}
                 </p>
                 <p className="text-xs text-gray-400">คะแนน</p>
               </div>
             </div>
 
-            {/* คะแนนล่าสุด */}
-            <div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4">
-              <div className="bg-pink-100 p-3 rounded-full">
-                <Zap className="text-pink-600" size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">คะแนนล่าสุด</p>
-                <p className="text-2xl font-bold text-gray-800">
-                  {loadingStats ? '...' : totalLatestScore}
-                </p>
-                <p className="text-xs text-gray-400">คะแนน</p>
-              </div>
-            </div>
-
-            {/* วิธีการเล่น */}
+            {/* ปุ่มวิธีการเล่น */}
             <div 
               onClick={() => {
                 playSound('click');
                 setShowHowToPlay(true);
               }}
-              className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-md p-4 flex items-center space-x-4 transform hover:scale-105 transition-all cursor-pointer"
+              className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-md p-4 flex items-center space-x-4 transform hover:scale-105 transition-all cursor-pointer hover:shadow-lg"
             >
               <div className="bg-white/20 p-3 rounded-full">
                 <HelpCircle className="text-white" size={24} />
@@ -460,10 +450,11 @@ export default function HomePage() {
                         ด่านที่ {user.unlockedLevels?.[game.id] || 1} / 10
                       </span>
                     </div>
-                    {realStats.gameStats[game.id]?.played > 0 && (
+                    {/* แสดงสถิติเฉพาะเกม (ถ้ามี) */}
+                    {realStats.gameStats[game.id] && realStats.gameStats[game.id].played > 0 && (
                       <div className="mt-2 text-xs text-white/80">
                         เล่นแล้ว {realStats.gameStats[game.id].played} ครั้ง • 
-                        ล่าสุด {latestScores[game.id] || 0} คะแนน
+                        เฉลี่ย {realStats.gameStats[game.id].averageScore} คะแนน
                       </div>
                     )}
                   </div>
@@ -542,7 +533,7 @@ export default function HomePage() {
                   {userRank > 5 && (
                     <>
                       <div className="text-center text-gray-400">...</div>
-                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-300">
+                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-300 hover:shadow-md transition-all">
                         <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
                           {userRank}
                         </div>
@@ -632,7 +623,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* ปุ่มรีเฟรช (Dev only) */}
+          {/* ปุ่มรีเฟรชสถิติ (ซ่อนไว้สำหรับดีบัก) */}
           {process.env.NODE_ENV === 'development' && (
             <button
               onClick={refreshStats}
@@ -723,6 +714,7 @@ export default function HomePage() {
 
                     {/* Rules & How to Play */}
                     <div className="grid md:grid-cols-2 gap-6">
+                      {/* กติกา */}
                       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
                         <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                           <Target className="text-blue-500" size={20} />
@@ -738,6 +730,7 @@ export default function HomePage() {
                         </ul>
                       </div>
 
+                      {/* วิธีการเล่น */}
                       <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6">
                         <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                           <Gamepad2 className="text-purple-500" size={20} />
@@ -786,6 +779,80 @@ export default function HomePage() {
                           <span className="font-medium">เคล็ดลับ: </span>
                           {game.tips}
                         </p>
+                      </div>
+                    </div>
+
+                    {/* ตัวอย่างไอคอน */}
+                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6">
+                      <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <Zap className="text-yellow-500" size={20} />
+                        ฟีเจอร์พิเศษ
+                      </h4>
+                      <div className="flex flex-wrap gap-4 justify-center">
+                        {game.id === 'game1' && (
+                          <>
+                            <div className="flex flex-col items-center">
+                              <div className="bg-blue-100 p-3 rounded-full">
+                                <Clock className="text-blue-600" size={24} />
+                              </div>
+                              <p className="text-xs mt-1">เวลา 30 วิ</p>
+                            </div>
+                            <div className="flex flex-col items-center">
+                              <div className="bg-green-100 p-3 rounded-full">
+                                <Layout className="text-green-600" size={24} />
+                              </div>
+                              <p className="text-xs mt-1">ตัวเลือก 4 ข้อ</p>
+                            </div>
+                          </>
+                        )}
+                        {game.id === 'game2' && (
+                          <>
+                            <div className="flex flex-col items-center">
+                              <div className="bg-blue-100 p-3 rounded-full">
+                                <GripHorizontal className="text-blue-600" size={24} />
+                              </div>
+                              <p className="text-xs mt-1">ลากวาง</p>
+                            </div>
+                            <div className="flex flex-col items-center">
+                              <div className="bg-green-100 p-3 rounded-full">
+                                <Clock className="text-green-600" size={24} />
+                              </div>
+                              <p className="text-xs mt-1">เวลา 40 วิ</p>
+                            </div>
+                          </>
+                        )}
+                        {game.id === 'game3' && (
+                          <>
+                            <div className="flex flex-col items-center">
+                              <div className="bg-blue-100 p-3 rounded-full">
+                                <Headphones className="text-blue-600" size={24} />
+                              </div>
+                              <p className="text-xs mt-1">ฟังเสียง</p>
+                            </div>
+                            <div className="flex flex-col items-center">
+                              <div className="bg-green-100 p-3 rounded-full">
+                                <Repeat className="text-green-600" size={24} />
+                              </div>
+                              <p className="text-xs mt-1">ฟังซ้ำได้</p>
+                            </div>
+                          </>
+                        )}
+                        {game.id === 'game4' && (
+                          <>
+                            <div className="flex flex-col items-center">
+                              <div className="bg-blue-100 p-3 rounded-full">
+                                <Pencil className="text-blue-600" size={24} />
+                              </div>
+                              <p className="text-xs mt-1">พิมพ์ตอบ</p>
+                            </div>
+                            <div className="flex flex-col items-center">
+                              <div className="bg-green-100 p-3 rounded-full">
+                                <HelpCircle className="text-green-600" size={24} />
+                              </div>
+                              <p className="text-xs mt-1">ดูคำใบ้ได้</p>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
