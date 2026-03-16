@@ -184,8 +184,9 @@ export default function SentenceGamePage() {
   setTimerActive(false);
 
   const totalQuestions = questions.length;
+  const correctAnswers = score;
   const finalScore =
-    totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+  totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
 
   const passed = finalScore >= 80;
 
@@ -194,12 +195,12 @@ export default function SentenceGamePage() {
   }
 
   addGameResult({
-    gameId: 'sentence',
-    level: selectedLevel,
-    score: finalScore,
-    words: questions.length,
-    correctAnswers: score
-  });
+  gameId: 'sentence',
+  level: selectedLevel,
+  score: finalScore,
+  words: totalQuestions,
+  correctAnswers: correctAnswers
+});
 
   if (passed && selectedLevel < 10) {
     unlockLevel('sentence', selectedLevel + 1);
