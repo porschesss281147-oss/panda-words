@@ -14,31 +14,40 @@
 }
 
 .backButton {
-  background: none;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
   border: none;
-  font-size: 1.2rem;
-  color: #666;
+  font-size: 1.3rem;
+  color: white;
   cursor: pointer;
-  padding: 0.5rem 1rem;
-  border-radius: 2rem;
+  padding: 0.8rem 2rem;
+  border-radius: 3rem;
   transition: all 0.3s;
+  font-weight: 600;
+  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
 }
 
 .backButton:hover {
-  background: #f0f0f0;
-  color: #333;
+  background: linear-gradient(135deg, #ff5252, #ff6b6b);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
 }
 
 .title {
-  font-size: 1.8rem;
+  font-size: 2.2rem;
   color: #333;
   margin: 0;
+  font-weight: 800;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
 
 .userInfo {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  padding: 0.5rem 1.5rem;
+  border-radius: 3rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .userIcon {
@@ -47,26 +56,32 @@
 
 .userName {
   font-size: 1.2rem;
-  color: #666;
+  color: #2c3e50;
+  font-weight: 600;
 }
 
 .gameStats {
   display: flex;
-  gap: 1rem;
-  font-size: 1.2rem;
+  gap: 1.5rem;
+  font-size: 1.5rem;
   font-weight: bold;
+  background: linear-gradient(135deg, #4ecdc4, #2c3e50);
+  padding: 0.8rem 2rem;
+  border-radius: 3rem;
+  color: white;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
 .score {
-  color: #ff6b6b;
+  color: #ffd700;
 }
 
 .progress {
-  color: #4ecdc4;
+  color: white;
 }
 
 .main {
-  max-width: 600px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 2rem;
 }
@@ -81,32 +96,43 @@
   font-size: 5rem;
   display: block;
   margin-bottom: 1rem;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
 }
 
 .gameDescription {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   color: white;
   opacity: 0.9;
+  background: rgba(0,0,0,0.2);
+  padding: 1rem 2rem;
+  border-radius: 3rem;
+  display: inline-block;
 }
 
 .levelTitle {
   text-align: center;
-  font-size: 2rem;
+  font-size: 2.5rem;
   color: white;
   margin-bottom: 2rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
 
 .levelGrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 1rem;
+  gap: 1.2rem;
   margin-bottom: 2rem;
 }
 
 .levelCard {
   aspect-ratio: 1;
   background: white;
-  border-radius: 1rem;
+  border-radius: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -114,34 +140,59 @@
   border: none;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.levelCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4ecdc4, #ff6b6b);
+  transform: translateX(-100%);
+  transition: transform 0.3s;
+}
+
+.levelCard:hover::before {
+  transform: translateX(0);
 }
 
 .levelCard:hover:not(:disabled) {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 20px 30px rgba(0,0,0,0.3);
 }
 
 .levelNumber {
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: bold;
   color: #4ecdc4;
+  line-height: 1;
 }
 
 .levelWords {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #666;
+  background: #f0f0f0;
+  padding: 0.3rem 0.8rem;
+  border-radius: 2rem;
+  margin-top: 0.5rem;
 }
 
 .levelCurrent {
   border: 4px solid #ffd700;
   transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
 }
 
 .levelLocked {
   opacity: 0.5;
   cursor: not-allowed;
   background: #ccc;
+  filter: grayscale(1);
 }
 
 .levelLocked .levelNumber {
@@ -150,13 +201,17 @@
 
 .progressInfo {
   text-align: center;
+  background: rgba(255,255,255,0.2);
+  padding: 1.5rem;
+  border-radius: 2rem;
+  backdrop-filter: blur(10px);
 }
 
 .progressBar {
   width: 100%;
-  height: 1rem;
+  height: 1.2rem;
   background: rgba(255,255,255,0.3);
-  border-radius: 1rem;
+  border-radius: 2rem;
   overflow: hidden;
   margin-bottom: 0.5rem;
 }
@@ -164,20 +219,35 @@
 .progressFill {
   height: 100%;
   background: linear-gradient(90deg, #ffd700, #ffaa00);
-  transition: width 0.3s;
+  transition: width 0.5s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progressFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 .progressText {
   color: white;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
 }
 
 /* Game Area */
-/* app/games/spelling/page.module.css */
-
-/* คงส่วนอื่นๆไว้เหมือนเดิม แต่เพิ่ม/แก้ไขเฉพาะส่วนหน้าเล่นเกม */
-
-/* Game Area - ทำให้ใหญ่ขึ้น */
 .gameArea {
   background: white;
   border-radius: 3rem;
@@ -185,9 +255,21 @@
   box-shadow: 0 20px 40px rgba(0,0,0,0.15);
   transform: scale(1.05);
   margin: 1rem 0;
+  animation: slideUp 0.5s ease;
 }
 
-/* Hint Box - ใหญ่ขึ้น */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(1);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1.05);
+  }
+}
+
+/* Hint Box */
 .hintBox {
   background: linear-gradient(135deg, #f6d5f7 0%, #fbe9d7 100%);
   border-radius: 2rem;
@@ -195,6 +277,18 @@
   margin-bottom: 2.5rem;
   text-align: center;
   border: 3px solid rgba(78, 205, 196, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.hintBox::before {
+  content: '💡';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  font-size: 4rem;
+  opacity: 0.2;
+  transform: rotate(-15deg);
 }
 
 .hintLabel {
@@ -215,6 +309,26 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.showHintButton::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(78, 205, 196, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.showHintButton:hover::after {
+  width: 300px;
+  height: 300px;
 }
 
 .showHintButton:hover {
@@ -225,57 +339,81 @@
 }
 
 .hintText {
-  font-size: 2rem;
+  font-size: 2.5rem;
   color: #333;
   font-weight: bold;
   line-height: 1.5;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  animation: fadeIn 0.5s ease;
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* Spelling Area */
 .spellingArea {
   text-align: center;
-  margin: 1.5rem 0;
+  margin: 2rem 0;
   background: #f8f9fa;
-  padding: 1.2rem 1rem;
-  border-radius: 16px;
+  padding: 1.5rem;
+  border-radius: 2rem;
+  border: 2px dashed #4ecdc4;
 }
 
-/* ช่องตัวอักษร */
 .wordLength {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: 0.6rem;
-  margin-bottom: 0.6rem;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
   flex-wrap: wrap;
 }
 
-/* ขีดคำ */
 .wordDash {
-  font-size: 1.9rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: #4ecdc4;
-  min-width: 32px;
+  min-width: 40px;
   text-align: center;
-  padding-bottom: 4px;
-  border-bottom: 3px solid #4ecdc4;
+  padding-bottom: 8px;
+  border-bottom: 4px solid #4ecdc4;
   line-height: 1.4;
+  transition: all 0.3s ease;
+  animation: dashAppear 0.3s ease;
 }
 
-/* ข้อความจำนวนตัวอักษร */
+@keyframes dashAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.wordDash:hover {
+  transform: translateY(-5px);
+  border-bottom-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
 .wordLengthText {
-  margin-top: 0.2rem;
+  margin-top: 0.5rem;
   color: #6c757d;
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 500;
   background: white;
   display: inline-block;
-  padding: 0.3rem 0.9rem;
+  padding: 0.5rem 1.2rem;
   border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-/* Input Form - ใหญ่ขึ้น */
+/* Input Form */
 .inputForm {
   display: flex;
   gap: 1.5rem;
@@ -299,7 +437,7 @@
 
 .input:focus {
   border-color: #ff6b6b;
-  box-shadow: 0 0 0 5px rgba(255, 107, 107, 0.2);
+  box-shadow: 0 0 0 8px rgba(255, 107, 107, 0.2);
   transform: scale(1.02);
   background: white;
 }
@@ -322,6 +460,26 @@
   white-space: nowrap;
   box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
   border: 2px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.submitButton::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.submitButton:hover::after {
+  width: 500px;
+  height: 500px;
 }
 
 .submitButton:hover:not(:disabled) {
@@ -338,7 +496,7 @@
   cursor: not-allowed;
 }
 
-/* Feedback - ใหญ่ขึ้น */
+/* Feedback */
 .feedback {
   text-align: center;
   padding: 1.8rem;
@@ -348,6 +506,19 @@
   margin: 2rem 0;
   animation: popIn 0.4s ease;
   border: 3px solid;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .success {
@@ -357,11 +528,29 @@
   box-shadow: 0 10px 20px rgba(21, 87, 36, 0.2);
 }
 
+.success::before {
+  content: '🎉';
+  position: absolute;
+  left: 20px;
+  font-size: 2rem;
+  opacity: 0.5;
+  animation: bounce 1s infinite;
+}
+
 .error {
   background: #f8d7da;
   color: #721c24;
   border-color: #f5c6cb;
   box-shadow: 0 10px 20px rgba(114, 28, 36, 0.2);
+}
+
+.error::before {
+  content: '💪';
+  position: absolute;
+  left: 20px;
+  font-size: 2rem;
+  opacity: 0.5;
+  animation: bounce 1s infinite;
 }
 
 .correctAnswer {
@@ -371,9 +560,21 @@
   border-top: 3px dashed #ff6b6b;
   color: #333;
   font-weight: 600;
+  animation: slideDown 0.3s ease;
 }
 
-/* Keyboard Hint - ใหญ่ขึ้น */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Keyboard Hint */
 .keyboardHint {
   text-align: center;
   background: linear-gradient(135deg, #f1f3f5 0%, #e9ecef 100%);
@@ -381,6 +582,12 @@
   border-radius: 3rem;
   margin-top: 1rem;
   border: 2px solid #dee2e6;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
 }
 
 .keyboardHintText {
@@ -394,84 +601,325 @@
   gap: 0.5rem;
 }
 
-/* Header ในหน้าเกม - ปรับให้ใหญ่ขึ้น */
-.gameStats {
-  display: flex;
-  gap: 1.5rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-  background: linear-gradient(135deg, #4ecdc4, #2c3e50);
-  padding: 0.8rem 2rem;
-  border-radius: 3rem;
-  color: white;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+/* Result Page */
+.resultCard {
+  background: white;
+  border-radius: 2.5rem;
+  padding: 2.5rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  animation: slideUp 0.5s ease;
 }
 
-.score {
-  color: #ffd700;
-}
-
-.progress {
-  color: white;
-}
-
-/* Header Title */
-.title {
+.resultTitle {
+  text-align: center;
   font-size: 2.2rem;
   color: #333;
-  margin: 0;
+  margin-bottom: 2rem;
   font-weight: 800;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  background: linear-gradient(135deg, #4ecdc4, #ff6b6b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.backButton {
-  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
-  border: none;
-  font-size: 1.3rem;
+.scoreBoard {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  margin-bottom: 2.5rem;
+}
+
+.scoreItem {
+  text-align: center;
+  background: #f8f9fa;
+  padding: 1.5rem 2.5rem;
+  border-radius: 2rem;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s;
+}
+
+.scoreItem:hover {
+  transform: translateY(-5px);
+}
+
+.scoreLabel {
+  display: block;
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.scoreValue {
+  font-size: 3.5rem;
+  font-weight: bold;
+  color: #4ecdc4;
+  line-height: 1;
+}
+
+.scorePass {
+  color: #4ecdc4;
+}
+
+.scoreFail {
+  color: #ff6b6b;
+}
+
+.passStatus {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.passBadge {
+  display: inline-block;
+  background: linear-gradient(135deg, #4ecdc4, #2c3e50);
   color: white;
-  cursor: pointer;
-  padding: 0.8rem 2rem;
+  padding: 1rem 3rem;
   border-radius: 3rem;
+  font-size: 1.8rem;
+  font-weight: bold;
+  animation: bounce 1s infinite;
+  box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
+}
+
+.failBadge {
+  display: inline-block;
+  background: linear-gradient(135deg, #ff6b6b, #c92a2a);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 3rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+}
+
+.wordsLearned {
+  margin-bottom: 2.5rem;
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 2rem;
+}
+
+.wordsTitle {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wordsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.2rem;
+}
+
+.wordCard {
+  background: white;
+  padding: 1.2rem;
+  border-radius: 1.2rem;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+  border: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.wordCard:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 20px rgba(78, 205, 196, 0.2);
+  border-color: #4ecdc4;
+}
+
+.wordHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.wordChinese {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  flex: 1;
+  text-align: left;
+}
+
+.speakButton {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  transition: all 0.2s;
+  line-height: 1;
+  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.speakButton:hover {
+  transform: scale(1.1) rotate(5deg);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+}
+
+.speakButton:active {
+  transform: scale(0.95);
+}
+
+.speakButton.speaking {
+  animation: soundWave 1s infinite;
+}
+
+@keyframes soundWave {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.wordPinyin {
+  font-size: 1rem;
+  color: #666;
+  font-style: italic;
+  margin: 2px 0;
+}
+
+.wordHint {
+  font-size: 1.1rem;
+  color: #4ecdc4;
+  font-weight: 500;
+  background: #f0f9ff;
+  padding: 4px 8px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.resultButtons {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.playAgainButton, .nextLevelButton {
+  padding: 1.2rem 2.5rem;
+  font-size: 1.3rem;
+  border: none;
+  border-radius: 3rem;
+  cursor: pointer;
   transition: all 0.3s;
   font-weight: 600;
-  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+  flex: 1;
+  max-width: 250px;
 }
 
-.backButton:hover {
-  background: linear-gradient(135deg, #ff5252, #ff6b6b);
+.playAgainButton {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  color: #333;
+  border: 2px solid #dee2e6;
+}
+
+.playAgainButton:hover {
+  background: linear-gradient(135deg, #e9ecef, #dee2e6);
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
-/* Main Container ปรับให้กว้างขึ้น */
-.main {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem;
+.nextLevelButton {
+  background: linear-gradient(135deg, #4ecdc4 0%, #2c3e50 100%);
+  color: white;
+  border: 2px solid rgba(255,255,255,0.3);
 }
 
-/* Animation */
-@keyframes popIn {
-  0% {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+.nextLevelButton:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(78, 205, 196, 0.4);
+}
+
+.nextLevelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Test Sound Button */
+.testSoundButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 3rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s;
+  animation: float 3s infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.testSoundButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+}
+
+/* Loading Animation */
+.hintBox.loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .header {
+    padding: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .title {
+    font-size: 1.8rem;
+    order: -1;
+    width: 100%;
+    text-align: center;
+  }
+
+  .gameStats {
+    font-size: 1.2rem;
+    padding: 0.6rem 1.2rem;
+  }
+
   .gameArea {
     transform: scale(1);
     padding: 2rem;
   }
   
+  .levelGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
   .wordDash {
-    font-size: 3.5rem;
-    min-width: 50px;
+    font-size: 2rem;
+    min-width: 35px;
   }
   
   .input {
@@ -480,13 +928,17 @@
     min-width: 250px;
   }
   
+  .input::placeholder {
+    font-size: 1.2rem;
+  }
+  
   .submitButton {
     font-size: 1.5rem;
     padding: 1.2rem 2.5rem;
   }
   
   .hintText {
-    font-size: 1.6rem;
+    font-size: 2rem;
   }
   
   .showHintButton {
@@ -503,18 +955,38 @@
     font-size: 1.3rem;
   }
   
-  .title {
-    font-size: 1.8rem;
+  .scoreBoard {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
   }
   
-  .gameStats {
-    font-size: 1.2rem;
-    padding: 0.6rem 1.2rem;
+  .scoreItem {
+    width: 100%;
+    max-width: 300px;
   }
   
-  .backButton {
-    font-size: 1.1rem;
-    padding: 0.6rem 1.5rem;
+  .resultButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .playAgainButton, .nextLevelButton {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .wordsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wordChinese {
+    font-size: 1.3rem;
+  }
+
+  .speakButton {
+    padding: 6px 10px;
+    font-size: 1rem;
   }
 }
 
@@ -523,9 +995,14 @@
     padding: 1.5rem;
   }
   
+  .levelGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
   .wordDash {
-    font-size: 2.5rem;
-    min-width: 40px;
+    font-size: 1.5rem;
+    min-width: 25px;
+    border-bottom-width: 2px;
   }
   
   .input {
@@ -544,7 +1021,7 @@
   }
   
   .hintText {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
   }
   
   .showHintButton {
@@ -559,276 +1036,113 @@
   .keyboardHintText {
     font-size: 1.1rem;
   }
-}
 
-/* Hover Effects */
-.wordDash {
-  transition: all 0.3s ease;
-}
-
-.wordDash:hover {
-  transform: translateY(-5px);
-  border-bottom-color: #ff6b6b;
-}
-
-.input:hover {
-  border-color: #ff6b6b;
-}
-
-/* Loading Animation สำหรับ hint */
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
+  .title {
+    font-size: 1.5rem;
   }
-  100% {
-    background-position: 1000px 0;
+
+  .userInfo {
+    padding: 0.3rem 1rem;
   }
-}
 
-.hintBox.loading {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite;
-}
-
-/* Result Page */
-.resultCard {
-  background: white;
-  border-radius: 2rem;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-
-.resultTitle {
-  text-align: center;
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 2rem;
-}
-
-.scoreBoard {
-  display: flex;
-  justify-content: center;
-  gap: 3rem;
-  margin-bottom: 3rem;
-}
-
-.scoreItem {
-  text-align: center;
-}
-
-.scoreLabel {
-  display: block;
-  font-size: 1.1rem;
-  color: #666;
-  margin-bottom: 0.5rem;
-}
-
-.scoreValue {
-  font-size: 3rem;
-  font-weight: bold;
-  color: #4ecdc4;
-}
-
-.wordsLearned {
-  margin-bottom: 2rem;
-}
-
-.wordsTitle {
-  font-size: 1.5rem;
-  color: #333;
-  margin-bottom: 1rem;
-}
-
-.wordsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
-}
-
-.wordCard {
-  background: #f5f5f5;
-  padding: 1rem;
-  border-radius: 1rem;
-  text-align: center;
-}
-
-.wordChinese {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.wordHint {
-  display: block;
-  font-size: 0.9rem;
-  color: #4ecdc4;
-}
-
-.resultButtons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.playAgainButton, .nextLevelButton {
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
-  border: none;
-  border-radius: 2rem;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.playAgainButton {
-  background: #f0f0f0;
-  color: #333;
-}
-
-.playAgainButton:hover {
-  background: #e0e0e0;
-}
-
-.nextLevelButton {
-  background: linear-gradient(135deg, #4ecdc4 0%, #2c3e50 100%);
-  color: white;
-}
-
-.nextLevelButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
-}
-
-.nextLevelButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-@keyframes popIn {
-  0% {
-    transform: scale(0.8);
-    opacity: 0;
+  .userIcon {
+    font-size: 1.5rem;
   }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
 
-/* Responsive */
-@media (max-width: 768px) {
-  .levelGrid {
-    grid-template-columns: repeat(3, 1fr);
+  .userName {
+    font-size: 1rem;
   }
-  
-  .wordDash {
+
+  .gameIcon {
+    font-size: 4rem;
+  }
+
+  .gameDescription {
+    font-size: 1.1rem;
+  }
+
+  .levelTitle {
     font-size: 2rem;
   }
-  
-  .inputForm {
-    flex-direction: column;
+
+  .wordsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .wordHeader {
+    flex-wrap: wrap;
+  }
+
+  .wordChinese {
+    font-size: 1.2rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .container {
+    background: white;
   }
   
-  .submitButton {
-    padding: 1rem;
+  .header, .backButton, .userInfo, .gameStats, .submitButton, .showHintButton, .speakButton, .testSoundButton {
+    display: none;
   }
   
-  .scoreBoard {
-    flex-direction: column;
-    gap: 1rem;
+  .gameArea {
+    transform: none;
+    box-shadow: none;
+    border: 1px solid #ccc;
   }
   
-  .resultButtons {
-    flex-direction: column;
+  .resultCard {
+    box-shadow: none;
+    border: 1px solid #ccc;
   }
 }
 
-/* เพิ่มส่วนนี้ในไฟล์ CSS */
-
-.levelWords {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.feedback {
-  text-align: center;
-  padding: 1rem;
-  border-radius: 3rem;
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin: 1rem 0;
-  animation: popIn 0.3s ease;
-}
-
-.success {
-  background: #d4edda;
-  color: #155724;
-  border: 2px solid #c3e6cb;
-}
-
-.error {
-  background: #f8d7da;
-  color: #721c24;
-  border: 2px solid #f5c6cb;
-}
-
-.correctAnswer {
-  font-size: 1rem;
-  margin-top: 0.5rem;
-  color: #333;
-}
-
-@keyframes popIn {
-  0% {
-    transform: scale(0.8);
-    opacity: 0;
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background: linear-gradient(135deg, #1a2634, #2d1f2d);
   }
-  100% {
-    transform: scale(1);
-    opacity: 1;
+  
+  .header {
+    background: #2c3e50;
   }
-}
-
-.wordCard {
-  background: #f5f5f5;
-  padding: 1rem;
-  border-radius: 1rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.wordChinese {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #333;
-}
-
-.wordPinyin {
-  display: block;
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.wordHint {
-  display: block;
-  font-size: 1rem;
-  color: #4ecdc4;
-}
-
-.hintPinyin {
-  font-size: 1rem;
-  color: #666;
-  margin-top: 0.3rem;
-}
-
-.wordsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  
+  .title, .backButton, .userName {
+    color: #ecf0f1;
+  }
+  
+  .gameArea {
+    background: #34495e;
+  }
+  
+  .hintText, .wordDash, .wordChinese {
+    color: #ecf0f1;
+  }
+  
+  .wordHint {
+    color: #4ecdc4;
+    background: #2c3e50;
+  }
+  
+  .input {
+    background: #2c3e50;
+    color: #ecf0f1;
+    border-color: #4ecdc4;
+  }
+  
+  .resultCard {
+    background: #34495e;
+  }
+  
+  .resultTitle {
+    color: #ecf0f1;
+  }
+  
+  .wordCard {
+    background: #2c3e50;
+    border-color: #4ecdc4;
+  }
 }
