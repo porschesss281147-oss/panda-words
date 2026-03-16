@@ -195,15 +195,13 @@ export default function SentenceGamePage() {
       gameId: 'sentence',
       level: selectedLevel,
       score: finalScore,
-      correct: score,
-      total: totalQuestions,
-      passed,
-      details: answerHistory
-    });
+      words: questions.length,
+      correctAnswers: score + 1
+     });
 
-    if (passed && selectedLevel < 10) {
-      unlockLevel('sentence', selectedLevel + 1);
-    }
+     if (selectedLevel < 10) {
+            unlockLevel('sentence', selectedLevel + 1);
+          }
 
     setTimeout(() => {
       setShowResult(true);
