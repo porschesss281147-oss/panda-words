@@ -218,19 +218,18 @@ export default function HomePage() {
 
   // คำนวณสถิติรวม
   const calculateTotalStats = () => {
-  if (!user) return { 
-    gamesPlayed: 0, 
-    totalScore: 0,  
-    totalLatestScore: 0,
-    unlockedLevels: 0 
-  };
+    if (!user) return { 
+      gamesPlayed: 0, 
+      totalAverageScore: 0,
+      totalLatestScore: 0,
+      unlockedLevels: 0 
+    };
 
     // จำนวนเกมที่เล่น
     const gamesPlayed = user.gamesPlayed || 0;
     
-    // ✅ คะแนนรวมสะสม
-  const totalScore = user.gameResults?.reduce((sum, game) => sum + (game.score || 0), 0) || 0;
-
+    // คะแนนเฉลี่ยรวม (จาก user.totalScore)
+    const totalAverageScore = user.totalScore || 0;
     
     // คะแนนล่าสุดรวม
     const totalLatestScore = Object.values(latestScores).reduce((a, b) => a + b, 0);
@@ -238,7 +237,7 @@ export default function HomePage() {
     // จำนวนด่านที่ปลดล็อกรวม
     const unlockedLevels = Object.values(user.unlockedLevels || {}).reduce((a, b) => a + b, 0);
 
-   return { gamesPlayed, totalScore, totalLatestScore, unlockedLevels };
+    return { gamesPlayed, totalAverageScore, totalLatestScore, unlockedLevels };
   };
 
   const stats = calculateTotalStats();
@@ -302,7 +301,7 @@ export default function HomePage() {
               <div>
                 <p className="text-sm text-gray-500">เล่นไปแล้ว</p>
                 <p className="text-2xl font-bold text-gray-800">
-                {loadingStats ? '...' : stats.totalScore}
+                  {loadingStats ? '...' : stats.gamesPlayed}
                 </p>
                 <p className="text-xs text-gray-400">เกม</p>
               </div>
@@ -320,19 +319,33 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* คะแนนรวม (ใช้จัดอันดับ) */}
-<div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4">
-  <div className="bg-purple-100 p-3 rounded-full">
-    <Award className="text-purple-600" size={24} />
-  </div>
-  <div>
-    <p className="text-sm text-gray-500">คะแนนรวม</p>
-    <p className="text-2xl font-bold text-gray-800">
-      {loadingStats ? '...' : stats.totalAverageScore}
-    </p>
-    <p className="text-xs text-gray-400">ใช้จัดอันดับ</p>
-  </div>
-</div>
+            {/* คะแนนเฉลี่ย (ใช้จัดอันดับ) */}
+            <div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4">
+              <div className="bg-purple-100 p-3 rounded-full">
+                <Award className="text-purple-600" size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">คะแนนเฉลี่ย</p>
+                <p className="text-2xl font-bold text-gray-800">
+                  {loadingStats ? '...' : stats.totalAverageScore}
+                </p>
+                <p className="text-xs text-gray-400">ใช้จัดอันดับ</p>
+              </div>
+            </div>
+
+            {/* คะแนนล่าสุด */}
+            <div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4">
+              <div className="bg-pink-100 p-3 rounded-full">
+                <Zap className="text-pink-600" size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">คะแนนล่าสุด</p>
+                <p className="text-2xl font-bold text-gray-800">
+                  {loadingStats ? '...' : stats.totalLatestScore}
+                </p>
+                <p className="text-xs text-gray-400">คะแนน</p>
+              </div>
+            </div>
 
             {/* วิธีการเล่น */}
             <div 
@@ -433,112 +446,112 @@ export default function HomePage() {
           </div>
 
           {/* อันดับผู้เล่นและคำศัพท์สุ่ม */}
-<div className="grid md:grid-cols-2 gap-6 mt-8">
-  {/* อันดับผู้เล่น */}
-  <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-    <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-      <Crown className="text-yellow-500" size={24} />
-      อันดับผู้เล่น
-    </h3>
+          <div className="grid md:grid-cols-2 gap-6 mt-8">
+            {/* อันดับผู้เล่น */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <Crown className="text-yellow-500" size={24} />
+                อันดับผู้เล่น
+              </h3>
 
-    {leaderboardLoading ? (
-      <div className="text-center py-8">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-        <p className="mt-2 text-gray-500">กำลังโหลด...</p>
-      </div>
-    ) : leaderboard.length > 0 ? (
-      <div className="space-y-3">
-        {leaderboard.slice(0, 5).map((player, index) => (
-          <div
-            key={player.id}
-            className={`flex items-center gap-3 p-3 rounded-xl border transition-all hover:shadow-md ${
-              player.id === user.id
-                ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300'
-                : index === 0
-                ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200'
-                : index === 1
-                ? 'bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200'
-                : index === 2
-                ? 'bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200'
-                : 'bg-white border border-gray-100 hover:border-gray-300'
-            }`}
-          >
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold shadow-md ${
-              index === 0 ? 'bg-yellow-400 text-white' :
-              index === 1 ? 'bg-gray-400 text-white' :
-              index === 2 ? 'bg-amber-700 text-white' :
-              'bg-gray-200 text-gray-600'
-            }`}>
-              {index + 1}
-            </div>
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white text-xl">
-              {player.icon || '😊'}
-            </div>
-            <div className="flex-1">
-              <p className={`font-semibold ${
-                player.id === user.id ? 'text-purple-700' : 'text-gray-800'
-              }`}>
-                {player.name}
-                {player.id === user.id && ' (คุณ)'}
-              </p>
-              <p className="text-xs text-gray-500">
-                เล่น {player.gamesPlayed || 0} เกม
-              </p>
-            </div>
-            <div className="text-right">
-              <p className={`font-bold ${
-                index === 0 ? 'text-yellow-600' :
-                index === 1 ? 'text-gray-600' :
-                index === 2 ? 'text-amber-700' :
-                'text-gray-600'
-              }`}>
-                {player.totalScore || 0}
-              </p>
-              <p className="text-xs text-gray-400">คะแนนรวม</p>  {/* แก้ตรงนี้ */}
-            </div>
-          </div>
-        ))}
+              {leaderboardLoading ? (
+                <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  <p className="mt-2 text-gray-500">กำลังโหลด...</p>
+                </div>
+              ) : leaderboard.length > 0 ? (
+                <div className="space-y-3">
+                  {leaderboard.slice(0, 5).map((player, index) => (
+                    <div
+                      key={player.id}
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all hover:shadow-md ${
+                        player.id === user.id
+                          ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300'
+                          : index === 0
+                          ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200'
+                          : index === 1
+                          ? 'bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200'
+                          : index === 2
+                          ? 'bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200'
+                          : 'bg-white border border-gray-100 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold shadow-md ${
+                        index === 0 ? 'bg-yellow-400 text-white' :
+                        index === 1 ? 'bg-gray-400 text-white' :
+                        index === 2 ? 'bg-amber-700 text-white' :
+                        'bg-gray-200 text-gray-600'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white text-xl">
+                        {player.icon || '😊'}
+                      </div>
+                      <div className="flex-1">
+                        <p className={`font-semibold ${
+                          player.id === user.id ? 'text-purple-700' : 'text-gray-800'
+                        }`}>
+                          {player.name}
+                          {player.id === user.id && ' (คุณ)'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          เล่น {player.gamesPlayed || 0} เกม
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`font-bold ${
+                          index === 0 ? 'text-yellow-600' :
+                          index === 1 ? 'text-gray-600' :
+                          index === 2 ? 'text-amber-700' :
+                          'text-gray-600'
+                        }`}>
+                          {player.totalScore || 0}
+                        </p>
+                        <p className="text-xs text-gray-400">คะแนนเฉลี่ย</p>
+                      </div>
+                    </div>
+                  ))}
 
-        {userRank > 5 && (
-          <>
-            <div className="text-center text-gray-400">...</div>
-            <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-300">
-              <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
-                {userRank}
-              </div>
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-xl">
-                {user.icon}
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-purple-700">{user.name}</p>
-                <p className="text-xs text-purple-500">อันดับ {userRank}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-bold text-purple-600">{stats.totalAverageScore}</p>
-                <p className="text-xs text-gray-400">คะแนนรวม</p>  {/* แก้ตรงนี้ */}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    ) : (
-      <div className="text-center py-8 text-gray-500">
-        <Users size={48} className="mx-auto mb-3 text-gray-300" />
-        <p>ยังไม่มีผู้เล่นอื่น</p>
-        <p className="text-sm">มาเป็นคนแรกเลย! 🎉</p>
-      </div>
-    )}
+                  {userRank > 5 && (
+                    <>
+                      <div className="text-center text-gray-400">...</div>
+                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-300">
+                        <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
+                          {userRank}
+                        </div>
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-xl">
+                          {user.icon}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-purple-700">{user.name}</p>
+                          <p className="text-xs text-purple-500">อันดับ {userRank}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-purple-600">{stats.totalAverageScore}</p>
+                          <p className="text-xs text-gray-400">คะแนนเฉลี่ย</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Users size={48} className="mx-auto mb-3 text-gray-300" />
+                  <p>ยังไม่มีผู้เล่นอื่น</p>
+                  <p className="text-sm">มาเป็นคนแรกเลย! 🎉</p>
+                </div>
+              )}
 
-    <button
-      onClick={() => {
-        playSound('click');
-        setShowLeaderboard(true);
-      }}
-      className="mt-4 w-full bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl py-3 text-gray-600 font-semibold hover:from-gray-100 hover:to-gray-200 transition-all hover:shadow-md"
-    >
-      ดูอันดับทั้งหมด 🏆
-    </button>
-  </div>
+              <button
+                onClick={() => {
+                  playSound('click');
+                  setShowLeaderboard(true);
+                }}
+                className="mt-4 w-full bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl py-3 text-gray-600 font-semibold hover:from-gray-100 hover:to-gray-200 transition-all hover:shadow-md"
+              >
+                ดูอันดับทั้งหมด 🏆
+              </button>
+            </div>
 
             {/* คำศัพท์สุ่ม */}
             <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 shadow-lg">
@@ -592,17 +605,18 @@ export default function HomePage() {
             </div>
           </div>
 
+    {/* ✅ ปุ่มรีเฟรช - อยู่ภายใน <main> */}
           {process.env.NODE_ENV === 'development' && (
-  <button
-    onClick={async () => {
-      await forceRefreshUser();  // โหลดข้อมูลจาก Firebase ใหม่
-      window.location.reload();   // รีโหลดหน้า
-    }}
-    className="fixed bottom-4 left-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm z-50"
-  >
-    🔄 รีเฟรชข้อมูล
-  </button>
-)}
+            <button
+              onClick={async () => {
+                await forceRefreshUser();  // โหลดข้อมูลจาก Firebase ใหม่
+                window.location.reload();   // รีโหลดหน้า
+              }}
+              className="fixed bottom-4 left-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm z-50"
+            >
+              🔄 รีเฟรชข้อมูล
+            </button>
+          )}
         </main>
       </div>
 
