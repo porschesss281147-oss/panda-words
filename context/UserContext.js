@@ -51,6 +51,13 @@ export function UserProvider({ children }) {
     }
   };
 
+const forceRefreshUser = async () => {
+  if (!user) return;
+  setLoading(true);
+  await loadUserFromFirebase(user.id);
+};
+
+  
   // สร้างผู้ใช้ใหม่
   const createUser = async (name, icon) => {
     try {
