@@ -17,13 +17,13 @@ export default function HomePage() {
   const { user, logout, getGameStats, getLatestScore, getAverageScore, forceRefreshUser } = useUser();
   const { leaderboard, loading: leaderboardLoading, getUserRank } = useLeaderboard();
   const { playSound } = useSound();
-  
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [wordOfDay, setWordOfDay] = useState(null);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [activeTab, setActiveTab] = useState('game1');
-  
+
   // ✅ State สำหรับเก็บสถิติ
   const [gameStats, setGameStats] = useState({});
   const [loadingStats, setLoadingStats] = useState(true);
@@ -134,13 +134,13 @@ export default function HomePage() {
           // ดึงสถิติแยกตามเกม
           const stats = await getGameStats();
           setGameStats(stats);
-          
+
           // คำนวณคะแนนล่าสุดจาก gameResults
           if (user.gameResults) {
             const sorted = [...user.gameResults].sort((a, b) => 
               new Date(b.date) - new Date(a.date)
             );
-            
+
             const scores = {};
             sorted.forEach(result => {
               if (!scores[result.gameId]) {
@@ -149,9 +149,9 @@ export default function HomePage() {
             });
             setLatestScores(scores);
           }
-          
+
           console.log('✅ Stats loaded:', { stats, latestScores: scores });
-          
+
         } catch (error) {
           console.error('❌ Error loading stats:', error);
         } finally {
@@ -159,7 +159,7 @@ export default function HomePage() {
         }
       }
     };
-    
+
     loadAllStats();
   }, [user, getGameStats]);
 
@@ -180,7 +180,7 @@ export default function HomePage() {
   // ฟังก์ชันสุ่มคำศัพท์ใหม่
   const generateNewWord = () => {
     playSound('click');
-    
+
     if (allHsk && allHsk.length > 0) {
       const randomIndex = Math.floor(Math.random() * allHsk.length);
       const word = allHsk[randomIndex];
@@ -200,7 +200,7 @@ export default function HomePage() {
   // ฟังก์ชันอ่านออกเสียง
   const speak = (text) => {
     playSound('click');
-    
+
     if (!window.speechSynthesis) {
       alert('เบราว์เซอร์ของคุณไม่รองรับการอ่านออกเสียง');
       return;
@@ -225,12 +225,23 @@ export default function HomePage() {
   const calculateTotalStats = () => {
     if (!user) return { 
       gamesPlayed: 0, 
+      totalAverageScore: 0,
       totalScore: 0, 
       totalLatestScore: 0,
       unlockedLevels: 0 
     };
 
+    // จำนวนเกมที่เล่น
     const gamesPlayed = user.gamesPlayed || 0;
+    
+    // คะแนนเฉลี่ยรวม (จาก user.totalScore)
+    const totalAverageScore = user.totalScore || 0;
+    
+    // คะแนนล่าสุดรวม
+    const totalLatestScore = Object.values(latestScores).reduce((a, b) => a + b, 0);
+    
+    // จำนวนด่านที่ปลดล็อกรวม
+    const unlockedLevels = Object.values(user.unlockedLevels || {}).reduce((a, b) => a + b, 0);
   
   // ✅ คำนวณคะแนนรวมสะสมจาก gameResults
   const totalScore = user.gameResults?.reduce((sum, game) => sum + (game.score || 0), 0) || 0;
@@ -238,6 +249,8 @@ export default function HomePage() {
   const totalLatestScore = Object.values(latestScores).reduce((a, b) => a + b, 0);
   const unlockedLevels = Object.values(user.unlockedLevels || {}).reduce((a, b) => a + b, 0);
 
+    return { gamesPlayed, totalAverageScore, totalLatestScore, unlockedLevels };
+  };
   return { gamesPlayed, totalScore, totalLatestScore, unlockedLevels };
 };
 
@@ -320,6 +333,19 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* คะแนนเฉลี่ย (ใช้จัดอันดับ) */}
+            <div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4">
+              <div className="bg-purple-100 p-3 rounded-full">
+                <Award className="text-purple-600" size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">คะแนนเฉลี่ย</p>
+                <p className="text-2xl font-bold text-gray-800">
+                  {loadingStats ? '...' : stats.totalAverageScore}
+                </p>
+                <p className="text-xs text-gray-400">ใช้จัดอันดับ</p>
+              </div>
+            </div>
            {/* คะแนนรวม (ใช้จัดอันดับ) */}
 <div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4">
   <div className="bg-purple-100 p-3 rounded-full">
@@ -376,7 +402,7 @@ export default function HomePage() {
               const gameId = game.id;
               const gameStat = gameStats[gameId] || { played: 0, averageScore: 0 };
               const latestScore = latestScores[gameId] || 0;
-              
+
               return (
                 <div
                   key={game.id}
@@ -412,7 +438,7 @@ export default function HomePage() {
                           ด่านที่ {user.unlockedLevels?.[game.id] || 1} / 10
                         </span>
                       </div>
-                      
+
                       {/* แสดงสถิติเฉพาะเกม */}
                       {gameStat.played > 0 && (
                         <div className="mt-3 space-y-1">
@@ -430,7 +456,7 @@ export default function HomePage() {
                           </div>
                         </div>
                       )}
-                      
+
                       {/* ถ้ายังไม่เคยเล่น */}
                       {gameStat.played === 0 && (
                         <div className="mt-3">
@@ -513,6 +539,27 @@ export default function HomePage() {
                     </div>
                   ))}
 
+                  {userRank > 5 && (
+                    <>
+                      <div className="text-center text-gray-400">...</div>
+                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-300">
+                        <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
+                          {userRank}
+                        </div>
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-xl">
+                          {user.icon}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-purple-700">{user.name}</p>
+                          <p className="text-xs text-purple-500">อันดับ {userRank}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-purple-600">{stats.totalAverageScore}</p>
+                          <p className="text-xs text-gray-400">คะแนนเฉลี่ย</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
                  {userRank > 5 && (
   <>
     <div className="text-center text-gray-400">...</div>
