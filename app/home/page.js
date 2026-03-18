@@ -192,6 +192,11 @@ export default function HomePage() {
     }
   };
 
+  useEffect(() => {
+  console.log('🔍 user.latestScores:', user?.latestScores);
+  console.log('🔍 user.gameResults:', user?.gameResults);
+}, [user]);
+
   // ฟังก์ชันอ่านออกเสียง
   const speak = (text) => {
     playSound('click');
@@ -220,25 +225,21 @@ export default function HomePage() {
   const calculateTotalStats = () => {
     if (!user) return { 
       gamesPlayed: 0, 
-      totalAverageScore: 0,
+      totalScore: 0, 
       totalLatestScore: 0,
       unlockedLevels: 0 
     };
 
-    // จำนวนเกมที่เล่น
     const gamesPlayed = user.gamesPlayed || 0;
-    
-    // คะแนนเฉลี่ยรวม (จาก user.totalScore)
-    const totalAverageScore = user.totalScore || 0;
-    
-    // คะแนนล่าสุดรวม
-    const totalLatestScore = Object.values(latestScores).reduce((a, b) => a + b, 0);
-    
-    // จำนวนด่านที่ปลดล็อกรวม
-    const unlockedLevels = Object.values(user.unlockedLevels || {}).reduce((a, b) => a + b, 0);
+  
+  // ✅ คำนวณคะแนนรวมสะสมจาก gameResults
+  const totalScore = user.gameResults?.reduce((sum, game) => sum + (game.score || 0), 0) || 0;
+  
+  const totalLatestScore = Object.values(latestScores).reduce((a, b) => a + b, 0);
+  const unlockedLevels = Object.values(user.unlockedLevels || {}).reduce((a, b) => a + b, 0);
 
-    return { gamesPlayed, totalAverageScore, totalLatestScore, unlockedLevels };
-  };
+  return { gamesPlayed, totalScore, totalLatestScore, unlockedLevels };
+};
 
   const stats = calculateTotalStats();
   const userRank = getUserRank(user?.id);
@@ -319,19 +320,19 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* คะแนนเฉลี่ย (ใช้จัดอันดับ) */}
-            <div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4">
-              <div className="bg-purple-100 p-3 rounded-full">
-                <Award className="text-purple-600" size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">คะแนนเฉลี่ย</p>
-                <p className="text-2xl font-bold text-gray-800">
-                  {loadingStats ? '...' : stats.totalAverageScore}
-                </p>
-                <p className="text-xs text-gray-400">ใช้จัดอันดับ</p>
-              </div>
-            </div>
+           {/* คะแนนรวม (ใช้จัดอันดับ) */}
+<div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4">
+  <div className="bg-purple-100 p-3 rounded-full">
+    <Award className="text-purple-600" size={24} />
+  </div>
+  <div>
+    <p className="text-sm text-gray-500">คะแนนรวม</p>  {/* ✅ เปลี่ยนข้อความ */}
+    <p className="text-2xl font-bold text-gray-800">
+      {loadingStats ? '...' : stats.totalScore}  {/* ✅ ใช้ stats.totalScore */}
+    </p>
+    <p className="text-xs text-gray-400">ใช้จัดอันดับ</p>
+  </div>
+</div>
 
             {/* คะแนนล่าสุด */}
             <div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-4">
@@ -512,27 +513,28 @@ export default function HomePage() {
                     </div>
                   ))}
 
-                  {userRank > 5 && (
-                    <>
-                      <div className="text-center text-gray-400">...</div>
-                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-300">
-                        <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
-                          {userRank}
-                        </div>
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-xl">
-                          {user.icon}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-semibold text-purple-700">{user.name}</p>
-                          <p className="text-xs text-purple-500">อันดับ {userRank}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-purple-600">{stats.totalAverageScore}</p>
-                          <p className="text-xs text-gray-400">คะแนนเฉลี่ย</p>
-                        </div>
-                      </div>
-                    </>
-                  )}
+                 {userRank > 5 && (
+  <>
+    <div className="text-center text-gray-400">...</div>
+    <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-300">
+      <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
+        {userRank}
+      </div>
+      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-xl">
+        {user.icon}
+      </div>
+      <div className="flex-1">
+        <p className="font-semibold text-purple-700">{user.name}</p>
+        <p className="text-xs text-purple-500">อันดับ {userRank}</p>
+      </div>
+      <div className="text-right">
+        {/* ✅ เปลี่ยนเป็น stats.totalScore */}
+         <p className="text-2xl font-bold text-gray-800">{player.totalScore || 0}</p>
+         <p className="text-xs text-gray-400">คะแนนรวม</p>
+      </div>
+    </div>
+  </>
+)}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
