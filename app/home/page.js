@@ -14,7 +14,7 @@ import {
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, logout, getGameStats, getLatestScore, getAverageScore } = useUser();
+  const { user, logout, getGameStats, getLatestScore, getAverageScore, forceRefreshUser } = useUser();
   const { leaderboard, loading: leaderboardLoading, getUserRank } = useLeaderboard();
   const { playSound } = useSound();
   
@@ -605,15 +605,17 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* ปุ่มรีเฟรชสถิติ (ซ่อนไว้สำหรับดีบัก) */}
           {process.env.NODE_ENV === 'development' && (
-            <button
-              onClick={() => window.location.reload()}
-              className="fixed bottom-4 left-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm z-50"
-            >
-              🔄 รีเฟรชหน้า
-            </button>
-          )}
+  <button
+    onClick={async () => {
+      await forceRefreshUser();  // โหลดข้อมูลจาก Firebase ใหม่
+      window.location.reload();   // รีโหลดหน้า
+    }}
+    className="fixed bottom-4 left-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm z-50"
+  >
+    🔄 รีเฟรชข้อมูล
+  </button>
+)}
         </main>
       </div>
 
