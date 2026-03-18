@@ -418,6 +418,7 @@ const forceRefreshUser = async () => {
       // User data functions
       updateUserData,
       unlockLevel,
+    forceRefreshUser,
       
       // Game functions
       addGameResult,
