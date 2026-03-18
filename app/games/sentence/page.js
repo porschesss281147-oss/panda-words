@@ -197,56 +197,57 @@ export default function SentenceGamePage() {
     }
   };
 
-  const finishGame = () => {
-    setGameCompleted(true);
-    setTimerActive(false);
+// ในฟังก์ชัน finishGame()
+const finishGame = () => {
+  setGameCompleted(true);
+  setTimerActive(false);
 
-    // คำนวณคะแนน
-    const totalQuestions = questions.length;
-    const correctAnswers = score;
-    const finalScore = totalQuestions > 0 
-      ? Math.round((correctAnswers / totalQuestions) * 100) 
-      : 0;
+  // คำนวณคะแนน (0-100)
+  const totalQuestions = questions.length;
+  const correctAnswers = score;
+  const finalScore = totalQuestions > 0 
+    ? Math.round((correctAnswers / totalQuestions) * 100) 
+    : 0;
 
-    const passed = finalScore >= 80;
+  const passed = finalScore >= 80;
 
-    console.log('🎮 Game Finished ==================');
-    console.log('📍 Game ID: sentence');
-    console.log('📍 Level:', selectedLevel);
-    console.log('📍 Total Questions:', totalQuestions);
-    console.log('📍 Correct Answers:', correctAnswers);
-    console.log('📍 Final Score:', finalScore);
-    console.log('📍 Passed:', passed);
-    console.log('===================================');
+  console.log('🎮 Game Finished ==================');
+  console.log('📍 Game ID: sentence');
+  console.log('📍 Level:', selectedLevel);
+  console.log('📍 Total Questions:', totalQuestions);
+  console.log('📍 Correct Answers:', correctAnswers);
+  console.log('📍 Final Score:', finalScore);
+  console.log('📍 Passed:', passed);
+  console.log('===================================');
 
-    if (passed) {
-      playSound('achievement');
-    }
+  if (passed) {
+    playSound('achievement');
+  }
 
-    // ✅ บันทึกผล (ใช้ค่าที่คำนวณได้)
-    const gameResult = {
-      gameId: 'sentence',
-      level: selectedLevel,
-      score: finalScore,
-      words: totalQuestions,
-      correctAnswers: correctAnswers,
-      date: new Date().toISOString()
-    };
-
-    console.log('📤 Sending to addGameResult:', gameResult);
-    addGameResult(gameResult);
-
-    // ปลดล็อกด่านถัดไป
-    if (passed && selectedLevel < 10) {
-      console.log('🔓 Unlocking next level:', selectedLevel + 1);
-      unlockLevel('sentence', selectedLevel + 1);
-    }
-
-    // แสดงผลสรุป
-    setTimeout(() => {
-      setShowResult(true);
-    }, 1500);
+  // ✅ บันทึกผล (ส่งคะแนนเป็นเปอร์เซ็นต์)
+  const gameResult = {
+    gameId: 'sentence',
+    level: selectedLevel,
+    score: finalScore, // ส่งเป็นเปอร์เซ็นต์
+    words: totalQuestions,
+    correctAnswers: correctAnswers,
+    date: new Date().toISOString()
   };
+
+  console.log('📤 Sending to addGameResult:', gameResult);
+  addGameResult(gameResult);
+
+  // ปลดล็อกด่านถัดไป
+  if (passed && selectedLevel < 10) {
+    console.log('🔓 Unlocking next level:', selectedLevel + 1);
+    unlockLevel('sentence', selectedLevel + 1);
+  }
+
+  // แสดงผลสรุป
+  setTimeout(() => {
+    setShowResult(true);
+  }, 1500);
+};
 
   const playAgain = () => {
     startNewGame();
