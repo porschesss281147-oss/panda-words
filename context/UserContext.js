@@ -77,19 +77,19 @@ export function UserProvider({ children }) {
         createdAt: new Date().toISOString(),
         lastLogin: new Date().toISOString(),
         unlockedLevels: {
-          spelling: 1,
-          wordmatch: 1,
           sentence: 1,
-          tonegame: 1
+          matching: 1,
+          listening: 1,
+          spelling: 1
         },
         // ✅ คะแนนเฉลี่ย (ใช้จัดอันดับ)
         totalScore: 0,
         // ✅ คะแนนล่าสุดของแต่ละเกม
         latestScores: {
-          spelling: 0,
-          wordmatch: 0,
           sentence: 0,
-          tonegame: 0
+          matching: 0,
+          listening: 0,
+          spelling: 0
         },
         gamesPlayed: 0,
         challengesCompleted: 0,
@@ -98,10 +98,10 @@ export function UserProvider({ children }) {
         achievements: [],
         gameResults: [], // เก็บประวัติการเล่นล่าสุด
         gameStats: {
-          spelling: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 },
-          wordmatch: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 },
           sentence: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 },
-          tonegame: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 }
+          matching: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 },
+          listening: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 },
+          spelling: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 }
         },
         settings: {
           sound: true,
@@ -320,10 +320,10 @@ export function UserProvider({ children }) {
       const querySnapshot = await getDocs(q);
       
       const stats = {
-        spelling: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
-        wordmatch: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
         sentence: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
-        tonegame: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 }
+        matching: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
+        listening: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
+        spelling: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 }
       };
       
       querySnapshot.forEach(doc => {
@@ -356,16 +356,16 @@ export function UserProvider({ children }) {
     
     const resetData = {
       unlockedLevels: {
-        spelling: 1,
-        wordmatch: 1,
         sentence: 1,
-        tonegame: 1
+        matching: 1,
+        listening: 1,
+        spelling: 1
       },
       latestScores: {
-        spelling: 0,
-        wordmatch: 0,
         sentence: 0,
-        tonegame: 0
+        matching: 0,
+        listening: 0,
+        spelling: 0
       },
       totalScore: 0,
       gamesPlayed: 0,
@@ -375,10 +375,10 @@ export function UserProvider({ children }) {
       achievements: [],
       gameResults: [],
       gameStats: {
-        spelling: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 },
-        wordmatch: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 },
         sentence: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 },
-        tonegame: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 }
+        matching: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 },
+        listening: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 },
+        spelling: { played: 0, totalScore: 0, bestScore: 0, totalCorrect: 0, totalQuestions: 0 }
       }
     };
     
