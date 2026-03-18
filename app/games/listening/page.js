@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { useSound } from '@/hooks/useSound';
 import { games } from '@/data/games';
-import { generateListeningQuestions } from '@/data/question-generators/hsk3';
+import { generateListeningQuestions } from '@/data/question-generators/hsk3'; // หรือ listening.js
 import { Volume2, CheckCircle, XCircle, RotateCcw, Home, Clock } from 'lucide-react';
 
 export default function ListeningGamePage() {
@@ -24,11 +24,6 @@ export default function ListeningGamePage() {
 
   useEffect(() => {
     console.log('🎵 Sound hook check in useEffect:', { playSound: !!playSound });
-    // ปลดล็อกเสียงอัตโนมัติเมื่อโหลดหน้า
-    const unlockAudioOnLoad = async () => {
-      await playSound('click');
-    };
-    unlockAudioOnLoad();
   }, [playSound]);
   
   // State หลัก
@@ -52,22 +47,7 @@ export default function ListeningGamePage() {
   
   const timerRef = useRef(null);
   const game = games.find(g => g.id === 'listening');
-  const unlockedLevel = user?.unlockedLevels?.listening || 1;
-  
-  // ✅ เพิ่มปุ่มทดสอบเสียงสำหรับ development
-  const TestSoundButton = () => {
-    if (process.env.NODE_ENV === 'development') {
-      return (
-        <button
-          onClick={testSound}
-          className="fixed top-20 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm z-50"
-        >
-          🔊 ทดสอบเสียง
-        </button>
-      );
-    }
-    return null;
-  };
+  const unlockedLevel = user?.unlockedLevels?.listening || 1; // เปลี่ยนกลับเป็น unlockedLevel
 
   // เล่นเสียงตาม feedback
   useEffect(() => {
@@ -91,21 +71,13 @@ export default function ListeningGamePage() {
 
   const startNewGame = () => {
     setLoading(true);
-    playSound('start'); // ✅ เสียงเริ่มเกม
     
     try {
-      console.log('🎮 Starting new game, level:', selectedLevel);
-      
-      // ทดสอบว่า hsk3 มีข้อมูลหรือไม่
-      console.log('📚 Testing HSK3 data...');
-      
       const newQuestions = generateListeningQuestions(selectedLevel, 10);
-      console.log('📋 Generated questions:', newQuestions);
+      console.log('Generated questions:', newQuestions);
       
-      // ถ้าไม่มีคำถาม ให้ใช้คำถามสำรอง
       if (!newQuestions || newQuestions.length === 0) {
-        console.warn('⚠️ No questions generated, using fallback questions');
-        
+        // สร้างคำถามสำรอง
         const fallbackQuestions = [
           {
             id: 1,
@@ -115,9 +87,9 @@ export default function ListeningGamePage() {
             meaning: 'สวัสดี',
             options: ['你好', '再见', '谢谢', '对不起'],
             correct: '你好',
-            sentence: '你好吗？',
-            sentence_pinyin: 'nǐ hǎo ma？',
-            sentence_th: 'คุณสบายดีไหม'
+            sentence: '',
+            sentence_pinyin: '',
+            sentence_th: ''
           },
           {
             id: 2,
@@ -127,48 +99,11 @@ export default function ListeningGamePage() {
             meaning: 'ลาก่อน',
             options: ['你好', '再见', '谢谢', '对不起'],
             correct: '再见',
-            sentence: '明天见。',
-            sentence_pinyin: 'míngtiān jiàn。',
-            sentence_th: 'เจอกันพรุ่งนี้'
-          },
-          {
-            id: 3,
-            audio: '谢谢',
-            chinese: '谢谢',
-            pinyin: 'xièxiè',
-            meaning: 'ขอบคุณ',
-            options: ['你好', '再见', '谢谢', '对不起'],
-            correct: '谢谢',
-            sentence: '谢谢你。',
-            sentence_pinyin: 'xièxiè nǐ。',
-            sentence_th: 'ขอบคุณ'
-          },
-          {
-            id: 4,
-            audio: '对不起',
-            chinese: '对不起',
-            pinyin: 'duìbuqǐ',
-            meaning: 'ขอโทษ',
-            options: ['你好', '再见', '谢谢', '对不起'],
-            correct: '对不起',
-            sentence: '对不起，我错了。',
-            sentence_pinyin: 'duìbuqǐ, wǒ cuò le。',
-            sentence_th: 'ขอโทษ ฉันผิดเอง'
-          },
-          {
-            id: 5,
-            audio: '没关系',
-            chinese: '没关系',
-            pinyin: 'méiguānxi',
-            meaning: 'ไม่เป็นไร',
-            options: ['你好', '再见', '谢谢', '没关系'],
-            correct: '没关系',
-            sentence: '没关系。',
-            sentence_pinyin: 'méiguānxi。',
-            sentence_th: 'ไม่เป็นไร'
+            sentence: '',
+            sentence_pinyin: '',
+            sentence_th: ''
           }
         ];
-        
         setQuestions(fallbackQuestions);
         setCurrentQuestionIndex(0);
         setScore(0);
@@ -180,13 +115,11 @@ export default function ListeningGamePage() {
         setTimerActive(true);
         setSelectedAnswer(null);
         
-        console.log('✅ Using fallback questions');
+        playSound('start');
         setLoading(false);
         return;
       }
       
-      // ถ้ามีคำถามจาก hsk3
-      console.log('✅ Using HSK3 questions');
       setQuestions(newQuestions);
       setCurrentQuestionIndex(0);
       setScore(0);
@@ -198,9 +131,10 @@ export default function ListeningGamePage() {
       setTimerActive(true);
       setSelectedAnswer(null);
       
+      playSound('start');
+      
     } catch (error) {
-      console.error('❌ Error starting game:', error);
-      playSound('error'); // ✅ เสียง error
+      console.error('Error starting game:', error);
       setFeedback({
         show: true,
         message: 'เกิดข้อผิดพลาด กรุณาลองใหม่',
@@ -217,7 +151,6 @@ export default function ListeningGamePage() {
     if (timerActive && !gameCompleted && !showResult && !feedback.show && questions.length > 0) {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
-          // ✅ เสียงเตือนเมื่อเหลือ 5,4,3,2 วินาที
           if (prev <= 5 && prev > 0) {
             playSound('tick');
           }
@@ -237,7 +170,7 @@ export default function ListeningGamePage() {
   const handleTimeOut = () => {
     if (!questions.length || currentQuestionIndex >= questions.length) return;
     
-    playSound('time'); // ✅ เสียงหมดเวลา
+    playSound('time');
     setTimerActive(false);
     
     const currentQuestion = questions[currentQuestionIndex];
@@ -264,7 +197,7 @@ export default function ListeningGamePage() {
     }, 2000);
   };
 
-  // ฟังก์ชันอ่านออกเสียง (ไม่มีเสียงเกม)
+  // ฟังก์ชันอ่านออกเสียง
   const speak = (text) => {
     if (!window.speechSynthesis) {
       setAudioPermission(false);
@@ -290,20 +223,20 @@ export default function ListeningGamePage() {
   };
 
   const handlePlaySound = () => {
-    if (!currentQuestion) return;
-    // ✅ ไม่มีเสียงเกมตรงนี้
-    speak(currentQuestion.audio || currentQuestion.chinese);
+    if (questions[currentQuestionIndex]) {
+      playSound('click');
+      speak(questions[currentQuestionIndex].audio);
+    }
   };
 
   const handleSelectAnswer = (answer) => {
     if (feedback.show) return;
-    playSound('click'); // ✅ เสียงคลิกเลือกคำตอบ
+    playSound('click');
     setSelectedAnswer(answer);
   };
 
   const checkAnswer = () => {
     if (!selectedAnswer) {
-      playSound('warning'); // ✅ เสียงเตือน
       setFeedback({
         show: true,
         message: '⚠️ กรุณาเลือกคำตอบ',
@@ -324,7 +257,6 @@ export default function ListeningGamePage() {
     setTimerActive(false);
     
     if (isCorrect) {
-      playSound('success'); // ✅ เสียงถูกต้อง
       setScore(prev => prev + 1);
       setFeedback({
         show: true,
@@ -344,7 +276,6 @@ export default function ListeningGamePage() {
         moveToNextQuestion();
       }, 1500);
     } else {
-      playSound('error'); // ✅ เสียงผิด
       setFeedback({
         show: true,
         message: '✗ ผิด!',
@@ -387,10 +318,7 @@ export default function ListeningGamePage() {
     const passed = finalScore >= 80;
     
     if (passed) {
-      playSound('success'); // ✅ เสียงผ่าน
-      playSound('achievement'); // ✅ เสียงพิเศษ
-    } else {
-      playSound('error'); // ✅ เสียงไม่ผ่าน
+      playSound('success');
     }
 
     addGameResult({
@@ -413,19 +341,16 @@ export default function ListeningGamePage() {
   };
 
   const playAgain = () => {
-    playSound('click'); // ✅ เสียงคลิก
     startNewGame();
   };
 
   const startGame = (level) => {
-    playSound('click'); // ✅ เสียงคลิกเลือกระดับ
     setSelectedLevel(level);
     setGameStarted(true);
     setShowResult(false);
   };
 
   const goToLevelSelect = () => {
-    playSound('click'); // ✅ เสียงคลิกกลับ
     setGameStarted(false);
     setShowResult(false);
   };
@@ -452,96 +377,84 @@ export default function ListeningGamePage() {
   // เลือกด่าน
   if (!gameStarted) {
     return (
-      <>
-        <TestSoundButton />
-        <div 
-          className="min-h-screen"
-          style={{ 
-            background: 'linear-gradient(135deg, #f89d25, #dfbcbbed 0%, #f89d25 100%)'
-          }}
-        >
-          <header className="bg-white/80 backdrop-blur-md border-b border-white/40">
-            <div className="max-w-6xl mx-auto px-4 py-4">
-              <div className="flex items-center justify-between">
+      <div 
+        className="min-h-screen"
+        style={{ 
+          background: 'linear-gradient(135deg, #667eea 10%, #764ba2 100%)'
+        }}
+      >
+        <header className="bg-white/80 backdrop-blur-md">
+          <div className="max-w-6xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => router.push('/home')}
+                className="text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2 bg-white/60 px-4 py-2 rounded-full"
+              >
+                ← กลับ
+              </button>
+              <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                {game?.title || 'เกมฟังเสียง'}
+              </h1>
+              <div className="flex items-center gap-2 bg-white/60 px-3 py-1 rounded-full">
+                <span className="text-2xl">{user?.icon}</span>
+                <span className="text-gray-700 font-medium">{user?.name}</span>
+              </div>
+            </div>
+          </div>
+        </header>
 
+        <main className="max-w-4xl mx-auto px-4 py-12">
+          <div className="text-center mb-12">
+            <span className="text-8xl mb-4 block animate-bounce">🎧</span>
+            <h2 className="text-3xl font-bold text-white mb-4">เกมฟังเสียง</h2>
+            <p className="text-xl text-white">ฟังเสียงแล้วเลือกคำศัพท์ที่ถูกต้อง</p>
+          </div>
+
+          <h3 className="text-2xl font-bold text-white text-center mb-6">เลือกระดับด่าน</h3>
+          
+          <div className="grid grid-cols-5 gap-4 mb-8">
+            {Array.from({ length: 10 }, (_, i) => i + 1).map((level) => {
+              const isUnlocked = level <= unlockedLevel; // ใช้ unlockedLevel
+              const isCurrent = level === unlockedLevel;
+              
+              return (
                 <button
-                  onClick={() => router.push('/home')}
-                  className="text-gray-600 hover:text-gray-800 transition flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow"
+                  key={level}
+                  onClick={() => isUnlocked && startGame(level)}
+                  disabled={!isUnlocked}
+                  className={`
+                    aspect-square rounded-2xl text-3xl font-bold
+                    flex flex-col items-center justify-center
+                    transition-all duration-300 transform
+                    ${isUnlocked 
+                      ? isCurrent
+                        ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-xl scale-105 ring-4 ring-blue-300'
+                        : 'bg-gradient-to-br from-blue-400 to-purple-400 text-white shadow-lg hover:scale-110 hover:shadow-xl'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }
+                  `}
                 >
-                  ← กลับ
+                  <span>{level}</span>
+                  {!isUnlocked && <span className="text-2xl mt-2">🔒</span>}
                 </button>
+              );
+            })}
+          </div>
 
-                <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">
-                  {game?.title || 'เกมฟังเสียง'}
-                </h1>
-
-                <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow">
-                  <span className="text-2xl">{user?.icon}</span>
-                  <span className="text-gray-700 font-medium">{user?.name}</span>
-                </div>
-
-              </div>
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-6">
+            <div className="flex items-center justify-between">
+              <span className="text-blue-800">ความคืบหน้า</span>
+              <span className="text-blue-600">{unlockedLevel}/10 ด่าน</span>
             </div>
-          </header>
-
-          <main className="max-w-4xl mx-auto px-4 py-12">
-
-            <div className="text-center mb-12">
-              <span className="text-8xl mb-4 block animate-bounce">🎧</span>
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">เกมฟังเสียง</h2>
-              <p className="text-lg text-gray-600">ฟังเสียงแล้วเลือกคำศัพท์ที่ถูกต้อง</p>
+            <div className="w-full bg-blue-200 rounded-full h-3 mt-2">
+              <div 
+                className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-full h-3 transition-all duration-500"
+                style={{ width: `${(unlockedLevel / 10) * 100}%` }}
+              ></div>
             </div>
-
-            <h3 className="text-2xl font-bold text-gray-800 text-center mb-6">
-              เลือกระดับด่าน
-            </h3>
-
-            <div className="grid grid-cols-5 gap-4 mb-10">
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((level) => {
-                const isUnlocked = level <= unlockedLevel;
-                const isCurrent = level === unlockedLevel;
-
-                return (
-                  <button
-                    key={level}
-                    onClick={() => isUnlocked && startGame(level)}
-                    disabled={!isUnlocked}
-                    className={`
-                      aspect-square rounded-2xl text-3xl font-bold
-                      flex flex-col items-center justify-center
-                      transition-all duration-300 transform border-2
-                      ${isUnlocked 
-                        ? isCurrent
-                          ? 'bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-xl scale-105 ring-4 ring-orange-200 border-transparent'
-                          : 'bg-white border-orange-300 text-orange-500 shadow hover:scale-110 hover:shadow-lg'
-                        : 'bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed'
-                      }
-                    `}
-                  >
-                    <span>{level}</span>
-                    {!isUnlocked && <span className="text-2xl mt-2">🔒</span>}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-700 font-medium">ความคืบหน้า</span>
-                <span className="text-orange-500 font-semibold">{unlockedLevel}/10 ด่าน</span>
-              </div>
-
-              <div className="w-full bg-gray-200 rounded-full h-3 mt-3 overflow-hidden">
-                <div 
-                  className="bg-gradient-to-r from-orange-400 to-amber-500 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${(unlockedLevel / 10) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-
-          </main>
-        </div>
-      </>
+          </div>
+        </main>
+      </div>
     );
   }
 
