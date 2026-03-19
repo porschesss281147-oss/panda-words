@@ -205,18 +205,20 @@ const finishGame = () => {
   // คำนวณคะแนน (0-100)
   const totalQuestions = questions.length;
   const correctAnswers = score;
-  const finalScore = totalQuestions > 0 
-    ? Math.round((correctAnswers / totalQuestions) * 100) 
-    : 0;
+  const finalScore = Math.round((correctAnswers / totalQuestions) * 100); // ปัดเศษครั้งเดียว
+  
+  // ✅ เก็บค่าดิบและเปอร์เซ็นต์แยกกัน
+  const rawCorrect = correctAnswers; // จำนวนข้อที่ถูก (เช่น 8)
+  const rawTotal = totalQuestions;   // จำนวนข้อทั้งหมด (เช่น 10)
+  const scorePercentage = finalScore; // เปอร์เซ็นต์ (เช่น 80)
 
-  const passed = finalScore >= 80;
+  const passed = scorePercentage >= 80;
 
   console.log('🎮 Game Finished ==================');
   console.log('📍 Game ID: sentence');
   console.log('📍 Level:', selectedLevel);
-  console.log('📍 Total Questions:', totalQuestions);
-  console.log('📍 Correct Answers:', correctAnswers);
-  console.log('📍 Final Score:', finalScore);
+  console.log('📍 Correct Answers:', rawCorrect, 'from', rawTotal);
+  console.log('📍 Score Percentage:', scorePercentage + '%');
   console.log('📍 Passed:', passed);
   console.log('===================================');
 
@@ -224,13 +226,15 @@ const finishGame = () => {
     playSound('achievement');
   }
 
-  // ✅ บันทึกผล (ส่งคะแนนเป็นเปอร์เซ็นต์)
+  // ✅ บันทึกผล - ส่งทั้งสองค่า
   const gameResult = {
     gameId: 'sentence',
     level: selectedLevel,
-    score: finalScore, // ส่งเป็นเปอร์เซ็นต์
-    words: totalQuestions,
-    correctAnswers: correctAnswers,
+    score: scorePercentage,     // เปอร์เซ็นต์สำหรับโชว์
+    correctCount: rawCorrect,    // จำนวนข้อที่ถูก (ดิบ)
+    totalQuestions: rawTotal,    // จำนวนข้อทั้งหมด (ดิบ)
+    words: rawTotal,             // เผื่อ compatibility
+    correctAnswers: rawCorrect,  // เผื่อ compatibility
     date: new Date().toISOString()
   };
 
@@ -239,7 +243,6 @@ const finishGame = () => {
 
   // ปลดล็อกด่านถัดไป
   if (passed && selectedLevel < 10) {
-    console.log('🔓 Unlocking next level:', selectedLevel + 1);
     unlockLevel('sentence', selectedLevel + 1);
   }
 
