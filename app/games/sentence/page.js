@@ -184,10 +184,18 @@ const finishGame = () => {
   setTimerActive(false);
 
   const totalQuestions = questions.length;
-  const correctAnswers = score; // เช่น 10
-  const finalScore = Math.round((correctAnswers / totalQuestions) * 100); // = 100
+  const correctAnswers = score; // เช่น 9
   
-  // ✅ ประกาศตัวแปร passed
+  // ✅ เพิ่ม Debug ตรงนี้
+  console.log('🔍 DEBUG - ก่อนคำนวณ:', {
+    totalQuestions,
+    correctAnswers,
+    scoreState: score,
+    questionsLength: questions.length,
+    answerHistory: answerHistory.map(a => a.correct) // ดูว่าตอบถูกข้อไหนบ้าง
+  });
+  
+  const finalScore = Math.round((correctAnswers / totalQuestions) * 100);
   const passed = finalScore >= 80;
 
   console.log('🎮 Game Finished ==================');
@@ -195,6 +203,11 @@ const finishGame = () => {
   console.log('📍 Correct Answers:', correctAnswers, 'from', totalQuestions);
   console.log('📍 Final Score:', finalScore);
   console.log('📍 Passed:', passed);
+  console.log('📍 Answer History:', answerHistory.map(a => ({
+    correct: a.correct,
+    userAnswer: a.userAnswer,
+    correctAnswer: a.question?.correct
+  })));
   console.log('===================================');
 
   if (passed) {
