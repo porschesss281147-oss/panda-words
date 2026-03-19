@@ -162,101 +162,101 @@ export function UserProvider({ children }) {
     return false;
   };
 
-  // ✅ เพิ่มผลการเล่นเกม (แก้ไขแล้ว)
-  const addGameResult = async (result) => {
-    if (!user) return null;
+ // ✅ เพิ่มผลการเล่นเกม (แก้ไขแล้ว)
+const addGameResult = async (result) => {
+  if (!user) return null;
+  
+  try {
+    setError(null);
+
+    console.log('📥 addGameResult received:', result);
     
-    try {
-      setError(null);
-
-      console.log('📥 addGameResult received:', result);
-      
-      const scoreToAdd = result.score; // คะแนนที่ได้ (เปอร์เซ็นต์)
-      
-      // ตรวจสอบความถูกต้อง
-      if (isNaN(scoreToAdd) || scoreToAdd < 0 || scoreToAdd > 100) {
-        console.error('Invalid score:', scoreToAdd);
-        return null;
-      }
-
-      // ✅ 1. บันทึกผลการเล่นลงใน collection games
-      const gamesRef = collection(db, 'games');
-      const gameResult = {
-        userId: user.id,
-        userName: user.name,
-        userIcon: user.icon,
-        ...result,
-        timestamp: new Date().toISOString()
-      };
-      
-      const docRef = await addDoc(gamesRef, gameResult);
-      
-      // ✅ 2. อัพเดทประวัติการเล่น (gameResults)
-      const gameResults = [gameResult, ...(user.gameResults || [])].slice(0, 50);
-      
-      // ✅ 3. คำนวณคะแนนรวมใหม่
-      const currentTotal = user.totalScore || 0;
-      const newTotalScore = currentTotal + scoreToAdd;
-      
-      // ✅ 4. อัพเดทสถิติเกม (gameStats)
-      const currentStats = user.gameStats?.[result.gameId] || {
-        played: 0,
-        totalScore: 0,
-        bestScore: 0,
-        totalCorrect: 0,
-        totalQuestions: 0
-      };
-      
-      const newStats = {
-        played: currentStats.played + 1,
-        totalScore: currentStats.totalScore + scoreToAdd,
-        bestScore: Math.max(currentStats.bestScore, scoreToAdd),
-        totalCorrect: currentStats.totalCorrect + (result.correctAnswers || 0),
-        totalQuestions: currentStats.totalQuestions + (result.words || 0)
-      };
-      
-      // ✅ 5. อัพเดทคะแนนล่าสุด (latestScores)
-      const latestScores = {
-        ...(user.latestScores || {}),
-        [result.gameId]: scoreToAdd
-      };
-      
-      // ✅ 6. เตรียมข้อมูลสำหรับอัพเดท
-      const updates = {
-        gameResults,
-        gameStats: {
-          ...user.gameStats,
-          [result.gameId]: newStats
-        },
-        latestScores,
-        totalScore: newTotalScore,
-        gamesPlayed: (user.gamesPlayed || 0) + 1
-      };
-      
-      // ✅ 7. ถ้าได้คะแนนเต็ม 100
-      if (scoreToAdd === 100) {
-        updates.perfectGames = (user.perfectGames || 0) + 1;
-      }
-      
-      // ✅ 8. บันทึกการอัพเดท
-      console.log('📊 Updating user with:', {
-        previousTotal: currentTotal,
-        adding: scoreToAdd,
-        newTotal: newTotalScore,
-        gameStats: newStats
-      });
-      
-      await updateUserData(updates);
-      
-      console.log('✅ Game result saved successfully! New total score:', newTotalScore);
-      return { id: docRef.id, ...gameResult };
-      
-    } catch (error) {
-      console.error('Error adding game result:', error);
-      setError('เกิดข้อผิดพลาดในการบันทึกผลการเล่น');
+    const scoreToAdd = result.score; // คะแนนที่ได้ (เปอร์เซ็นต์)
+    
+    // ตรวจสอบความถูกต้อง
+    if (isNaN(scoreToAdd) || scoreToAdd < 0 || scoreToAdd > 100) {
+      console.error('Invalid score:', scoreToAdd);
       return null;
     }
-  };
+
+    // ✅ 1. บันทึกผลการเล่นลงใน collection games
+    const gamesRef = collection(db, 'games');
+    const gameResult = {
+      userId: user.id,
+      userName: user.name,
+      userIcon: user.icon,
+      ...result,
+      timestamp: new Date().toISOString()
+    };
+    
+    const docRef = await addDoc(gamesRef, gameResult);
+    
+    // ✅ 2. อัพเดทประวัติการเล่น (gameResults)
+    const gameResults = [gameResult, ...(user.gameResults || [])].slice(0, 50);
+    
+    // ✅ 3. คำนวณคะแนนรวมใหม่
+    const currentTotal = user.totalScore || 0;
+    const newTotalScore = currentTotal + scoreToAdd;
+    
+    // ✅ 4. อัพเดทสถิติเกม (gameStats) - แก้ไขตรงนี้!
+    const currentStats = user.gameStats?.[result.gameId] || {
+      played: 0,
+      totalScore: 0,
+      bestScore: 0,
+      totalCorrect: 0,
+      totalQuestions: 0
+    };
+    
+    const newStats = {
+      played: currentStats.played + 1,
+      totalScore: currentStats.totalScore + scoreToAdd,
+      bestScore: Math.max(currentStats.bestScore, scoreToAdd),
+      totalCorrect: currentStats.totalCorrect + (result.correct || 0), // ← เปลี่ยนจาก correctAnswers เป็น correct
+      totalQuestions: currentStats.totalQuestions + (result.total || 0) // ← เปลี่ยนจาก words เป็น total
+    };
+    
+    // ✅ 5. อัพเดทคะแนนล่าสุด (latestScores)
+    const latestScores = {
+      ...(user.latestScores || {}),
+      [result.gameId]: scoreToAdd
+    };
+    
+    // ✅ 6. เตรียมข้อมูลสำหรับอัพเดท
+    const updates = {
+      gameResults,
+      gameStats: {
+        ...user.gameStats,
+        [result.gameId]: newStats
+      },
+      latestScores,
+      totalScore: newTotalScore,
+      gamesPlayed: (user.gamesPlayed || 0) + 1
+    };
+    
+    // ✅ 7. ถ้าได้คะแนนเต็ม 100
+    if (scoreToAdd === 100) {
+      updates.perfectGames = (user.perfectGames || 0) + 1;
+    }
+    
+    // ✅ 8. บันทึกการอัพเดท
+    console.log('📊 Updating user with:', {
+      previousTotal: currentTotal,
+      adding: scoreToAdd,
+      newTotal: newTotalScore,
+      gameStats: newStats
+    });
+    
+    await updateUserData(updates);
+    
+    console.log('✅ Game result saved successfully! New total score:', newTotalScore);
+    return { id: docRef.id, ...gameResult };
+    
+  } catch (error) {
+    console.error('Error adding game result:', error);
+    setError('เกิดข้อผิดพลาดในการบันทึกผลการเล่น');
+    return null;
+  }
+};
 
   // เพิ่มเวลาเล่น
   const addPlayTime = async (minutes) => {
