@@ -138,81 +138,126 @@ export default function SentenceGamePage() {
     
     const isCorrect = answer === currentQuestion.correct;
     
+    // 🔍 DEBUG: เช็คว่าตอบถูกไหม
+    console.log(`📝 ข้อ ${currentQuestionIndex + 1}:`, {
+        answer,
+        correct: currentQuestion.correct,
+        isCorrect,
+        currentScoreBefore: score
+    });
+    
     if (isCorrect) {
-      playSound('success');
-      setScore(prev => prev + 1);
-      setFeedback({
-        show: true,
-        message: '✓ ถูกต้อง!',
-        type: 'success',
-        correct: currentQuestion.correct
-      });
+        playSound('success');
+        setScore(prev => {
+            const newScore = prev + 1;
+            // 🔍 DEBUG: ดูการเพิ่มคะแนน
+            console.log(`✅ เพิ่มคะแนน: ${prev} → ${newScore}`);
+            return newScore;
+        });
+        setFeedback({
+            show: true,
+            message: '✓ ถูกต้อง!',
+            type: 'success',
+            correct: currentQuestion.correct
+        });
     } else {
-      playSound('error');
-      setFeedback({
-        show: true,
-        message: '✗ ผิด!',
-        type: 'error',
-        correct: currentQuestion.correct || ''
-      });
+        playSound('error');
+        setFeedback({
+            show: true,
+            message: '✗ ผิด!',
+            type: 'error',
+            correct: currentQuestion.correct || ''
+        });
     }
 
-      // บันทึกประวัติ
-    setAnswerHistory(prev => [...prev, {
-      question: currentQuestion,
-      userAnswer: answer,
-      correct: isCorrect
-    }]);
+    // บันทึกประวัติ
+    setAnswerHistory(prev => {
+        const newHistory = [...prev, {
+            question: currentQuestion,
+            userAnswer: answer,
+            correct: isCorrect
+        }];
+        // 🔍 DEBUG: ดูประวัติการตอบ
+        console.log('📚 Answer History:', newHistory.map(h => ({
+            correct: h.correct
+        })));
+        return newHistory;
+    });
 
     setTimeout(() => {
-      setFeedback({ show: false, message: '', type: '', correct: '' });
-      moveToNextQuestion();
+        setFeedback({ show: false, message: '', type: '', correct: '' });
+        moveToNextQuestion();
     }, 2500);
-  };
+};
 
-  const moveToNextQuestion = () => {
+const moveToNextQuestion = () => {
+    // 🔍 DEBUG: เช็คก่อนไปข้อถัดไป
+    console.log(`➡️ จบข้อ ${currentQuestionIndex + 1}, คะแนนปัจจุบัน: ${score}`);
+    
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-      setTimeLeft(30);
-      setSelectedAnswer(null);
-      setTimerActive(true);
+        setCurrentQuestionIndex(prev => {
+            const next = prev + 1;
+            console.log(`📌 ไปข้อ ${next + 1}`);
+            return next;
+        });
+        setTimeLeft(30);
+        setSelectedAnswer(null);
+        setTimerActive(true);
     } else {
-      finishGame();
+        console.log('🏁 จบเกม!');
+        finishGame();
     }
-  };
+};
 
- const finishGame = () => {
-  setGameCompleted(true);
-  setTimerActive(false);
+const finishGame = () => {
+    setGameCompleted(true);
+    setTimerActive(false);
 
-      const totalQuestions = questions.length;
-    const finalScore = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+    const totalQuestions = questions.length;
+    
+    // 🔍 DEBUG สำคัญ: ตรวจสอบค่าก่อนคำนวณ
+    console.log('🔍 FINAL CHECK:', {
+        scoreState: score,
+        totalQuestions,
+        answerHistoryLength: answerHistory.length,
+        correctInHistory: answerHistory.filter(a => a.correct).length,
+        allAnswers: answerHistory.map(a => a.correct)
+    });
+
+    // ใช้ค่าจาก answerHistory เพื่อความแน่ใจ
+    const correctCount = answerHistory.filter(a => a.correct).length;
+    const finalScore = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+    
+    console.log('📊 FINAL SCORE:', {
+        using_score_state: score,
+        using_history: correctCount,
+        finalScore
+    });
+
     const passed = finalScore >= 80;
     
     if (passed) {
-      playSound('achievement');
+        playSound('achievement');
     }
 
-  // บันทึกผล
+    // บันทึกผล
     addGameResult({
-      gameId: 'sentence',
-      level: selectedLevel,
-      score: finalScore,
-      correct: score,
-      total: totalQuestions,
-      passed,
-      details: answerHistory
+        gameId: 'sentence',
+        level: selectedLevel,
+        score: finalScore,
+        correct: correctCount,  // ใช้จาก history แทน score state
+        total: totalQuestions,
+        passed,
+        details: answerHistory
     });
 
+    if (passed && selectedLevel < 10) {
+        unlockLevel('sentence', selectedLevel + 1);
+    }
 
-  if (passed && selectedLevel < 10) {
-    unlockLevel('sentence', selectedLevel + 1);
-  }
-
-  // ใช้ setTimeout เพื่อให้ state อัพเดทก่อนแสดงผล
-  setTimeout(() => {
-    setShowResult(true);
-  }, 2000);
+    setTimeout(() => {
+        setShowResult(true);
+    }, 2000);
 };
 
   const playAgain = () => {
