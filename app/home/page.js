@@ -272,24 +272,25 @@ export default function HomePage() {
     }
   };
 
-  // ในฟังก์ชัน calculateStats หรือส่วนที่ใช้แสดงคะแนน
-const calculateStats = () => {
-  if (!user) return { 
-    gamesPlayed: 0, 
-    totalScore: 0, 
-    unlockedLevels: 0, 
-    challengesCompleted: 0 
-  };
+  // คำนวณสถิติ (fallback)
+  const calculateStats = () => {
+    if (!user) return { 
+      gamesPlayed: 0, 
+      totalScore: 0, 
+      unlockedLevels: 0, 
+      challengesCompleted: 0 
+    };
 
-  const unlockedLevels = Object.values(user.unlockedLevels || {}).reduce((a, b) => a + b, 0);
+    const unlockedLevels = Object.values(user.unlockedLevels || {}).reduce((a, b) => a + b, 0);
+  const challengesCompleted = user.challengesCompleted || 0;
 
-  return { 
-    gamesPlayed: user.gamesPlayed || 0, 
-    totalScore: user.totalScore || 0,
+    return { 
+      gamesPlayed: user.gamesPlayed || realStats.gamesPlayed || 0, 
+    totalScore: user.totalScore || realStats.totalScore || 0, 
     unlockedLevels, 
-    challengesCompleted: user.challengesCompleted || 0 
+    challengesCompleted 
+    };
   };
-};
 
   const stats = calculateStats();
   const userRank = getUserRank(user?.id);
