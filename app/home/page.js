@@ -281,14 +281,13 @@ const calculateStats = () => {
     challengesCompleted: 0 
   };
 
-    const unlockedLevels = Object.values(user.unlockedLevels || {}).reduce((a, b) => a + b, 0);
-  const challengesCompleted = user.challengesCompleted || 0;
+  const unlockedLevels = Object.values(user.unlockedLevels || {}).reduce((a, b) => a + b, 0);
 
   return { 
     gamesPlayed: user.gamesPlayed || 0, 
-    totalScore: user.totalScore || 0, // ✅ คะแนนรวมจริง
+    totalScore: user.totalScore || 0,
     unlockedLevels, 
-    challengesCompleted 
+    challengesCompleted: user.challengesCompleted || 0 
   };
 };
 
