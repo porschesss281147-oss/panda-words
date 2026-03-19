@@ -392,9 +392,17 @@ const finishGame = () => {
 
   // หน้าสรุปผล
   if (showResult) {
-    const totalQuestions = questions.length;
-    const finalScore = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+    const correctCount = answerHistory.filter(a => a.correct).length;
+    const finalScore = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
     const passed = finalScore >= 80;
+
+    // เพิ่ม console.log เพื่อตรวจสอบ
+    console.log('📊 SHOW RESULT:', {
+        score_state: score,
+        correct_from_history: correctCount,
+        finalScore,
+        answerHistory_length: answerHistory.length
+    });
     
     return (
       <div className="min-h-screen" style={{ background: "#f4efe6" }}>
