@@ -44,6 +44,10 @@ export default function MatchingGamePage() {
   const [answerHistory, setAnswerHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [timerActive, setTimerActive] = useState(false);
+
+  // ✅ แก้ไข: เพิ่ม useRef เพื่อจำค่าล่าสุดแบบ Real-time ตัดปัญหา Stale Closure
+  const scoreRef = useRef(0);
+  const historyRef = useRef([]);
   
   // State สำหรับเกมลากวาง
   const [availableWords, setAvailableWords] = useState([]);
@@ -54,7 +58,7 @@ export default function MatchingGamePage() {
   const game = games.find(g => g.id === 'matching');
   const unlockedLevel = user?.unlockedLevels?.matching || 1;
 
-  // ✅ แก้ไข: เพิ่มเสียงให้ useEffect สำหรับ Feedback
+  // เพิ่มเสียงให้ useEffect สำหรับ Feedback
   useEffect(() => {
     if (feedback.show) {
       if (feedback.type === 'success') {
@@ -76,7 +80,7 @@ export default function MatchingGamePage() {
 
   const startNewGame = () => {
     setLoading(true);
-    playSound('start'); // ✅ เพิ่มเสียงเริ่มเกม
+    playSound('start'); // เสียงเริ่มเกม
     
     try {
       const newQuestions = generateMatchingQuestions(selectedLevel, 10);
@@ -88,9 +92,14 @@ export default function MatchingGamePage() {
       
       setQuestions(newQuestions);
       setCurrentQuestionIndex(0);
+      
+      // ✅ แก้ไข: รีเซ็ตค่าทั้งใน State และ Ref
       setScore(0);
+      scoreRef.current = 0;
       setTimeLeft(40);
       setAnswerHistory([]);
+      historyRef.current = [];
+      
       setGameCompleted(false);
       setShowResult(false);
       setFeedback({ show: false, message: '', type: '', correct: '' });
@@ -99,7 +108,7 @@ export default function MatchingGamePage() {
       initializeRound(newQuestions[0]);
     } catch (error) {
       console.error('Error starting game:', error);
-      playSound('error'); // ✅ เพิ่มเสียง error
+      playSound('error'); 
       setFeedback({
         show: true,
         message: 'เกิดข้อผิดพลาด กรุณาลองใหม่',
@@ -144,7 +153,7 @@ export default function MatchingGamePage() {
     setDropZones(zones);
   };
 
-  // ✅ แก้ไข: เพิ่มเสียง tick และ time
+  // เสียง tick และ time
   useEffect(() => {
     if (timerActive && !gameCompleted && !showResult && !feedback.show && questions.length > 0) {
       timerRef.current = setInterval(() => {
@@ -170,7 +179,7 @@ export default function MatchingGamePage() {
   const handleTimeOut = () => {
     if (!questions.length || currentQuestionIndex >= questions.length) return;
     
-    playSound('time'); // ✅ เสียงหมดเวลา
+    playSound('time'); // เสียงหมดเวลา
     setTimerActive(false);
     
     const currentQuestion = questions[currentQuestionIndex];
@@ -184,12 +193,15 @@ export default function MatchingGamePage() {
       correct: currentQuestion.chinese
     });
 
-    setAnswerHistory(prev => [...prev, {
+    // ✅ แก้ไข: บันทึกประวัติผ่าน Ref
+    const newHistoryItem = {
       question: currentQuestion,
       userAnswer: null,
       correct: false,
       timeOut: true
-    }]);
+    };
+    historyRef.current = [...historyRef.current, newHistoryItem];
+    setAnswerHistory(historyRef.current);
 
     setTimeout(() => {
       setFeedback({ show: false, message: '', type: '', correct: '' });
@@ -202,7 +214,7 @@ export default function MatchingGamePage() {
     setDraggedItem(wordItem);
     e.dataTransfer.setData('text/plain', wordItem.word);
     e.dataTransfer.effectAllowed = 'move';
-    playSound('click'); // ✅ เสียงลาก
+    playSound('click'); 
   };
 
   const handleDragOver = (e) => {
@@ -216,12 +228,12 @@ export default function MatchingGamePage() {
     
     // เช็คว่าช่องนี้ว่างหรือไม่
     if (dropZones[zoneIndex].word !== null) {
-      playSound('error'); // ✅ เสียงเตือนเมื่อวางไม่ได้
+      playSound('error'); 
       setDraggedItem(null);
       return;
     }
 
-    playSound('click'); // ✅ เสียงวางสำเร็จ
+    playSound('click'); 
 
     // อัพเดทช่องวาง
     const newZones = [...dropZones];
@@ -245,7 +257,7 @@ export default function MatchingGamePage() {
     const zone = dropZones[zoneIndex];
     if (!zone.word) return;
 
-    playSound('click'); // ✅ เสียงลบคำ
+    playSound('click'); 
 
     // คืนคำศัพท์กลับไปให้ลากใหม่
     const wordItem = availableWords.find(item => item.word === zone.word && item.isUsed);
@@ -269,7 +281,7 @@ export default function MatchingGamePage() {
   const checkAnswer = () => {
     // ตรวจสอบว่าวางครบทุกช่องหรือยัง
     if (dropZones.some(zone => !zone.word)) {
-      playSound('warning'); // ✅ เสียงเตือน
+      playSound('warning'); 
       setFeedback({
         show: true,
         message: '⚠️ วางคำศัพท์ให้ครบทุกช่องก่อน',
@@ -295,8 +307,12 @@ export default function MatchingGamePage() {
     setTimerActive(false);
     
     if (isCorrect) {
-      playSound('success'); // ✅ เสียงถูกต้อง
-      setScore(prev => prev + 1);
+      playSound('success'); 
+      
+      // ✅ แก้ไข: บวกคะแนนและอัปเดตประวัติผ่าน Ref
+      scoreRef.current += 1;
+      setScore(scoreRef.current);
+      
       setFeedback({
         show: true,
         message: '✓ ถูกต้อง!',
@@ -304,18 +320,20 @@ export default function MatchingGamePage() {
         correct: currentQuestion.chinese
       });
 
-      setAnswerHistory(prev => [...prev, {
+      const newHistoryItem = {
         question: currentQuestion,
         userAnswer: userSentence,
         correct: true
-      }]);
+      };
+      historyRef.current = [...historyRef.current, newHistoryItem];
+      setAnswerHistory(historyRef.current);
 
       setTimeout(() => {
         setFeedback({ show: false, message: '', type: '', correct: '' });
         moveToNextQuestion();
       }, 1500);
     } else {
-      playSound('error'); // ✅ เสียงผิด
+      playSound('error'); 
       setFeedback({
         show: true,
         message: '✗ ผิด!',
@@ -323,15 +341,17 @@ export default function MatchingGamePage() {
         correct: currentQuestion.chinese
       });
 
-      setAnswerHistory(prev => [...prev, {
+      // ✅ แก้ไข: อัปเดตประวัติผ่าน Ref
+      const newHistoryItem = {
         question: currentQuestion,
         userAnswer: userSentence,
         correct: false
-      }]);
+      };
+      historyRef.current = [...historyRef.current, newHistoryItem];
+      setAnswerHistory(historyRef.current);
 
       setTimeout(() => {
         setFeedback({ show: false, message: '', type: '', correct: '' });
-        // ไม่ต้อง setTimerActive(true) ที่นี่ เพราะ moveToNextQuestion จะจัดการให้
         moveToNextQuestion();
       }, 2000);
     }
@@ -357,25 +377,29 @@ export default function MatchingGamePage() {
     setGameCompleted(true);
     setTimerActive(false);
     
+    // ✅ แก้ไข: ดึงข้อมูลล่าสุดจาก Ref มาใช้ประมวลผลแทน State
+    const actualScore = scoreRef.current;
+    const actualHistory = historyRef.current;
+    
     const totalQuestions = questions.length;
-    const finalScore = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+    const finalScore = totalQuestions > 0 ? Math.round((actualScore / totalQuestions) * 100) : 0;
     const passed = finalScore >= 80;
     
     if (passed) {
-      playSound('success'); // ✅ เสียงผ่าน
-      playSound('achievement'); // ✅ เสียงพิเศษ
+      playSound('success'); 
+      playSound('achievement'); 
     } else {
-      playSound('error'); // ✅ เสียงไม่ผ่าน
+      playSound('error'); 
     }
 
     addGameResult({
       gameId: 'matching',
       level: selectedLevel,
       score: finalScore,
-      correct: score,
+      correct: actualScore, // ใช้ค่าจาก Ref
       total: totalQuestions,
       passed,
-      details: answerHistory
+      details: actualHistory // ใช้ค่าจาก Ref
     });
 
     if (passed && selectedLevel < 10) {
@@ -388,19 +412,19 @@ export default function MatchingGamePage() {
   };
 
   const playAgain = () => {
-    playSound('click'); // ✅ เสียงคลิก
+    playSound('click'); 
     startNewGame();
   };
 
   const startGame = (level) => {
-    playSound('click'); // ✅ เสียงคลิกเลือกระดับ
+    playSound('click'); 
     setSelectedLevel(level);
     setGameStarted(true);
     setShowResult(false);
   };
 
   const goToLevelSelect = () => {
-    playSound('click'); // ✅ เสียงคลิกกลับ
+    playSound('click'); 
     setGameStarted(false);
     setShowResult(false);
   };
@@ -408,7 +432,7 @@ export default function MatchingGamePage() {
   const speak = (text) => {
     if (!text) return;
     
-    playSound('click'); // ✅ เสียงคลิกเมื่อกดฟัง
+    playSound('click'); 
     
     if (!window.speechSynthesis) {
       alert('เบราว์เซอร์ของคุณไม่รองรับการอ่านออกเสียง');
@@ -425,7 +449,6 @@ export default function MatchingGamePage() {
     window.speechSynthesis.speak(utterance);
   };
 
-  // ✅ เพิ่มปุ่มทดสอบเสียง (สำหรับ development)
   const TestSoundButton = () => {
     if (process.env.NODE_ENV === 'development') {
       return (
@@ -547,6 +570,7 @@ export default function MatchingGamePage() {
   // หน้าสรุปผล
   if (showResult) {
     const totalQuestions = questions.length;
+    // ✅ แก้ไข: ใช้ค่าที่อัปเดตล่าสุดตรงนี้เพื่อให้หน้าจอแสดงผลถูกด้วย
     const finalScore = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
     const passed = finalScore >= 80;
     
