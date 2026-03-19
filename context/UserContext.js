@@ -12,7 +12,8 @@ import {
   where,
   getDocs,
   orderBy,
-  limit
+  limit,
+  increment
 } from '@/lib/firebase';
 
 const UserContext = createContext();
@@ -40,6 +41,7 @@ export function UserProvider({ children }) {
       if (userDoc.exists()) {
         setUser({ id: userId, ...userDoc.data() });
       } else {
+        // ถ้าไม่พบผู้ใช้ใน Firebase ให้ลบ localStorage
         localStorage.removeItem('userId');
         setError('ไม่พบข้อมูลผู้ใช้');
       }
@@ -51,18 +53,12 @@ export function UserProvider({ children }) {
     }
   };
 
-  const forceRefreshUser = async () => {
-    if (!user) return;
-    setLoading(true);
-    await loadUserFromFirebase(user.id);
-  };
-
   // สร้างผู้ใช้ใหม่
   const createUser = async (name, icon) => {
     try {
       setError(null);
       
-      // ตรวจสอบชื่อซ้ำ
+      // ตรวจสอบชื่อซ้ำ (optional)
       const usersRef = collection(db, 'users');
       const q = query(usersRef, where('name', '==', name));
       const querySnapshot = await getDocs(q);
@@ -82,66 +78,18 @@ export function UserProvider({ children }) {
         icon,
         createdAt: new Date().toISOString(),
         lastLogin: new Date().toISOString(),
-        
-        // ✅ ด่านที่ปลดล็อกแล้ว
         unlockedLevels: {
-          sentence: 1,
+          memory: 1,
           matching: 1,
-          listening: 1,
-          spelling: 1
+          spelling: 1,
+          listening: 1
         },
-        
-        // ✅ คะแนนรวมจริง (ผลรวมทั้งหมด - ใช้อันดับ)
         totalScore: 0,
-        
-        // ✅ คะแนนล่าสุดของแต่ละเกม
-        latestScores: {
-          sentence: 0,
-          matching: 0,
-          listening: 0,
-          spelling: 0
-        },
-        
-        // ✅ สถิติการเล่น
         gamesPlayed: 0,
         challengesCompleted: 0,
         perfectGames: 0,
         totalPlayTime: 0,
         achievements: [],
-        gameResults: [],
-        
-        // ✅ สถิติแยกตามเกม (เก็บคะแนนรวมของแต่ละเกม)
-        gameStats: {
-          sentence: { 
-            played: 0, 
-            totalScore: 0,
-            bestScore: 0, 
-            totalCorrect: 0, 
-            totalQuestions: 0 
-          },
-          matching: { 
-            played: 0, 
-            totalScore: 0, 
-            bestScore: 0, 
-            totalCorrect: 0, 
-            totalQuestions: 0 
-          },
-          listening: { 
-            played: 0, 
-            totalScore: 0, 
-            bestScore: 0, 
-            totalCorrect: 0, 
-            totalQuestions: 0 
-          },
-          spelling: { 
-            played: 0, 
-            totalScore: 0, 
-            bestScore: 0, 
-            totalCorrect: 0, 
-            totalQuestions: 0 
-          }
-        },
-        
         settings: {
           sound: true,
           music: true,
@@ -209,105 +157,46 @@ export function UserProvider({ children }) {
     return false;
   };
 
- // ✅ เพิ่มผลการเล่นเกม (แก้ไขให้รับค่าถูกต้อง)
-const addGameResult = async (result) => {
-  if (!user) return null;
-  
-  try {
-    setError(null);
+  // เพิ่มผลการเล่นเกม
+  const addGameResult = async (result) => {
+    if (!user) return null;
     
-    // ✅ ใช้ score โดยตรง ไม่ต้องคำนวณใหม่
-    const scoreToAdd = result.score; // ที่ส่งมาเป็นเปอร์เซ็นต์แล้ว (0-100)
-    
-    // ✅ ตรวจสอบว่าค่าถูกต้อง
-    if (isNaN(scoreToAdd) || scoreToAdd < 0 || scoreToAdd > 100) {
-      console.error('Invalid score:', scoreToAdd);
+    try {
+      setError(null);
+      
+      // บันทึกผลการเล่นลงใน collection games
+      const gamesRef = collection(db, 'games');
+      const gameResult = {
+        userId: user.id,
+        userName: user.name,
+        userIcon: user.icon,
+        ...result,
+        timestamp: new Date().toISOString()
+      };
+      
+      const docRef = await addDoc(gamesRef, gameResult);
+      
+      // คำนวณสถิติใหม่
+      const updates = {
+        gamesPlayed: (user.gamesPlayed || 0) + 1,
+        totalScore: (user.totalScore || 0) + (result.score || 0)
+      };
+      
+      // ถ้าได้คะแนนเต็ม
+      if (result.score === 100) {
+        updates.perfectGames = (user.perfectGames || 0) + 1;
+      }
+      
+      await updateUserData(updates);
+      
+      return { id: docRef.id, ...gameResult };
+      
+    } catch (error) {
+      console.error('Error adding game result:', error);
+      setError('เกิดข้อผิดพลาดในการบันทึกผลการเล่น');
       return null;
     }
-
-    console.log('📊 Adding score:', scoreToAdd, 'to total:', user.totalScore);
-
-    // เตรียมข้อมูลผลการเล่น
-    const gameResult = {
-      userId: user.id,
-      userName: user.name,
-      userIcon: user.icon,
-      ...result,
-      date: new Date().toISOString(),
-      timestamp: new Date().toISOString()
-    };
-    
-    // บันทึกลง Firestore
-    const gamesRef = collection(db, 'games');
-    const docRef = await addDoc(gamesRef, gameResult);
-    
-    // อัพเดทประวัติการเล่น
-    const gameResults = [gameResult, ...(user.gameResults || [])].slice(0, 50);
-    
-    // ✅ คำนวณคะแนนรวมใหม่ (บวกเพิ่ม)
-    const currentTotal = user.totalScore || 0;
-    const newTotalScore = currentTotal + scoreToAdd;
-    
-    console.log('🧮 Score calculation:', {
-      current: currentTotal,
-      adding: scoreToAdd,
-      newTotal: newTotalScore
-    });
-    
-    // ✅ อัพเดทสถิติเกม
-    const currentStats = user.gameStats?.[result.gameId] || {
-      played: 0,
-      totalScore: 0,
-      bestScore: 0,
-      totalCorrect: 0,
-      totalQuestions: 0
-    };
-    
-    const newStats = {
-      played: currentStats.played + 1,
-      totalScore: currentStats.totalScore + scoreToAdd,
-      bestScore: Math.max(currentStats.bestScore, scoreToAdd),
-      totalCorrect: currentStats.totalCorrect + (result.correctCount || result.correctAnswers || 0),
-      totalQuestions: currentStats.totalQuestions + (result.totalQuestions || result.words || 0)
-    };
-    
-    // ✅ อัพเดทคะแนนล่าสุด
-    const latestScores = {
-      ...(user.latestScores || {}),
-      [result.gameId]: scoreToAdd
-    };
-    
-    // เตรียมข้อมูลสำหรับอัพเดท
-    const updates = {
-      gameResults,
-      gameStats: {
-        ...user.gameStats,
-        [result.gameId]: newStats
-      },
-      latestScores,
-      totalScore: newTotalScore, // ✅ คะแนนรวมใหม่
-      gamesPlayed: (user.gamesPlayed || 0) + 1
-    };
-    
-    // ถ้าได้คะแนนเต็ม 100
-    if (scoreToAdd === 100) {
-      updates.perfectGames = (user.perfectGames || 0) + 1;
-    }
-    
-    // บันทึกการอัพเดท
-    await updateUserData(updates);
-    
-    console.log('✅ Game result saved successfully!');
-    console.log('📈 New total score:', newTotalScore);
-    
-    return { id: docRef.id, ...gameResult };
-    
-  } catch (error) {
-    console.error('Error adding game result:', error);
-    setError('เกิดข้อผิดพลาดในการบันทึกผลการเล่น');
-    return null;
-  }
-};
+  };
 
   // เพิ่มเวลาเล่น
   const addPlayTime = async (minutes) => {
@@ -340,7 +229,7 @@ const addGameResult = async (result) => {
   };
 
   // ดึงประวัติการเล่น
-  const getGameHistory = async (limitCount = 10) => {
+  const getGameHistory = async (limit = 10) => {
     if (!user) return [];
     
     try {
@@ -349,7 +238,7 @@ const addGameResult = async (result) => {
         gamesRef, 
         where('userId', '==', user.id),
         orderBy('timestamp', 'desc'),
-        limit(limitCount)
+        limit(limit)
       );
       
       const querySnapshot = await getDocs(q);
@@ -371,10 +260,10 @@ const addGameResult = async (result) => {
       const querySnapshot = await getDocs(q);
       
       const stats = {
-        sentence: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
-        matching: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
-        listening: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 },
-        spelling: { played: 0, totalScore: 0, bestScore: 0, averageScore: 0 }
+        memory: { played: 0, totalScore: 0, bestScore: 0 },
+        matching: { played: 0, totalScore: 0, bestScore: 0 },
+        spelling: { played: 0, totalScore: 0, bestScore: 0 },
+        listening: { played: 0, totalScore: 0, bestScore: 0 }
       };
       
       querySnapshot.forEach(doc => {
@@ -386,13 +275,6 @@ const addGameResult = async (result) => {
         }
       });
       
-      // คำนวณค่าเฉลี่ย
-      Object.keys(stats).forEach(key => {
-        if (stats[key].played > 0) {
-          stats[key].averageScore = Math.round(stats[key].totalScore / stats[key].played);
-        }
-      });
-      
       return stats;
       
     } catch (error) {
@@ -401,19 +283,26 @@ const addGameResult = async (result) => {
     }
   };
 
-  // ดึงคะแนนรวมจริงของแต่ละเกม
-  const getGameTotalScore = (gameId) => {
-    return user?.gameStats?.[gameId]?.totalScore || 0;
-  };
-
-  // ดึงคะแนนล่าสุดของเกม
-  const getLatestScore = (gameId) => {
-    return user?.latestScores?.[gameId] || 0;
-  };
-
-  // ดึงคะแนนรวมทั้งหมด
-  const getTotalScore = () => {
-    return user?.totalScore || 0;
+  // รีเซ็ตความคืบหน้า
+  const resetProgress = async () => {
+    if (!user) return;
+    
+    const resetData = {
+      unlockedLevels: {
+        memory: 1,
+        matching: 1,
+        spelling: 1,
+        listening: 1
+      },
+      totalScore: 0,
+      gamesPlayed: 0,
+      challengesCompleted: 0,
+      perfectGames: 0,
+      totalPlayTime: 0,
+      achievements: []
+    };
+    
+    await updateUserData(resetData);
   };
 
   return (
@@ -430,16 +319,12 @@ const addGameResult = async (result) => {
       // User data functions
       updateUserData,
       unlockLevel,
-      forceRefreshUser,
       
       // Game functions
       addGameResult,
       addPlayTime,
       getGameHistory,
       getGameStats,
-      getLatestScore,
-      getGameTotalScore,
-      getTotalScore,
       
       // Achievement functions
       addAchievement,
@@ -448,6 +333,7 @@ const addGameResult = async (result) => {
       updateSettings,
       
       // Utility
+      resetProgress,
       
       // Helper
       isLoaded: !loading,
@@ -467,22 +353,10 @@ export const useUser = () => {
   return context;
 };
 
-// ✅ Custom hook สำหรับดึงคะแนนรวมจริง
-export const useTotalScore = () => {
-  const { user } = useUser();
-  return user?.totalScore || 0;
-};
-
-// ✅ Custom hook สำหรับดึงคะแนนรวมของแต่ละเกม
-export const useGameTotalScore = (gameId) => {
-  const { user } = useUser();
-  return user?.gameStats?.[gameId]?.totalScore || 0;
-};
-
-// ✅ Custom hook สำหรับดึงคะแนนล่าสุด
-export const useLatestScore = (gameId) => {
-  const { user } = useUser();
-  return user?.latestScores?.[gameId] || 0;
+// Custom hook สำหรับดึงข้อมูลผู้ใช้แบบมีเงื่อนไข
+export const useUserData = () => {
+  const { user, loading } = useUser();
+  return { user, loading };
 };
 
 // Custom hook สำหรับเช็คสิทธิ์การปลดล็อกด่าน
@@ -491,19 +365,16 @@ export const useUnlockedLevel = (gameId) => {
   return user?.unlockedLevels?.[gameId] || 1;
 };
 
-// ✅ Custom hook สำหรับเช็คสถิติรวม
+// Custom hook สำหรับเช็คสถิติรวม
 export const useUserStats = () => {
   const { user } = useUser();
   
-  // คำนวณสถิติจาก user โดยตรง
   return {
-    totalScore: user?.totalScore || 0, // คะแนนรวมจริง
+    totalScore: user?.totalScore || 0,
     gamesPlayed: user?.gamesPlayed || 0,
     challengesCompleted: user?.challengesCompleted || 0,
     perfectGames: user?.perfectGames || 0,
     totalPlayTime: user?.totalPlayTime || 0,
-    achievements: user?.achievements?.length || 0,
-    latestScores: user?.latestScores || {},
-    gameStats: user?.gameStats || {}
+    achievements: user?.achievements?.length || 0
   };
 };
