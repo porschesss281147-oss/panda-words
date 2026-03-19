@@ -1,4 +1,3 @@
-// app/games/sentence/page.js
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -28,7 +27,6 @@ export default function SentenceGamePage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
   const [timerActive, setTimerActive] = useState(false);
-  const [error, setError] = useState(null);
   
   const timerRef = useRef(null);
   const game = games.find(g => g.id === 'sentence');
@@ -43,30 +41,14 @@ export default function SentenceGamePage() {
 
   const startNewGame = () => {
     setLoading(true);
-    setError(null);
     
     try {
-      // สร้างคำถาม 10 ข้อ
       const newQuestions = generateSentenceQuestions(selectedLevel, 10);
+      console.log('Generated questions:', newQuestions);
       
       if (!newQuestions || newQuestions.length === 0) {
-        throw new Error('ไม่สามารถสร้างคำถามได้');
+        throw new Error('No questions generated');
       }
-      
-      // ตรวจสอบโครงสร้างคำถาม
-      const isValid = newQuestions.every(q => 
-        q.correct && 
-        q.options && 
-        q.options.length > 0 &&
-        q.options.includes(q.correct)
-      );
-      
-      if (!isValid) {
-        console.error('Invalid question structure:', newQuestions);
-        throw new Error('โครงสร้างคำถามไม่ถูกต้อง');
-      }
-      
-      console.log('✅ Game started with questions:', newQuestions.length);
       
       setQuestions(newQuestions);
       setCurrentQuestionIndex(0);
@@ -79,10 +61,14 @@ export default function SentenceGamePage() {
       setSelectedAnswer(null);
       setTimerActive(true);
       playSound('start');
-      
     } catch (error) {
-      console.error('❌ Error starting game:', error);
-      setError(error.message);
+      console.error('Error starting game:', error);
+      setFeedback({
+        show: true,
+        message: 'เกิดข้อผิดพลาด กรุณาลองใหม่',
+        type: 'error',
+        correct: ''
+      });
     } finally {
       setLoading(false);
     }
@@ -153,11 +139,7 @@ export default function SentenceGamePage() {
     
     if (isCorrect) {
       playSound('success');
-      setScore(prev => {
-        const newScore = prev + 1;
-        console.log('✅ Score increased:', newScore);
-        return newScore;
-      });
+      setScore(prev => prev + 1);
       setFeedback({
         show: true,
         message: '✓ ถูกต้อง!',
@@ -183,7 +165,7 @@ export default function SentenceGamePage() {
     setTimeout(() => {
       setFeedback({ show: false, message: '', type: '', correct: '' });
       moveToNextQuestion();
-    }, 1500); // ลดเวลาลงเหลือ 1.5 วินาที
+    }, 2500);
   };
 
   const moveToNextQuestion = () => {
@@ -197,59 +179,45 @@ export default function SentenceGamePage() {
     }
   };
 
-// ในฟังก์ชัน finishGame()
-const finishGame = () => {
+ const finishGame = () => {
   setGameCompleted(true);
   setTimerActive(false);
 
-  // คำนวณคะแนน (0-100)
+  // คำนวณคะแนนจาก state โดยตรง
   const totalQuestions = questions.length;
-  const correctAnswers = score;
-  const finalScore = Math.round((correctAnswers / totalQuestions) * 100); // ปัดเศษครั้งเดียว
-  
-  // ✅ เก็บค่าดิบและเปอร์เซ็นต์แยกกัน
-  const rawCorrect = correctAnswers; // จำนวนข้อที่ถูก (เช่น 8)
-  const rawTotal = totalQuestions;   // จำนวนข้อทั้งหมด (เช่น 10)
-  const scorePercentage = finalScore; // เปอร์เซ็นต์ (เช่น 80)
+  const correctAnswers = score; // ใช้ค่าปัจจุบัน
+  const finalScore = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
 
-  const passed = scorePercentage >= 80;
-
-  console.log('🎮 Game Finished ==================');
-  console.log('📍 Game ID: sentence');
-  console.log('📍 Level:', selectedLevel);
-  console.log('📍 Correct Answers:', rawCorrect, 'from', rawTotal);
-  console.log('📍 Score Percentage:', scorePercentage + '%');
-  console.log('📍 Passed:', passed);
-  console.log('===================================');
+  const passed = finalScore >= 80;
 
   if (passed) {
     playSound('achievement');
   }
 
-  // ✅ บันทึกผล - ส่งทั้งสองค่า
-  const gameResult = {
+  // แสดงใน console เพื่อ debug
+  console.log('=== Game Finished ===');
+  console.log('Total Questions:', totalQuestions);
+  console.log('Correct Answers:', correctAnswers);
+  console.log('Final Score:', finalScore);
+  console.log('Passed:', passed);
+
+  // บันทึกผล
+  addGameResult({
     gameId: 'sentence',
     level: selectedLevel,
-    score: scorePercentage,     // เปอร์เซ็นต์สำหรับโชว์
-    correctCount: rawCorrect,    // จำนวนข้อที่ถูก (ดิบ)
-    totalQuestions: rawTotal,    // จำนวนข้อทั้งหมด (ดิบ)
-    words: rawTotal,             // เผื่อ compatibility
-    correctAnswers: rawCorrect,  // เผื่อ compatibility
-    date: new Date().toISOString()
-  };
+    score: finalScore,
+    words: totalQuestions,
+    correctAnswers: correctAnswers
+  });
 
-  console.log('📤 Sending to addGameResult:', gameResult);
-  addGameResult(gameResult);
-
-  // ปลดล็อกด่านถัดไป
   if (passed && selectedLevel < 10) {
     unlockLevel('sentence', selectedLevel + 1);
   }
 
-  // แสดงผลสรุป
+  // ใช้ setTimeout เพื่อให้ state อัพเดทก่อนแสดงผล
   setTimeout(() => {
     setShowResult(true);
-  }, 1500);
+  }, 2000);
 };
 
   const playAgain = () => {
@@ -284,18 +252,12 @@ const finishGame = () => {
     utterance.rate = 0.9;
     utterance.pitch = 1;
     utterance.volume = 1;
-    
-    utterance.onstart = () => setIsPlaying(true);
-    utterance.onend = () => setIsPlaying(false);
-    utterance.onerror = () => setIsPlaying(false);
-    
     window.speechSynthesis.speak(utterance);
   };
 
-  // ถ้าไม่มี game
   if (!game) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f4efe6]">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f4efe6" }}>
         <div className="bg-white rounded-2xl p-8 text-center shadow-xl">
           <p className="text-purple-800 text-xl">ไม่พบข้อมูลเกม</p>
           <button
@@ -312,7 +274,7 @@ const finishGame = () => {
   // เลือกด่าน
   if (!gameStarted) {
     return (
-      <div className="min-h-screen bg-[#f4efe6]">
+      <div className="min-h-screen" style={{ background: "#f4efe6" }}>
         <header className="bg-white/70 backdrop-blur-md shadow-sm border-b border-purple-200/50">
           <div className="max-w-6xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
@@ -341,12 +303,6 @@ const finishGame = () => {
           </div>
 
           <h3 className="text-2xl font-bold text-pink-500 text-center mb-6">เลือกระดับด่าน</h3>
-          
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {error}
-            </div>
-          )}
           
           <div className="grid grid-cols-5 gap-4 mb-8">
             {Array.from({ length: 10 }, (_, i) => i + 1).map((level) => {
@@ -401,7 +357,7 @@ const finishGame = () => {
     const passed = finalScore >= 80;
     
     return (
-      <div className="min-h-screen bg-[#f4efe6]">
+      <div className="min-h-screen" style={{ background: "#f4efe6" }}>
         <header className="bg-white/70 backdrop-blur-md shadow-sm border-b border-purple-200/50">
           <div className="max-w-6xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
@@ -559,7 +515,7 @@ const finishGame = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f4efe6]">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f4efe6" }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
           <p className="text-gray-600 text-xl">กำลังโหลด...</p>
@@ -570,7 +526,7 @@ const finishGame = () => {
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f4efe6]">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f4efe6" }}>
         <div className="text-center">
           <p className="text-red-500 text-xl">ไม่พบคำถาม</p>
           <button
@@ -587,7 +543,7 @@ const finishGame = () => {
   const currentQuestion = questions[currentQuestionIndex];
   if (!currentQuestion) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f4efe6]">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f4efe6" }}>
         <div className="text-center">
           <p className="text-red-500 text-xl">ข้อผิดพลาด</p>
           <button
@@ -602,7 +558,7 @@ const finishGame = () => {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+  <div className="relative min-h-screen overflow-hidden">
       {/* Background */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -612,66 +568,75 @@ const finishGame = () => {
 
       {/* Content */}
       <div className="relative z-10">
-        {/* Header */}
-        <header className="fixed top-0 left-0 w-full z-50 bg-white backdrop-blur-md shadow-md border-b border-yellow-500/40">
-          <div className="w-full px-4 sm:px-6 lg:px-10 py-3">
-            <div className="flex items-center justify-between">
-              {/* Exit Button */}
-              <button
-                onClick={goToLevelSelect}
-                className="text-yellow-200 hover:text-yellow-100 transition-colors flex items-center gap-2 bg-red-800/80 px-4 sm:px-5 py-2 rounded-full text-base sm:text-lg shadow-sm font-medium border border-yellow-500/40"
-              >
-                ← ออกจากเกม
-              </button>
+      {/* Header */}
+<header className="fixed top-0 left-0 w-full z-50 bg-White backdrop-blur-md shadow-md border-b border-yellow-500/40">
+  <div className="w-full px-4 sm:px-6 lg:px-10 py-3">
+    <div className="flex items-center justify-between">
 
-              {/* Title */}
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500">
-                เกมเติมประโยค
-              </h1>
+      {/* Exit Button */}
+      <button
+        onClick={goToLevelSelect}
+        className="text-yellow-200 hover:text-yellow-100 transition-colors flex items-center gap-2 bg-red-800/80 px-4 sm:px-5 py-2 rounded-full text-base sm:text-lg shadow-sm font-medium border border-yellow-500/40"
+      >
+        ← ออกจากเกม
+      </button>
 
-              <div className="flex items-center gap-3 sm:gap-4">
-                {/* Question Progress */}
-                <div className="flex items-center gap-2 bg-gradient-to-r from-red-800 to-red-700 px-4 py-2 rounded-full shadow-md border border-yellow-500/40">
-                  <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full text-red-900 font-bold text-sm shadow-inner">
-                    {currentQuestionIndex + 1}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs text-yellow-200">ข้อที่</span>
-                    <span className="text-sm font-bold text-yellow-100">/{questions.length}</span>
-                  </div>
-                </div>
+      {/* Title */}
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500">
+        เกมเติมประโยค
+      </h1>
 
-                {/* User */}
-                <div className="flex items-center gap-2 sm:gap-3 bg-red-800/80 px-3 py-1.5 rounded-full shadow-sm border border-yellow-500/40">
-                  <span className="text-2xl sm:text-3xl">{user?.icon}</span>
-                  <span className="hidden sm:inline text-yellow-200 font-medium text-base sm:text-lg">
-                    {user?.name}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
+      <div className="flex items-center gap-3 sm:gap-4">
 
-        {/* Timer */}
-        <div className="w-full max-w-5xl mt-20 sm:mt-24 px-4 mx-auto">
-          {/* Progress Bar */}
-          <div className="relative w-full h-5 sm:h-6 bg-red-900/40 rounded-full overflow-hidden border border-yellow-500/40 shadow-inner">
-            <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-red-600 via-red-500 to-yellow-400 transition-all duration-1000 shadow-[0_0_15px_rgba(250,204,21,0.5)]"
-              style={{ width: `${(timeLeft / 30) * 100}%` }}
-            >
-              <div className="absolute top-0 right-0 w-6 h-full bg-yellow-200/40 blur-md"></div>
-            </div>
+        {/* Question Progress */}
+        <div className="flex items-center gap-2 bg-gradient-to-r from-red-800 to-red-700 px-4 py-2 rounded-full shadow-md border border-yellow-500/40">
+
+          <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full text-red-900 font-bold text-sm shadow-inner">
+            {currentQuestionIndex + 1}
           </div>
 
-          {/* Timer Text */}
-          <div className="flex justify-end items-center mt-3">
-            <span className="bg-gradient-to-r from-red-700 to-red-800 text-yellow-200 px-5 py-2 rounded-full shadow-md border border-yellow-400/50 font-semibold text-base sm:text-lg flex items-center gap-2">
-              ⏳ {timeLeft} วินาที
-            </span>
+          <div className="flex flex-col">
+            <span className="text-xs text-yellow-200">ข้อที่</span>
+            <span className="text-sm font-bold text-yellow-100">/{questions.length}</span>
           </div>
         </div>
+
+        {/* User */}
+        <div className="flex items-center gap-2 sm:gap-3 bg-red-800/80 px-3 py-1.5 rounded-full shadow-sm border border-yellow-500/40">
+          <span className="text-2xl sm:text-3xl">{user?.icon}</span>
+          <span className="hidden sm:inline text-yellow-200 font-medium text-base sm:text-lg">
+            {user?.name}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+       {/* Timer */}
+<div className="w-full max-w-5xl mt-20 sm:mt-24 px-4 mx-auto">
+
+  {/* Progress Bar */}
+  <div className="relative w-full h-5 sm:h-6 bg-red-900/40 rounded-full overflow-hidden border border-yellow-500/40 shadow-inner">
+
+    <div
+      className="absolute top-0 left-0 h-full bg-gradient-to-r from-red-600 via-red-500 to-yellow-400 transition-all duration-1000 shadow-[0_0_15px_rgba(250,204,21,0.5)]"
+      style={{ width: `${(timeLeft / 30) * 100}%` }}
+    >
+      {/* Glow effect */}
+      <div className="absolute top-0 right-0 w-6 h-full bg-yellow-200/40 blur-md"></div>
+    </div>
+
+  </div>
+
+  {/* Timer Text */}
+  <div className="flex justify-end items-center mt-3">
+    <span className="bg-gradient-to-r from-red-700 to-red-800 text-yellow-200 px-5 py-2 rounded-full shadow-md border border-yellow-400/50 font-semibold text-base sm:text-lg flex items-center gap-2">
+      ⏳ {timeLeft} วินาที
+    </span>
+  </div>
+
+</div>
 
         {/* Main Content */}
         <main className="flex-1 w-full max-w-5xl mx-auto flex flex-col items-center justify-center px-6 pt-10 min-h-[65vh]">
@@ -692,53 +657,55 @@ const finishGame = () => {
                 {currentQuestion.fullMeaning}
               </p>
             </div>
+{/* Options */}
+<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+  {currentQuestion.options.map((option, index) => {
 
-            {/* Options */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-              {currentQuestion.options.map((option, index) => {
-                const colors = [
-                  'from-red-600 to-red-700',
-                  'from-red-500 to-red-700',
-                  'from-red-700 to-red-900',
-                  'from-red-600 to-red-800'
-                ];
+    const colors = [
+      'from-red-600 to-red-700',
+      'from-red-500 to-red-700',
+      'from-red-700 to-red-900',
+      'from-red-600 to-red-800'
+    ];
 
-                const isCorrectOption = feedback.show && option === currentQuestion.correct;
-                const isWrongOption = feedback.show && option === selectedAnswer && option !== currentQuestion.correct;
+    const isCorrectOption = feedback.show && option === currentQuestion.correct;
+    const isWrongOption = feedback.show && option === selectedAnswer && option !== currentQuestion.correct;
 
-                return (
-                  <button
-                    key={index}
-                    onClick={() => handleAnswer(option)}
-                    disabled={feedback.show || selectedAnswer !== null}
-                    className={`
-                      py-5 sm:py-6 md:py-7 px-3
-                      text-xl sm:text-2xl md:text-3xl lg:text-4xl
-                      font-bold
-                      rounded-2xl sm:rounded-3xl
-                      text-yellow-200
-                      bg-gradient-to-r ${colors[index % colors.length]}
-                      border-2 border-yellow-400
-                      shadow-lg shadow-red-900/40
-                      transform transition-all duration-200
-                      hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/30
-                      disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
-                      ${isCorrectOption ? 'ring-4 ring-green-400 ring-offset-2' : ''}
-                      ${isWrongOption ? 'ring-4 ring-red-400 ring-offset-2' : ''}
-                      ${selectedAnswer === option && !feedback.show ? 'ring-4 ring-yellow-400 ring-offset-2' : ''}
-                    `}
-                  >
-                    {option}
-                  </button>
-                );
-              })}
-            </div>
+    return (
+      <button
+        key={index}
+        onClick={() => handleAnswer(option)}
+        disabled={feedback.show || selectedAnswer !== null}
+        className={`
+          py-5 sm:py-6 md:py-7 px-3
+          text-xl sm:text-2xl md:text-3xl lg:text-4xl
+          font-bold
+          rounded-2xl sm:rounded-3xl
+          text-yellow-200
+          bg-gradient-to-r ${colors[index % colors.length]}
+          border-2 border-yellow-400
+          shadow-lg shadow-red-900/40
+          transform transition-all duration-200
+          hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/30
+          disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+          ${isCorrectOption ? 'ring-4 ring-green-400 ring-offset-2' : ''}
+          ${isWrongOption ? 'ring-4 ring-red-400 ring-offset-2' : ''}
+          ${selectedAnswer === option && !feedback.show ? 'ring-4 ring-yellow-400 ring-offset-2' : ''}
+        `}
+      >
+        {option}
+      </button>
+    );
+  })}
+</div>
 
             {/* Feedback */}
             {feedback.show && (
               <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
+                {/* Overlay */}
                 <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fadeIn"></div>
                 
+                {/* Feedback Box */}
                 <div className={`
                   relative max-w-2xl w-full p-8 sm:p-10 md:p-12 
                   rounded-3xl shadow-2xl text-center
@@ -748,6 +715,7 @@ const finishGame = () => {
                     : 'bg-gradient-to-br from-red-500 to-rose-600 border-4 border-red-300'
                   }
                 `}>
+                  {/* Icon */}
                   <div className="mb-6">
                     {feedback.type === 'success' ? (
                       <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center">
@@ -760,10 +728,12 @@ const finishGame = () => {
                     )}
                   </div>
 
+                  {/* Message */}
                   <p className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-4 drop-shadow-lg">
                     {feedback.message}
                   </p>
 
+                  {/* Correct Answer (if wrong) */}
                   {feedback.type === 'error' && feedback.correct && (
                     <div className="mt-6 p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
                       <p className="text-2xl sm:text-3xl text-white/90 mb-2">
@@ -778,6 +748,7 @@ const finishGame = () => {
                     </div>
                   )}
 
+                  {/* Motivational Message */}
                   <div className="mt-8 text-center">
                     {feedback.type === 'success' ? (
                       <div className="space-y-2">
