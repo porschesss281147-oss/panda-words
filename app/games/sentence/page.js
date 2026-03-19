@@ -179,29 +179,29 @@ export default function SentenceGamePage() {
     }
   };
 
- const finishGame = () => {
+const finishGame = () => {
   setGameCompleted(true);
   setTimerActive(false);
 
-  // คำนวณคะแนนจาก state โดยตรง
   const totalQuestions = questions.length;
-  const correctAnswers = score; // ใช้ค่าปัจจุบัน
-  const finalScore = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
-
+  const correctAnswers = score; // เช่น 10
+  const finalScore = Math.round((correctAnswers / totalQuestions) * 100); // = 100
+  
+  // ✅ ประกาศตัวแปร passed
   const passed = finalScore >= 80;
+
+  console.log('🎮 Game Finished ==================');
+  console.log('📍 Game ID: sentence');
+  console.log('📍 Correct Answers:', correctAnswers, 'from', totalQuestions);
+  console.log('📍 Final Score:', finalScore);
+  console.log('📍 Passed:', passed);
+  console.log('===================================');
 
   if (passed) {
     playSound('achievement');
   }
 
-  // แสดงใน console เพื่อ debug
-  console.log('=== Game Finished ===');
-  console.log('Total Questions:', totalQuestions);
-  console.log('Correct Answers:', correctAnswers);
-  console.log('Final Score:', finalScore);
-  console.log('Passed:', passed);
-
-  // บันทึกผล
+  // ✅ ส่ง finalScore (100)
   addGameResult({
     gameId: 'sentence',
     level: selectedLevel,
@@ -210,11 +210,11 @@ export default function SentenceGamePage() {
     correctAnswers: correctAnswers
   });
 
+  // ✅ ใช้ passed ที่ประกาศไว้
   if (passed && selectedLevel < 10) {
     unlockLevel('sentence', selectedLevel + 1);
   }
 
-  // ใช้ setTimeout เพื่อให้ state อัพเดทก่อนแสดงผล
   setTimeout(() => {
     setShowResult(true);
   }, 2000);
